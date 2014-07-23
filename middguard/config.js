@@ -1,0 +1,32 @@
+var express = require('express'),
+    path = require('path');
+
+var env = process.env.NODE_ENV || 'development';
+var root = path.normalize(__dirname + '/..');
+
+exports.express = function (app) {
+  app.set('showStackError', true);
+
+  app.use('/static', express.static(root + '/static'));
+  app.use('/modules', express.static(root + '/packages/modules'));
+
+  app.set('views', root + '/middguard/views');
+  app.set('view engine', 'jade');
+};
+
+exports.settings = {
+  root: root,
+  db: 'default.db'
+};
+
+exports.clientLibs = {
+  prefix: 'static/bower_components',
+  js: [
+    'jquery/dist/jquery.js',
+    'underscore/underscore.js',
+    'socket.io-client/socket.io.js',
+    'backbone/backbone.js',
+    'backbone.iobind/dist/backbone.iosync.js',
+    'backbone.iobind/dist/backbone.iobind.js'
+  ]
+};

@@ -1,0 +1,32 @@
+{
+  "name": "middguard",
+  "version": "0.0.1",
+  "description": "Modular, multiperson analytics.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danasilver/middguard.git"
+  },
+  "keywords": [
+    "analytics",
+    "module",
+    "multiperson"
+  ],
+  "author": {
+    "name": "Dana Silver",
+    "email": "dsilver@middlebury.edu"
+  },
+  "bugs": {
+    "url": "https://github.com/danasilver/middguard/issues"
+  },
+  "homepage": "https://github.com/danasilver/middguard",
+  "dependencies": {
+    "express": "^4.6.1",
+    "jade": "^1.5.0",
+    "socket.io": "^1.0.6",
+    "sqlite3": "^2.2.4"
+  }
+}

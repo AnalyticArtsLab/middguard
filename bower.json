@@ -1,0 +1,21 @@
+{
+  "name": "middguard",
+  "version": "0.0.1",
+  "authors": [
+    "Dana Silver <dsilver@middlebury.edu>"
+  ],
+  "description": "Modular, multiperson analytics.",
+  "homepage": "https://github.com/danasilver/middguard",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "backbone": "~1.1.2",
+    "backbone.iobind": "~0.4.7",
+    "jquery": "~2.1.1",
+    "socket.io-client": "~1.0.6",
+    "d3": "~3.4.11"
+  }
+}
