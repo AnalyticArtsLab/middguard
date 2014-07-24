@@ -12,7 +12,7 @@ var io = socketio(server);
 
 var db = new sqlite.Database(config.settings.db);
 
-// io.on('connection', require('./middguard/routes'));
+io.on('connection', require('./middguard/socket'));
 
 require('./middguard/routes')(app);
 
