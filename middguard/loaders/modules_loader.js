@@ -2,12 +2,6 @@ var fs = require('fs'),
     path = require('path'),
     settings = require('../config').settings;
 
-/**
- * Discovers and returns paths to all js and css files to be loaded.
- *
- * @return { 'js': string[], 'css': string[] }
- */
-
 module.exports = function(callback) {
   var modules = {
     js: [],
