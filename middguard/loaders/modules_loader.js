@@ -4,11 +4,13 @@ var fs = require('fs'),
 
 module.exports = function(callback) {
   var modules = {
+    names: [],
     js: [],
     css: []
   };
   var modulesCount;
   var push = Array.prototype.push;
+  var hasOwnProperty = Object.prototype.hasOwnProperty;
 
   var modulesPath = settings.modulesPath;
   var modulesAbsPath = path.resolve(modulesPath);
@@ -26,18 +28,28 @@ module.exports = function(callback) {
 
         manifest = JSON.parse(manifest);
 
-        if (!manifest.js && !manifest.css) {
-          console.warn('Module %s does not list any js or css files to load!',
+        if (hasOwnProperty.call(manifest, 'name') &&
+            hasOwnProperty.call(manifest, 'main')) {
+          modules.names.push({name: manifest.name, main: manifest.main});
+        } else {
+          var message = 'Module `' + module + '` does not contain required ' +
+                        'properties `name` and `main`!';
+          throw new Error(message, manifestPath);
+        }
+
+        if (!hasOwnProperty.call(manifest, 'js') && !manifest.js.length &&
+            !hasOwnProperty.call(manifest, 'js') && !manifest.css.length) {
+          console.warn('Module `%s` does not list any js or css files to load!',
             module);
         }
 
-        if (manifest.js) {
+        if (hasOwnProperty.call(manifest, 'js') && manifest.js.length) {
           var prefixedJs = manifest.js.map(function (js) {
             return path.join(modulesDir, module, js);
           });
           push.apply(modules.js, prefixedJs);
         }
-        if (manifest.css) {
+        if (hasOwnProperty.call(manifest, 'css') && manifest.css.length) {
           var prefixedCss = manifest.css.map(function (css) {
             return path.join(modulesDir, module, css);
           });
