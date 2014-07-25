@@ -14,7 +14,20 @@ exports.express = function (app) {
   app.set('view engine', 'jade');
 };
 
-exports.settings = {
+exports.bookshelf = function (app) {
+  var knex = require('knex')({
+    client: 'sqlite3',
+    connection: {
+      filename: path.resolve(root, settings.db)
+    }
+  });
+
+  var bookshelf = require('bookshelf')(knex);
+
+  app.set('db', bookshelf);
+};
+
+var settings = exports.settings = {
   root: root,
   modulesDir: 'modules',
   modulesPath: 'packages/modules',
