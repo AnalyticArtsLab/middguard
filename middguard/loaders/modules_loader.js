@@ -28,14 +28,23 @@ module.exports = function(callback) {
 
         manifest = JSON.parse(manifest);
 
+        var metadata = {};
+
         if (hasOwnProperty.call(manifest, 'name') &&
             hasOwnProperty.call(manifest, 'main')) {
-          modules.names.push({name: manifest.name, main: manifest.main});
+          metadata.name = manifest.name;
+          metadata.main = manifest.main;
         } else {
           var message = 'Module `' + module + '` does not contain required ' +
                         'properties `name` and `main`!';
           throw new Error(message, manifestPath);
         }
+
+        if (hasOwnProperty.call(manifest, 'version')) {
+          metadata.version = manifest.version;
+        }
+
+        modules.names.push(metadata);
 
         if (!hasOwnProperty.call(manifest, 'js') && !manifest.js.length &&
             !hasOwnProperty.call(manifest, 'js') && !manifest.css.length) {

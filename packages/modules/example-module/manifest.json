@@ -1,6 +1,7 @@
 {
   "name": "Example",
   "main": "ExampleView",
+  "version": "0.0.1",
   "js": [
     "example-view.js"
   ]
