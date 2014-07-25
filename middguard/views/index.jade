@@ -9,3 +9,5 @@ html(lang='en-us')
   body
     each script in clientLibs.js
       script(src=clientLibs.prefix + '/' + script)
+    each script in js
+      script(src=script)

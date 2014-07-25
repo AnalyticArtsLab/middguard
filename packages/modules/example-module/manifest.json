@@ -1,0 +1,7 @@
+{
+  "name": "Example",
+  "main": "ExampleView",
+  "js": [
+    "example-view.js"
+  ]
+}

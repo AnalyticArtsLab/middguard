@@ -16,6 +16,10 @@ exports.express = function (app) {
 
 exports.settings = {
   root: root,
+  modulesDir: 'modules',
+  modulesPath: 'packages/modules',
+  modelsPath: 'packages/models',
+  analyticsPath: 'packages/analytics',
   db: 'default.db'
 };
 
