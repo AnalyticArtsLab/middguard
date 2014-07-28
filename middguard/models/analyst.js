@@ -3,7 +3,7 @@ var bcrypt = Promise.promisifyAll(require('bcrypt'));
 var db = require('../../app').get('db');
 
 module.exports = db.Model.extend({
-  tableName: 'analysts',
+  tableName: 'analyst',
   initialize: function () {
     this.on('saving', this.validateSave);
     this.on('creating', this.hashPassword);
