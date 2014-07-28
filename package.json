@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/danasilver/middguard",
   "dependencies": {
+    "bcrypt": "^0.7.8",
     "bookshelf": "^0.7.7",
     "express": "^4.6.1",
     "jade": "^1.5.0",
