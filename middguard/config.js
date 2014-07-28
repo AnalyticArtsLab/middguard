@@ -34,7 +34,7 @@ var settings = exports.settings = {
   modulesPath: 'packages/modules',
   modelsPath: 'packages/models',
   analyticsPath: 'packages/analytics',
-  db: 'default.db'
+  db: 'middguard.db'
 };
 
 exports.clientLibs = {
