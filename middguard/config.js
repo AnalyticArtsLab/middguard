@@ -23,8 +23,9 @@ exports.bookshelf = function (app) {
   });
 
   var bookshelf = require('bookshelf')(knex);
+  bookshelf.plugin('registry');
 
-  app.set('db', bookshelf);
+  app.set('bookshelf', bookshelf);
 };
 
 var settings = exports.settings = {

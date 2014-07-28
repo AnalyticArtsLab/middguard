@@ -9,20 +9,21 @@ system between the server and clients, and loaders for various packages.
 
 Three tables are built into the system:
 
-**User**
+**analyst**
 
  - id
- - name
+ - username
  - password
 
-**Message**
+**message**
 
  - id
- - user_id
+ - analyst_id
  - state
  - content
+ - timestamp
 
-**Relationship**
+**relationship**
 
  - id_1
  - id_2

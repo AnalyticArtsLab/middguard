@@ -1,12 +1,16 @@
-ar Promise = require('bluebird');
+require('./message');
+var Promise = require('bluebird');
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
-var db = require('../../app').get('db');
+var Bookshelf = require('../../app').get('bookshelf');
 
-module.exports = db.Model.extend({
+var Analyst = Bookshelf.Model.extend({
   tableName: 'analyst',
   initialize: function () {
     this.on('saving', this.validateSave);
     this.on('creating', this.hashPassword);
+  },
+  messages: function () {
+    return this.hasMany('Message');
   },
   hashPassword: function () {
     this.get('password')
@@ -32,3 +36,5 @@ module.exports = db.Model.extend({
       });
   })
 });
+
+module.exports = Bookshelf.model('Analyst', Analyst);
