@@ -1,12 +1,15 @@
+var path = require('path'),
+    settings = require('./middguard/config/settings');
+
 // Add `debug: true` to the config to log SQL statements
 var development = {
   client: 'sqlite3',
   connection: {
-    filename: './middguard.db'
+    filename: path.join(settings.root, settings.db)
   }
 };
 
-module.exports {
+module.exports = {
   development: development,
 
   // For now, use the same setting for all envs
