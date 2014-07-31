@@ -1,6 +1,6 @@
 var fs = require('fs'),
     path = require('path'),
-    settings = require('../config').settings;
+    settings = require('../config/settings');
 
 module.exports = function(callback) {
   var modules = {

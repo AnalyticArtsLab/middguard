@@ -2,15 +2,16 @@ var express = require('express'),
     socketio = require('socket.io'),
     http = require('http'),
     path = require('path'),
-    config = require('./middguard/config');
+    expressConfig = require('./middguard/config/express'),
+    bookshelfConfig = require('./middguard/config/bookshelf');
 
 var app = express();
-config.express(app);
+expressConfig(app);
 
 var server = http.createServer(app);
 var io = socketio(server);
 
-config.bookshelf(app);
+bookshelfConfig(app);
 require('./middguard/models')(app);
 
 io.on('connection', require('./middguard/socket'));

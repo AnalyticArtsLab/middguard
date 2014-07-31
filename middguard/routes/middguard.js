@@ -1,5 +1,5 @@
 var modulesLoader = require('../loaders/modules_loader'),
-    clientLibs = require('../config').clientLibs;
+    clientLibs = require('../config/client_libs');
 
 module.exports = function(req, res) {
   modulesLoader(function (modules) {
