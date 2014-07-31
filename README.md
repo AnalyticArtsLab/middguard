@@ -55,6 +55,33 @@ as follows:
 }
 ```
 
+#### Models
+
+*manifest.json*
+
+```
+{
+  "name": string,                 // no spaces, singular
+  "migrations_directory": string, // defaults to 'migrations'
+  "model_path": string,           // defaults to 'index.js'
+  "version": string               // semantic versioning
+}
+```
+
+**name**: Each model should be named with the singular version of the entity it
+represents (*person*, *car*, *building*).
+
+**migrations**: Each model should contain a **migrations** subdirectory.
+Migrations define and update the model schema.  The default name is
+*migrations*.  If you name the directory differently, add *migrations_directory*
+to your *manifest.json*.
+
+**model_path**: Each model should contain a [Bookshelf][4] model definition.
+The default name for the containing file is *index.js*.  If you name the file
+differently, add *model_path* to your *manifest.json*.
+
+**version**: The model's [SemVer][5] version.
+
 ### Install
 
 With [Node.js][1] v0.10.x installed, install [bower][2] with
@@ -77,6 +104,8 @@ Alternatively, install [nodemon][3] with `npm install -g nodemon` and start the
 server with `nodemon app.js`.  nodemon watches for changes and automatically
 restarts the server.
 
-[1]: http://nodejs.org/ "Node.js"
-[2]: http://bower.io/   "bower"
-[3]: http://nodemon.io/ "nodemon"
+[1]: http://nodejs.org/       "Node.js"
+[2]: http://bower.io/         "bower"
+[3]: http://nodemon.io/       "nodemon"
+[4]: http://bookshelfjs.org/  "bookshelf"
+[5]: http://semver.org/       "semver"
