@@ -79,6 +79,52 @@ differently, add *model_path* to your *manifest.json*.
 
 **version**: The model's [SemVer][5] version.
 
+### Database and migrations
+
+MiddGuard operates on a single SQLite database called *middguard.db* stored at
+the project root.  It will be automatically created when you run your first
+migration.
+
+#### Make a MiddGuard migration
+
+This is different than a packaged model migration.  You should only need this
+if you are altering the MiddGuard framework.
+
+```sh
+$ bin/migrate make --middguard --name <migration name>
+```
+
+#### Run MiddGuard migrations
+
+You should only need to run this once at startup to migrate the database to the
+MiddGuard schema.
+
+```sh
+$ bin/migrate latest --middguard
+```
+
+#### Make a model migration
+
+Create a migration template for a specific model.  The *model name*
+is the name of model's package directory.  The *migration name* is required.
+
+If a **migrations** directory does not exist as an immediate subdirectory of the
+model, it will be created when the first `migrate make --model ...` command is
+run.
+
+```sh
+$ bin/migrate make --model <model name> --name <migration name>
+```
+
+#### Run model migrations
+
+Run the migrations for a specific model.  Run this for each model in your
+**packages/models** directory.
+
+```sh
+$ bin/migrate latest --model <model name>
+```
+
 ### Install
 
 With [Node.js][1] v0.10.x installed, install [bower][2] with
