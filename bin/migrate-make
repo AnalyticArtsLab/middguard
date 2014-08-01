@@ -14,18 +14,21 @@ program
   .option('--middguard', 'Make a new migration for MiddGuard')
   .parse(process.argv);
 
-console.assert(program.name && program.name !== '',
-  'Specify a name for the migration with --name <name>.');
+var migrationsConfig = { database: knexConfig };
 
-var migrationsConfig = {
-  database: knexConfig
-};
+console.assert(program.name && program.name !== '',
+  'Specify a name for the migration with --name <name>');
+
+console.assert(program.model || program.middguard,
+  'Specify middguard with --middguard or a model to migrate with --model <model>');
 
 if (program.middguard) {
+  console.assert(!program.model, 'Only specify --model or --middguard');
   migrationsConfig.directory = path.join(settings.root, 'migrations');
 }
 
 if (program.model) {
+  console.assert(!program.middguard, 'Only specify --model or --middguard');
   migrationsConfig.directory = path.join(settings.root, settings.modelsPath,
     program.model, 'migrations');
 }
