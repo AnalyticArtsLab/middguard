@@ -4,7 +4,8 @@
   "description": "Modular, multiperson analytics.",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "jshint": "jshint app.js middguard/*"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
   "homepage": "https://github.com/danasilver/middguard",
   "dependencies": {
     "bcrypt": "^0.7.8",
+    "bluebird": "^2.2.2",
     "bookshelf": "^0.7.7",
     "express": "^4.6.1",
     "jade": "^1.5.0",
@@ -33,6 +35,6 @@
     "sqlite3": "^2.2.4"
   },
   "devDependencies": {
-    "gulp": "^3.8.6"
+    "jshint": "^2.5.2"
   }
 }

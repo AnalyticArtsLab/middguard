@@ -94,12 +94,6 @@ $ npm install   # server dependencies
 $ bower install # client dependencies
 ```
 
-Install the build system CLI ([gulp][6]):
-
-```sh
-$ npm install -g gulp
-```
-
 Start the server on port 3000:
 
 ```sh
@@ -115,4 +109,3 @@ restarts the server.
 [3]: http://nodemon.io/       "nodemon"
 [4]: http://bookshelfjs.org/  "bookshelf"
 [5]: http://semver.org/       "semver"
-[6]: http://gulpjs.com/       "gulp"
