@@ -1,0 +1,27 @@
+#!/usr/bin/env node
+
+var program = require('commander'),
+    chalk = require('chalk'),
+    settings = require('../middguard/config/settings'),
+    knexConfig = require('../knexfile')[settings.env],
+    knex = require('knex')(knexConfig);
+
+program
+  .version('0.0.1')
+  .option('--model <model>', 'Run all migrations for model <model>')
+  .option('--middguard', 'Run all migrations for MiddGuard')
+  .parse(process.argv);
+
+var migrationsConfig = require('./utils/migrations_config')(program);
+knex.migrate.latest(migrationsConfig).spread(function (batchNo, log) {
+  if (log.length === 0) {
+    console.log(chalk.cyan('Already up to date'));
+    process.exit(0);
+  }
+  console.log(chalk.green('Batch ' + batchNo + ' run: ' + log.length +
+    ' migrations \n' + chalk.cyan(log.join('\n'))));
+  process.exit(0);
+}).catch(function () {
+  chalk.red('Error migrating to latest');
+  process.exit(1);
+});

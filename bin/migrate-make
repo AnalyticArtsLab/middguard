@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
 var program = require('commander'),
-    fs = require('fs'),
-    path = require('path'),
     settings = require('../middguard/config/settings'),
     knexConfig = require('../knexfile')[settings.env],
     knex = require('knex')(knexConfig);
@@ -14,23 +12,14 @@ program
   .option('--middguard', 'Make a new migration for MiddGuard')
   .parse(process.argv);
 
-var migrationsConfig = { database: knexConfig };
+  console.assert(program.name && program.name !== '',
+    'Specify a name for the migration with --name <name>');
 
-console.assert(program.name && program.name !== '',
-  'Specify a name for the migration with --name <name>');
-
-console.assert(program.model || program.middguard,
-  'Specify middguard with --middguard or a model to migrate with --model <model>');
-
-if (program.middguard) {
-  console.assert(!program.model, 'Only specify --model or --middguard');
-  migrationsConfig.directory = path.join(settings.root, 'migrations');
-}
-
-if (program.model) {
-  console.assert(!program.middguard, 'Only specify --model or --middguard');
-  migrationsConfig.directory = path.join(settings.root, settings.modelsPath,
-    program.model, 'migrations');
-}
-
-knex.migrate.make(program.name, migrationsConfig);
+var migrationsConfig = require('./utils/migrations_config')(program);
+knex.migrate.make(program.name, migrationsConfig).then(function (name) {
+  console.log(chalk.green('Created migration: ' + name));
+  process.exit(0);
+}).catch(function () {
+  chalk.red('Error creating migration');
+  process.exit(1);
+});
