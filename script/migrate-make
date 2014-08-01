@@ -1,0 +1,33 @@
+#!/usr/bin/env node
+
+var program = require('commander'),
+    fs = require('fs'),
+    path = require('path'),
+    settings = require('../middguard/config/settings'),
+    knexConfig = require('../knexfile')[settings.env],
+    knex = require('knex')(knexConfig);
+
+program
+  .version('0.0.1')
+  .option('-n, --name <name>', 'The name for the new migration')
+  .option('--model <model>', 'Make a new migration for <model>')
+  .option('--middguard', 'Make a new migration for MiddGuard')
+  .parse(process.argv);
+
+console.assert(program.name && program.name !== '',
+  'Specify a name for the migration with --name <name>.');
+
+var migrationsConfig = {
+  database: knexConfig
+};
+
+if (program.middguard) {
+  migrationsConfig.directory = path.join(settings.root, 'migrations');
+}
+
+if (program.model) {
+  migrationsConfig.directory = path.join(settings.root, settings.modelsPath,
+    program.model, 'migrations');
+}
+
+knex.migrate.make(program.name, migrationsConfig);

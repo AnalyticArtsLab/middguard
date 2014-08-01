@@ -4,7 +4,6 @@
   "description": "Modular, multiperson analytics.",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
     "jshint": "jshint app.js middguard/*"
   },
   "repository": {
@@ -28,6 +27,7 @@
     "bcrypt": "^0.7.8",
     "bluebird": "^2.2.2",
     "bookshelf": "^0.7.7",
+    "commander": "^2.3.0",
     "express": "^4.6.1",
     "jade": "^1.5.0",
     "knex": "^0.6.22",

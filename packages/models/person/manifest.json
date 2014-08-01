@@ -1,6 +1,5 @@
 {
   "name": "person",
-  "migrations_directory": "migrations",
   "model_path": "person.js",
   "version": "0.0.1"
 }

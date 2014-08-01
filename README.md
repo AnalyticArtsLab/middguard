@@ -62,7 +62,6 @@ as follows:
 ```
 {
   "name": string,                 // no spaces, singular
-  "migrations_directory": string, // defaults to 'migrations'
   "model_path": string,           // defaults to 'index.js'
   "version": string               // semantic versioning
 }
@@ -72,9 +71,7 @@ as follows:
 represents (*person*, *car*, *building*).
 
 **migrations**: Each model should contain a **migrations** subdirectory.
-Migrations define and update the model schema.  The default name is
-*migrations*.  If you name the directory differently, add *migrations_directory*
-to your *manifest.json*.
+Migrations define and update the model schema.
 
 **model_path**: Each model should contain a [Bookshelf][4] model definition.
 The default name for the containing file is *index.js*.  If you name the file
