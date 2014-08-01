@@ -1,3 +1,7 @@
-module.exports = function (app) {
-  var db = app.get('db');
+var modelsLoader = require('../loaders/models_loader');
+
+module.exports = function (app, callback) {
+  var Bookshelf = app.get('bookshelf');
+
+  modelsLoader(Bookshelf, callback);
 };

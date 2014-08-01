@@ -1,5 +1,5 @@
 {
   "name": "person",
-  "model_path": "person.js",
+  "model": "person.js",
   "version": "0.0.1"
 }

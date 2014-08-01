@@ -12,15 +12,15 @@ var server = http.createServer(app);
 var io = socketio(server);
 
 bookshelfConfig(app);
-require('./middguard/models')(app);
+require('./middguard/models')(app, function () {
+  io.on('connection', require('./middguard/socket'));
 
-io.on('connection', require('./middguard/socket'));
+  require('./middguard/routes')(app);
 
-require('./middguard/routes')(app);
-
-var port = process.env.PORT || 3000;
-server.listen(port, function () {
-  console.log('Listening on port %d...', port);
+  var port = process.env.PORT || 3000;
+  server.listen(port, function () {
+    console.log('Listening on port %d...', port);
+  });
 });
 
 module.exports = app;
