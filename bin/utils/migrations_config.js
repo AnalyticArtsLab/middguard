@@ -1,5 +1,5 @@
 var settings = require('../../middguard/config/settings'),
-    knexConfig = require('../../knexfile')[settings.env],
+    knexConfig = require('../../middguard/config/knex')[settings.env],
     path = require('path');
 
 module.exports = function (program) {

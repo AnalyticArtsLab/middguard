@@ -1,8 +1,5 @@
 var env = require('./settings').env,
-
-    // knexfile.js is in the root dir so the knex binary can find it for
-    // migrations. This will change soon with a real build system.
-    knexConfig = require('../../knexfile')[env];
+    knexConfig = require('./knex')[env];
 
 module.exports = function (app) {
   var knex = require('knex')(knexConfig);

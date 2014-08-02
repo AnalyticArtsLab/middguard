@@ -3,7 +3,7 @@
 var program = require('commander'),
     chalk = require('chalk'),
     settings = require('../middguard/config/settings'),
-    knexConfig = require('../knexfile')[settings.env],
+    knexConfig = require('../middguard/config/knex')[settings.env],
     knex = require('knex')(knexConfig);
 
 program
