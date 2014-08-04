@@ -2,43 +2,36 @@ var fs = require('fs'),
     path = require('path'),
     settings = require('../config/settings');
 
-module.exports = function (Bookshelf, callback) {
-  var modelsCount;
+module.exports = function (app) {
+  var register = app.get('bookshelf').collection('models');
+  var ModelPackage = app.get('bookshelf').model('ModelPackage');
+
   var hasOwnProperty = Object.prototype.hasOwnProperty;
 
   var modelsPath = settings.modelsPath;
   var modelsAbsPath = path.resolve(modelsPath);
 
-  fs.readdir(modelsAbsPath, function (err, list) {
-    if (err) throw new Error(err);
+  fs.readdirSync(modelsAbsPath).forEach(function (model) {
+    var manifestPath = path.join(modelsAbsPath, model, 'manifest.json');
+    var manifest = JSON.parse(fs.readFileSync(manifestPath));
 
-    modelsCount = list.length;
+    var _name, _model;
 
-    list.map(function (model) {
-      var manifestPath = path.join(modelsAbsPath, model, 'manifest.json');
+    if (hasOwnProperty.call(manifest, 'name') && manifest.name !== '') {
+      _name = manifest.name;
+    }
 
-      fs.readFile(manifestPath, function (err, manifest) {
-        if (err) throw new Error(err);
+    if (hasOwnProperty.call(manifest, 'model') && manifest.model !== '') {
+      _model = path.join('../../', modelsPath, model, manifest.model);
+    } else {
+      _model = path.join('../../', modelsPath, model);
+    }
 
-        manifest = JSON.parse(manifest);
+    Bookshelf.model(_name, require(_model)(Bookshelf));
 
-        var _name, _model;
-
-        if (hasOwnProperty.call(manifest, 'name') && manifest.name !== '') {
-          _name = manifest.name;
-        }
-
-        if (hasOwnProperty.call(manifest, 'model') && manifest.model !== '') {
-          _model = path.join('../../', modelsPath, model, manifest.model);
-        } else {
-          _model = path.join('../../', modelsPath, model);
-        }
-
-        Bookshelf.model(_name, require(_model)(Bookshelf));
-
-        modelsCount--;
-        if (!modelsCount) callback();
-      });
-    });
-  });
-};
+    register.add(new ModelPackage({
+      name: _name,
+      requirePath: path.join(modelsAbsPath, model, _model);
+    }))
+  })
+}

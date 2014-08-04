@@ -9,5 +9,21 @@ module.exports = function (app) {
   // Use named models to avoid circular import problems
   bookshelf.plugin('registry');
 
+  var AnalyticsPackage = Bookshelf.Model.extend();
+  var ModelPackage = Bookshelf.Model.extend();
+
+  var AnalyticsRegister = Bookshelf.Collection.extend({
+    model: AnalyticsPackage
+  });
+  var ModelRegister = Bookshelf.Collection.extend({
+    model: ModelPackage
+  });
+
+  Bookshelf.model('AnalyticsPackage', AnalyticsPackage);
+  Bookshelf.model('ModelPackage', ModelPackage);
+
+  Bookshelf.collection('analytics', AnalyticsRegister);
+  Bookshelf.collection('models', ModelRegister);
+
   app.set('bookshelf', bookshelf);
 };

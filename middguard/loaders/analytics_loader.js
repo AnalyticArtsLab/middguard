@@ -6,9 +6,6 @@ module.exports = function (app) {
   var register = app.get('bookshelf').collection('analytics');
   var AnalyticsPackage = app.get('bookshelf').model('AnalyticsPackage');
 
-  var analyticsCount;
-  var hasOwnProperty = Object.prototype.hasOwnProperty;
-
   var analyticsPath = settings.analyticsPath;
   var analyticsAbsPath = path.resolve(analyticsPath);
 

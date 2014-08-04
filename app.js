@@ -12,21 +12,16 @@ var server = http.createServer(app);
 var io = socketio(server);
 
 bookshelfConfig(app);
-require('./middguard/models')(app, function () {
-  io.on('connection', require('./middguard/socket'));
+require('./middguard/loaders/models_loader')(app);
+require('./middguard/loaders/analytics_loader')(app);
 
-  require('./middguard/routes')(app);
+io.on('connection', require('./middguard/socket'));
 
-  // Create analytics register.  Has to happen after Bookshelf is configured.
-  require('./middguard/config/analytics_register')(app);
+require('./middguard/routes')(app);
 
-  // Load analytics packages into memory
-  require('./middguard/loaders/analytics_loader')(app);
-
-  var port = process.env.PORT || 3000;
-  server.listen(port, function () {
-    console.log('Listening on port %d...', port);
-  });
+var port = process.env.PORT || 3000;
+server.listen(port, function () {
+  console.log('Listening on port %d...', port);
 });
 
 module.exports = app;
