@@ -1,0 +1,24 @@
+var fs = require('fs'),
+    path = require('path'),
+    settings = require('../config/settings');
+
+module.exports = function (app) {
+  var register = app.get('bookshelf').collection('analytics');
+  var AnalyticsPackage = app.get('bookshelf').model('AnalyticsPackage');
+
+  var analyticsCount;
+  var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+  var analyticsPath = settings.analyticsPath;
+  var analyticsAbsPath = path.resolve(analyticsPath);
+
+  fs.readdirSync(analyticsAbsPath).forEach(function (tool) {
+    var manifestPath = path.join(analyticsAbsPath, tool, 'manifest.json');
+    var manifest = JSON.parse(fs.readFileSync(manifestPath));
+
+    register.add(new AnalyticsPackage({
+      name: manifest.name,
+      requirePath: path.join(analyticsAbsPath, tool, manifest.main);
+    }));
+  });
+};
