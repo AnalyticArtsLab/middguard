@@ -1,5 +1,5 @@
 var path = require('path'),
-    settings = require('./middguard/config/settings');
+    settings = require('./settings');
 
 // Add `debug: true` to the config to log SQL statements
 var development = {

@@ -3,8 +3,9 @@ var fs = require('fs'),
     settings = require('../config/settings');
 
 module.exports = function (app) {
-  var register = app.get('bookshelf').collection('models');
-  var ModelPackage = app.get('bookshelf').model('ModelPackage');
+  var Bookshelf = app.get('bookshelf');
+  var register = Bookshelf.collection('models');
+  var ModelPackage = Bookshelf.model('ModelPackage');
 
   var hasOwnProperty = Object.prototype.hasOwnProperty;
 
@@ -31,7 +32,7 @@ module.exports = function (app) {
 
     register.add(new ModelPackage({
       name: _name,
-      requirePath: path.join(modelsAbsPath, model, _model);
+      requirePath: path.join(modelsAbsPath, model, _model)
     }))
   })
 }

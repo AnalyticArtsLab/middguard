@@ -4,10 +4,10 @@ var env = require('./settings').env,
 module.exports = function (app) {
   var knex = require('knex')(knexConfig);
 
-  var bookshelf = require('bookshelf')(knex);
+  var Bookshelf = require('bookshelf')(knex);
 
   // Use named models to avoid circular import problems
-  bookshelf.plugin('registry');
+  Bookshelf.plugin('registry');
 
   var AnalyticsPackage = Bookshelf.Model.extend();
   var ModelPackage = Bookshelf.Model.extend();
@@ -22,8 +22,8 @@ module.exports = function (app) {
   Bookshelf.model('AnalyticsPackage', AnalyticsPackage);
   Bookshelf.model('ModelPackage', ModelPackage);
 
-  Bookshelf.collection('analytics', AnalyticsRegister);
-  Bookshelf.collection('models', ModelRegister);
+  Bookshelf.collection('analytics', new AnalyticsRegister());
+  Bookshelf.collection('models', new ModelRegister());
 
-  app.set('bookshelf', bookshelf);
+  app.set('bookshelf', Bookshelf);
 };

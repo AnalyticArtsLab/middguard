@@ -15,7 +15,7 @@ module.exports = function (app) {
 
     register.add(new AnalyticsPackage({
       name: manifest.name,
-      requirePath: path.join(analyticsAbsPath, tool, manifest.main);
+      requirePath: path.join(analyticsAbsPath, tool, manifest.main)
     }));
   });
 };
