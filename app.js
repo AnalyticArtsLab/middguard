@@ -6,6 +6,8 @@ var express = require('express'),
     bookshelfConfig = require('./middguard/config/bookshelf');
 
 var app = express();
+module.exports = app;
+
 expressConfig(app);
 
 var server = http.createServer(app);
@@ -23,5 +25,3 @@ var port = process.env.PORT || 3000;
 server.listen(port, function () {
   console.log('Listening on port %d...', port);
 });
-
-module.exports = app;

@@ -6,7 +6,7 @@ var Message = Bookshelf.Model.extend({
   initialize: function () {
 
   },
-  user: function () {
+  analyst: function () {
     return this.belongsTo('Analyst');
   }
 });

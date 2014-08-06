@@ -18,6 +18,7 @@ var middguard = middguard || {};
     },
     initialize: function () {
       this.collapsed = false;
+      middguard.Messages.fetch();
     },
     render: function () {
       this.$el.html(this.template());
@@ -29,7 +30,7 @@ var middguard = middguard || {};
     messageContents: function () {
       return {
         content: this.$input.val().trim(),
-        // analyst: middguard.user.get('id'),
+        analyst_id: 1,
         seen: true,
         state: JSON.stringify(middguard.state.toJSON())
       }
