@@ -1,6 +1,12 @@
 html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
@@ -9,8 +15,52 @@ body {
 
 #middguard-chat {
   position: absolute;
-  top: 0;
-  right: 0;
+  right: 20px;
   bottom: 0;
-  border-left: 1px solid #666;
+  width: 300px;
+  border-top: 1px solid #999;
+  border-right: 1px solid #999;
+  border-left: 1px solid #999;
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+}
+
+#middguard-chat-header {
+  padding: 7px 5px;
+  color: #fff;
+  background-color: #333;
+}
+
+#middguard-chat-collapse {
+  margin: 0;
+  padding: 0 5px;
+  outline: none;
+  border: none;
+  float: right;
+  color: #fff;
+  background-color: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+#middguard-chat-log {
+  margin: 0;
+  padding: 0 10px;
+  height: 434px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #e9eaed;
+}
+
+#middguard-chat-input {
+  width: 100%;
+  height: 28px;
+  outline: none;
+  border: none;
+  border-top: 1px solid #999;
+  padding: 7px 5px;
+  resize: none;
+  overflow: hidden;
+  box-shadow: 0 1px #e6e6e6 inset;
+  font-size: 13px;
 }
