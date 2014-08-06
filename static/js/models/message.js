@@ -6,6 +6,7 @@ var middguard = middguard || {};
       analyst: '',
       state: '',
       content: '',
+      seen: false,
       timestamp: Date.now()
     }
   });

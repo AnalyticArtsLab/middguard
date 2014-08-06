@@ -12,7 +12,7 @@ var middguard = middguard || {};
       '<textarea id="middguard-chat-input"></textarea>'
     ),
     events: {
-      'keyup #middguard-chat-input': 'sendMessage',
+      'keydown #middguard-chat-input': 'sendMessage',
       'click #middguard-chat-collapse': 'toggleCollapsed',
       'click': 'focusInput'
     },
@@ -22,29 +22,31 @@ var middguard = middguard || {};
     render: function () {
       this.$el.html(this.template());
       this.$chatlog = this.$('#middguard-chat-log');
-      this.$collapse = this.$('#middguard-chat-collapse')
+      this.$collapse = this.$('#middguard-chat-collapse');
       this.$input = this.$('#middguard-chat-input');
       return this;
     },
     messageContents: function () {
       return {
-        contents: this.$('#middguard-chat-input').val(),
-        analyst: middguard.user.get('id'),
-        state: middguard.state.getJSON()
+        content: this.$input.val().trim(),
+        // analyst: middguard.user.get('id'),
+        seen: true,
+        state: JSON.stringify(middguard.state.toJSON())
       }
     },
     sendMessage: function (event) {
-      console.log('e');
-      if (event.which === 13) {
-        middguard.messages.create(this.messageContents());
+      if (event.which === 13 && !event.shiftKey) {
+        event.preventDefault();
+        var message = middguard.Messages.create(this.messageContents());
+        this.$input.val('');
+        return false;
       }
     },
     toggleCollapsed: function () {
-      console.log(this.$log);
       if (this.collapsed) {
         this.$chatlog.show();
         this.$input.show();
-        this.$collapse.html('&mdash;')
+        this.$collapse.html('&mdash;');
         this.collapsed = false;
       } else {
         this.$chatlog.hide();
@@ -66,5 +68,5 @@ var middguard = middguard || {};
     render: function () {
       this.$el.html(this.model.get('content'));
     }
-  })
+  });
 })();
