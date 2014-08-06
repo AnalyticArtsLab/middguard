@@ -18,7 +18,11 @@ var middguard = middguard || {};
     },
     initialize: function () {
       this.collapsed = false;
-      middguard.Messages.fetch();
+
+      _.bindAll(this, 'addOne', 'addAll');
+      this.listenTo(middguard.Messages, 'add', this.addOne);
+      this.listenTo(middguard.Messages, 'reset', this.addAll);
+      middguard.Messages.fetch({reset: true});
     },
     render: function () {
       this.$el.html(this.template());
@@ -34,6 +38,13 @@ var middguard = middguard || {};
         seen: true,
         state: JSON.stringify(middguard.state.toJSON())
       }
+    },
+    addOne: function (message) {
+      var view = new middguard.ChatMessageView({model: message});
+      this.$chatlog.append(view.render().el);
+    },
+    addAll: function () {
+      middguard.Messages.each(this.addOne);
     },
     sendMessage: function (event) {
       if (event.which === 13 && !event.shiftKey) {
@@ -68,6 +79,7 @@ var middguard = middguard || {};
     },
     render: function () {
       this.$el.html(this.model.get('content'));
+      return this;
     }
   });
 })();
