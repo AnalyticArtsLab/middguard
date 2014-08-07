@@ -1,0 +1,29 @@
+doctype html
+html
+  head
+    title MiddGuard Authentication
+    link(href='/static/css/auth.css', rel='stylesheet')
+  body
+    .container
+      h1 MiddGuard
+      form#register(method='post', action='/auth/register')
+        h2 Register
+        label
+          div username
+          input(name='username', type='text')
+        label
+          div password
+          input(name='password', type='password')
+        label
+          div confirm password
+          input(name='passwordConfirm', type='password')
+        input(type='submit' value='Register')
+      form#login(method='post', action='/auth/login')
+        h2 Login
+        label
+          div username
+          input(name='username', type='text' autofocus)
+        label
+          div password
+          input(name='password', type='password')
+        input(type='submit' value='Login')
