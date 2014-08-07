@@ -6,8 +6,7 @@ var middguard = middguard || {};
       analyst_id: '',
       state: '',
       content: '',
-      seen: false,
-      timestamp: Date.now()
+      seen: false
     }
   });
 })();

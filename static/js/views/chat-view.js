@@ -8,7 +8,7 @@ var middguard = middguard || {};
     template: _.template(
       '<div id="middguard-chat-header">Chat' +
       '<button id="middguard-chat-collapse">&mdash;</button></div>' +
-      '<ul id="middguard-chat-log"></ul>' +
+      '<div id="middguard-chat-log"></div>' +
       '<textarea id="middguard-chat-input"></textarea>'
     ),
     events: {
@@ -73,13 +73,45 @@ var middguard = middguard || {};
   });
 
   middguard.ChatMessageView = Backbone.View.extend({
-    tagName: 'li',
+    tagName: 'div',
+    className: 'middguard-chat-message',
+    template: _.template(
+      '<div class="middguard-chat-message-meta"><%= analyst %>' +
+      '<span class="timeOrRestore"><%= time %></span></div>' +
+      '<div class="middguard-chat-message-content"><%= content %></div>'
+    ),
+    events: {
+      'mouseover': 'showRestoreState',
+      'mouseout': 'showTime',
+      'click .timeOrRestore': 'restoreState'
+    },
     initialize: function () {
+      this.analyst = middguard.Analysts.findWhere({
+        id: this.model.get('analyst_id')
+      });
+
+      // this.sentBySelf = this.analyst.get('id') === middguard.analyst.get('id');
+
       this.listenTo(this.model, 'change', this.render);
     },
     render: function () {
-      this.$el.html(this.model.get('content'));
+      var attrs = {
+        // analyst: this.analyst.get('username'),
+        content: this.model.get('content'),
+        analyst: 'dsilver',
+        time: moment(this.model.get('timestamp')).calendar()
+      };
+      this.$el.html(this.template(attrs));
       return this;
+    },
+    showRestoreState: function () {
+      this.$el.find('span').html('Restore state');
+    },
+    showTime: function () {
+      this.$el.find('span').html(moment(this.model.get('timestamp')).calendar());
+    },
+    restoreState: function () {
+
     }
   });
 })();

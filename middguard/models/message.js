@@ -3,6 +3,9 @@ var Bookshelf = require('../../app').get('bookshelf');
 
 var Message = Bookshelf.Model.extend({
   tableName: 'message',
+  defaults: {
+    timestamp: new Date().toISOString()
+  },
   initialize: function () {
 
   },

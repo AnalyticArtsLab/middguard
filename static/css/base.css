@@ -44,8 +44,6 @@ body {
 }
 
 #middguard-chat-log {
-  margin: 0;
-  padding: 0 10px;
   height: 434px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -63,4 +61,28 @@ body {
   overflow: hidden;
   box-shadow: 0 1px #e6e6e6 inset;
   font-size: 13px;
+}
+
+.middguard-chat-message {
+  width: calc(100% - 6px);
+  background-color: #fff;
+  padding: 3px 5px;
+  margin: 3px;
+  border: 1px solid #e6e6e6;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.middguard-chat-message-meta {
+  padding: 3px 0;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.middguard-chat-message-meta span {
+  float: right;
+  cursor: pointer;
+}
+
+.middguard-chat-message-content {
+  padding: 3px 0;
 }
