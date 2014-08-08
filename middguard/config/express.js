@@ -1,4 +1,7 @@
 var express = require('express'),
+    bodyParser = require('body-parser'),
+    cookieParser = require('cookie-parser'),
+    session = require('express-session'),
     path = require('path'),
     settings = require('./settings');
 
@@ -10,6 +13,18 @@ module.exports = function (app) {
 
   app.use('/static', express.static(path.join(root, '/static')));
   app.use('/modules', express.static(path.join(root, modulesPath)));
+
+  var sessionStore = new session.MemoryStore();
+  app.set('sessionStore', sessionStore);
+
+  var cookieParser = cookieParser(settings.SECRET);
+
+  app.use(bodyParser());
+  app.use(cookieParser);
+  app.use(session({
+    store: sessionStore,
+    secret: settings.SECRET_KEY
+  }));
 
   app.set('views', path.join(root, 'middguard/views'));
   app.set('view engine', 'jade');

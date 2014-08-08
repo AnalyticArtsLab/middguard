@@ -17,5 +17,7 @@ module.exports = {
   analyticsPath: 'packages/analytics',
 
   // The name of the SQLite database, stored at the root
-  db: 'middguard.db'
+  db: 'middguard.db',
+
+  SECRET_KEY: process.env.SECRET_KEY || 'turn down for what'
 };

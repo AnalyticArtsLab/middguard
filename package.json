@@ -26,10 +26,13 @@
   "dependencies": {
     "bcrypt": "^0.7.8",
     "bluebird": "^2.2.2",
+    "body-parser": "^1.6.2",
     "bookshelf": "^0.7.7",
     "chalk": "^0.5.1",
     "commander": "^2.3.0",
+    "cookie-parser": "^1.3.2",
     "express": "^4.6.1",
+    "express-session": "^1.7.4",
     "jade": "^1.5.0",
     "knex": "^0.6.22",
     "lodash": "^2.4.1",

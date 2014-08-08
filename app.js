@@ -1,5 +1,6 @@
 var express = require('express'),
     socketio = require('socket.io'),
+    SessionSockets = require('./middguard/config/session_socket'),
     http = require('http'),
     path = require('path'),
     expressConfig = require('./middguard/config/express'),
@@ -13,11 +14,15 @@ expressConfig(app);
 var server = http.createServer(app);
 var io = socketio(server);
 
+var sessionSockets = new SessionSockets(io,
+  app.get('sessionStore'),
+  app.get('cookieParser'));
+
 bookshelfConfig(app);
 require('./middguard/loaders/models_loader')(app);
 require('./middguard/loaders/analytics_loader')(app);
 
-io.on('connection', require('./middguard/socket'));
+sessionSockets.on('connection', require('./middguard/socket'));
 
 require('./middguard/routes')(app);
 

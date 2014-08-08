@@ -1,7 +1,9 @@
 var _ = require('lodash'),
     message = require('./message');
 
-module.exports = function (socket) {
+module.exports = function (err, socket, session) {
+  if (!session.user) res.render('auth');
+
   socket.on('messages:create', _.bind(message.create, socket));
   socket.on('messages:read', _.bind(message.read, socket));
 
