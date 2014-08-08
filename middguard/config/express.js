@@ -1,6 +1,6 @@
 var express = require('express'),
     bodyParser = require('body-parser'),
-    cookieParser = require('cookie-parser'),
+    connectCookieParser = require('cookie-parser'),
     session = require('express-session'),
     path = require('path'),
     settings = require('./settings');
@@ -17,13 +17,16 @@ module.exports = function (app) {
   var sessionStore = new session.MemoryStore();
   app.set('sessionStore', sessionStore);
 
-  var cookieParser = cookieParser(settings.SECRET);
+  var cookieParser = connectCookieParser(settings.SECRET);
+  app.set('cookieParser', cookieParser);
 
   app.use(bodyParser());
   app.use(cookieParser);
   app.use(session({
     store: sessionStore,
-    secret: settings.SECRET_KEY
+    secret: settings.SECRET_KEY,
+    resave: true,
+    saveUninitialized: true
   }));
 
   app.set('views', path.join(root, 'middguard/views'));

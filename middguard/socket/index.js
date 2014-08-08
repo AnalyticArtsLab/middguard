@@ -2,7 +2,7 @@ var _ = require('lodash'),
     message = require('./message');
 
 module.exports = function (err, socket, session) {
-  if (!session.user) res.render('auth');
+  // if (!session.user) socket.emit('session', session);
 
   socket.on('messages:create', _.bind(message.create, socket));
   socket.on('messages:read', _.bind(message.read, socket));
