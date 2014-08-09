@@ -70,3 +70,19 @@ input:active {
 #login {
   margin-left: 20px;
 }
+
+.error {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #f2dede;
+  border: 1px solid #f39797;
+  width: 300px;
+}
+
+.message {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #d9edf7;
+  border: 1px solid #98d8f8;
+  width: 300px;
+}

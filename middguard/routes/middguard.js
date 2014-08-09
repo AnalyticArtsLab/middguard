@@ -3,6 +3,8 @@ var modulesLoader = require('../loaders/modules_loader'),
     appJs = require('../config/app_js');
 
 module.exports = function(req, res) {
+  if (!req.session.user) return res.redirect('/auth');
+
   modulesLoader(function (modules) {
     res.render('index', {
       js: modules.js,

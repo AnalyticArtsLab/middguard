@@ -4,7 +4,7 @@ exports.up = function(knex, Promise) {
   return Promise.all([
     knex.schema.createTable('analyst', function (table) {
       table.increments('id').primary();
-      table.text('username');
+      table.text('username').unique();
       table.text('password');
     }),
     knex.schema.createTable('message', function (table) {

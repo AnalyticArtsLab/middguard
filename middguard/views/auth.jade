@@ -7,10 +7,18 @@ html
     .container
       h1 MiddGuard
       form#register(method='post', action='/auth/register')
+        - if (!register) register = {};
         h2 Register
+        if register.message
+          .message #{register.message}
+        if register.error
+          .error #{register.error}
         label
           div username
-          input(name='username', type='text')
+          if register.username
+            input(name='username', type='text', value='#{register.username}')
+          else
+            input(name='username', type='text')
         label
           div password
           input(name='password', type='password')
@@ -19,10 +27,16 @@ html
           input(name='passwordConfirm', type='password')
         input(type='submit' value='Register')
       form#login(method='post', action='/auth/login')
+        - if (!login) login = {};
         h2 Login
+        if login.error
+          .error #{login.error}
         label
           div username
-          input(name='username', type='text' autofocus)
+          if login.username
+            input(name='username', type='text', value='#{login.username}')
+          else
+            input(name='username', type='text')
         label
           div password
           input(name='password', type='password')

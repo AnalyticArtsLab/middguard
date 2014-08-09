@@ -11,18 +11,6 @@ var Analyst = Bookshelf.Model.extend({
   },
   messages: function () {
     return this.hasMany('Message');
-  },
-  hashPassword: function () {
-    this.get('password')
-      .then(function (password) {
-        return bcrypt.genSalt(10)
-          .then(function (err, salt) {
-            return bcrypt.hash(password, salt)
-          })
-          .then(function (err, hash) {
-            return this.set('password', hash);
-          }).done();
-      });
   }
 }, {
   login: Promise.method(function (username, password) {
@@ -30,10 +18,10 @@ var Analyst = Bookshelf.Model.extend({
       throw new Error('Email and password are required.');
     }
     return new this({username: username})
-      .fetch({require: true})
-      .tap(function (user) {
-        return bcrypt.compareAsync(user.get('password'), password);
-      });
+      .fetch({require: true});
+      // .tap(function (user) {
+      //   return bcrypt.compareAsync(user.get('password'), password);
+      // });
   })
 });
 
