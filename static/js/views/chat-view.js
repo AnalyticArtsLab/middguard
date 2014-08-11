@@ -112,7 +112,8 @@ var middguard = middguard || {};
       this.$el.find('span').html(moment(this.model.get('timestamp')).calendar());
     },
     restoreState: function () {
-
+      var state = JSON.parse(this.model.get('state'));
+      middguard.state.set(state);
     }
   });
 })();

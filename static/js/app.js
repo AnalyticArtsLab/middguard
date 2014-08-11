@@ -18,6 +18,12 @@ $(function () {
         selections: selectionsEncoding,
         workingSet: workingSetEncoding
       };
+    },
+    set: function (state) {
+      this.selections.reset(state.selections.map(getModel));
+      this.workingSet.reset(state.workingSet.map(getModel));
+      this.timeRange.start = state.timeRange.start;
+      this.timeRange.end = state.timeRange.end;
     }
   };
 
@@ -25,6 +31,10 @@ $(function () {
     return collection.map(function (model) {
       return {type: model.get('type'), id: model.get('id')};
     });
+  };
+
+  var getModel = function (entity) {
+    return middguard.collections[entity.model].findWhere({id: entity.id});
   };
 
   middguard.app = new middguard.AppView();
