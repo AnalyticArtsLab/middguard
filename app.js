@@ -13,6 +13,7 @@ expressConfig(app);
 
 var server = http.createServer(app);
 var io = socketio(server);
+app.set('io', io);
 
 var sessionSockets = new SessionSockets(io,
   app.get('sessionStore'),

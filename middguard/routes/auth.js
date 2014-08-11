@@ -1,6 +1,7 @@
 var Promise = require('bluebird'),
     bcrypt = Promise.promisifyAll(require('bcrypt')),
-    Analyst = require('../models/analyst');
+    Analyst = require('../models/analyst'),
+    io = require('../../app').get('io');
 
 exports.index = function (req, res) {
   res.render('auth');
@@ -27,6 +28,7 @@ exports.register = function (req, res) {
         new Analyst({username: req.body.username, password: hash})
         .save()
         .then(function (analyst) {
+          io.sockets.emit('analysts:create', analyst);
           res.render('auth', {
             register: {message: 'Successfully registered!'}
           });
