@@ -2,9 +2,12 @@ var _ = require('lodash'),
     Analyst = require('../models/analyst'),
     Message = require('../models/message');
 
-exports.create = function (data, callback) {
-  var socket = this;
-  new Analyst({id: _.result(data, 'analyst_id')}).fetch()
+exports.create = function (data, callback, socket, session) {
+  if (_.result(data, 'analyst_id') !== session.user.id) {
+    return callback(null, {'error': 'Request forbidden'})
+  }
+
+  new Analyst({id: session.user.id}).fetch()
     .then(function (analyst) {
       return analyst.messages().create(_.omit(data, 'analyst_id', 'seen'));
     })
@@ -13,7 +16,6 @@ exports.create = function (data, callback) {
       socket.broadcast.emit('messages:create', message.toJSON());
     })
     .catch(function (error) {
-      console.log(error);
       callback(error);
     });
 };
