@@ -102,6 +102,7 @@ var middguard = middguard || {};
         time: moment(this.model.get('timestamp')).calendar()
       };
       this.$el.html(this.template(attrs));
+      this.$el.toggleClass('sent-by-self', this.sentBySelf);
       return this;
     },
     showRestoreState: function () {

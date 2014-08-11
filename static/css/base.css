@@ -73,9 +73,18 @@ body {
   font-size: 13px;
 }
 
+.middguard-chat-message.sent-by-self {
+  background-color: #dbedfe;
+  border-color: #acd6fd;
+}
+
 .middguard-chat-message-meta {
   padding: 3px 0;
   border-bottom: 1px solid #e6e6e6;
+}
+
+.middguard-chat-message.sent-by-self .middguard-chat-message-meta {
+  border-bottom-color: #acd6fd;
 }
 
 .middguard-chat-message-meta span {
