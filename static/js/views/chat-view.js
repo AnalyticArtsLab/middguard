@@ -22,6 +22,7 @@ var middguard = middguard || {};
       _.bindAll(this, 'addOne', 'addAll');
       this.listenTo(middguard.Messages, 'add', this.addOne);
       this.listenTo(middguard.Messages, 'reset', this.addAll);
+      middguard.Analysts.fetch();
       middguard.Messages.fetch({reset: true});
     },
     render: function () {
@@ -34,7 +35,7 @@ var middguard = middguard || {};
     messageContents: function () {
       return {
         content: this.$input.val().trim(),
-        analyst_id: 1,
+        analyst_id: middguard.user.id,
         seen: true,
         state: JSON.stringify(middguard.state.toJSON())
       }
@@ -90,15 +91,14 @@ var middguard = middguard || {};
         id: this.model.get('analyst_id')
       });
 
-      // this.sentBySelf = this.analyst.get('id') === middguard.analyst.get('id');
+      this.sentBySelf = this.analyst.get('id') === middguard.user.id;
 
       this.listenTo(this.model, 'change', this.render);
     },
     render: function () {
       var attrs = {
-        // analyst: this.analyst.get('username'),
+        analyst: this.analyst.get('username'),
         content: this.model.get('content'),
-        analyst: 'dsilver',
         time: moment(this.model.get('timestamp')).calendar()
       };
       this.$el.html(this.template(attrs));
