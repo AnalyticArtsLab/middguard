@@ -18,7 +18,7 @@ exports.create = function (data, callback) {
     });
 };
 
-exports.read = function (data, callback) {
+exports.readAll = function (data, callback) {
   Message.fetchAll({withRelated: ['analyst']})
     .then(function (messages) {
       callback(null, messages.toJSON());

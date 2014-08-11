@@ -10,7 +10,8 @@ module.exports = function(req, res) {
       js: modules.js,
       css: modules.css,
       appJs: appJs,
-      clientLibs: clientLibs
+      clientLibs: clientLibs,
+      user: {id: req.session.user.id, username: req.session.user.username}
     });
   });
 };

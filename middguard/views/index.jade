@@ -7,6 +7,9 @@ html(lang='en-us')
     each link in css
       link(rel='stylesheet', href=link)
   body
+    script.
+      var middguard = middguard || {};
+      middguard.user = {id: #{user.id}, username: '#{user.username}'};
     each script in clientLibs.js
       script(src=clientLibs.prefix + '/' + script)
     each script in appJs.js

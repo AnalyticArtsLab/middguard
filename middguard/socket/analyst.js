@@ -1,19 +1,27 @@
-var Analyst = require('../models/analyst');
+var _ = require('lodash'),
+    Analyst = require('../models/analyst');
 
-exports.create = function (data, callback) {
-  var username = data.username;
-  var password = data.password;
-  var passwordConfirm = data.passwordConfirm;
+exports.read = function (data, callback) {
+  var analystId = _.result(data, 'id');
 
-  if (password !== passwordConfirm) {
-    var message = {error: {message: 'Passwords do not match.'}}
-    callback(null, message);
-    return false;
-  }
-
-  var analyst = new Analyst({username: username, password: password}).save();
-
-  callback(null, analyst.toJSON());
-  this.broadcast.emit('analysts:create', analyst.toJSON());
+  new Analyst({id: analystId}).fetch()
+  .then(function (analyst) {
+    callback(null, analyst.toJSON());
+  })
+  .catch(Analyst.NotFoundError, function () {
+    callback(null, {'error': 'Analyst ' + analystId + ' not found.'});
+  })
+  .catch(function (error) {
+    callback(error);
+  });
 };
 
+exports.readAll = function (data, callback) {
+  Analyst.fetchAll()
+  .then(function (analysts) {
+    callback(null, analysts.toJSON());
+  })
+  .catch(function (error) {
+    callback(error);
+  });
+};
