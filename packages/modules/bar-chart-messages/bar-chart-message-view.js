@@ -4,7 +4,7 @@ var middguard = middguard || {};
   'use strict';
 
   var BarChartMessagesView = Backbone.View.extend({
-    id: '#bar-chart-messages',
+    id: 'bar-chart-messages',
     initialize: function () {
       // Properties for our chart
       this.margin = {top: 20, right: 20, bottom: 30, left: 40};
@@ -13,12 +13,16 @@ var middguard = middguard || {};
 
       // Setup elements for the view
       this.d3el = d3.select(this.el);
-      this.svg = this.d3el.append('svg');
-      this.xAxisEl = this.svg.append('g').attr('class', 'x axis');
-      this.yAxisEl = this.svg.append('g').attr('class', 'y axis');
-      this.rectsEl = this.svg.append('g').attr('class', 'rects')
+      this.svg = this.d3el.append('svg')
+          .attr('height', this.height + this.margin.top + this.margin.bottom)
+          .attr('width', this.width + this.margin.left + this.margin.right)
+        .append('g')
           .attr('transform', 'translate(' + this.margin.left + ','
                 + this.margin.top + ')');
+      this.xAxisEl = this.svg.append('g').attr('class', 'x axis')
+          .attr('transform', 'translate(0,' + this.height + ')')
+      this.yAxisEl = this.svg.append('g').attr('class', 'y axis');
+      this.rectsEl = this.svg.append('g').attr('class', 'rects');
       this.yAxisEl.append('text')
           .style('text-anchor', 'end')
           .attr('transform', 'rotate(-90)')
