@@ -1,6 +1,7 @@
 var _ = require('lodash'),
     analyst = require('./analyst'),
-    message = require('./message');
+    message = require('./message'),
+    modules = require('./modules');
 
 module.exports = function (err, socket, session) {
   if (!session || !session.user) return;
@@ -8,7 +9,7 @@ module.exports = function (err, socket, session) {
   socket.on('messages:create', socketContext(message.create, socket, session));
   socket.on('messages:read', _.bind(message.readAll, socket));
 
-  socket.on('modules:read', _.bind(require('./modules').read, socket));
+  socket.on('modules:read', _.bind(modules.readAll, socket));
 
   socket.on('analyst:read', _.bind(analyst.read, socket));
   socket.on('analysts:read', _.bind(analyst.readAll, socket));

@@ -15,6 +15,18 @@ var middguard = middguard || {};
       } else {
         exists.set(data);
       }
+    },
+    messagesPerUser: function () {
+      var stats = {},
+          nativeHasOwnProperty = Object.prototype.hasOwnProperty;
+      this.each(function (message) {
+        var analyst = middguard.Analysts.findWhere({
+          id: message.get('analyst_id')
+        }).get('username');
+        if (nativeHasOwnProperty.call(stats, analyst)) stats[analyst]++;
+        else stats[analyst] = 1;
+      });
+      return d3.entries(stats);
     }
   });
 

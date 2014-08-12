@@ -1,15 +1,17 @@
 module.exports = {
   prefix: 'static/js',
   js: [
-    'socket_setup.js',
+    'setup.js',
 
     'models/analyst.js',
     'models/message.js',
     'models/relationship.js',
+    'models/module.js',
 
     'collections/analysts.js',
     'collections/messages.js',
     'collections/relationships.js',
+    'collections/modules.js',
 
     'views/packages-view.js',
     'views/chat-view.js',

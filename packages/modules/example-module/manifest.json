@@ -1,6 +1,6 @@
 {
-  "name": "Example",
-  "main": "ExampleView",
+  "name": "Bar Chart Messages",
+  "main": "BarChartMessagesView",
   "version": "0.0.1",
   "js": [
     "example-view.js"

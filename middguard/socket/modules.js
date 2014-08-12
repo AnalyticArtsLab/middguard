@@ -1,7 +1,7 @@
-var moduleLoader = require('../loaders/modules_loader');
+var modulesLoader = require('../loaders/modules_loader');
 
-exports.read = function (data, callback) {
-  moduleLoader(function (modules) {
+exports.readAll = function (data, callback) {
+  modulesLoader(function (modules) {
     callback(null, modules.names);
   });
 };
