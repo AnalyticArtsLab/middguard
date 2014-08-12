@@ -118,3 +118,9 @@ body {
 #middguard-packages .middguard-package.active {
   background-color: lightgreen;
 }
+
+.middguard-module {
+  float: left;
+  height: 100%;
+  overflow-y: auto;
+}

@@ -3,7 +3,7 @@ var middguard = middguard || {};
 (function () {
   'use strict';
 
-  var BarChartMessagesView = Backbone.View.extend({
+  var BarChartMessagesView = middguard.View.extend({
     id: 'bar-chart-messages',
     initialize: function () {
       // Properties for our chart

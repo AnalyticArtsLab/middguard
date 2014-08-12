@@ -14,4 +14,8 @@ var middguard = middguard || {};
     }
   };
 
+  middguard.View = Backbone.View.extend({
+    className: 'middguard-module'
+  });
+
 })();
