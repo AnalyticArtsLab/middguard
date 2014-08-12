@@ -3,6 +3,6 @@
   "main": "BarChartMessagesView",
   "version": "0.0.1",
   "js": [
-    "example-view.js"
+    "bar-chart-message-view.js"
   ]
 }
