@@ -95,3 +95,26 @@ body {
 .middguard-chat-message-content {
   padding: 3px 0;
 }
+
+#middguard-packages {
+  float: left;
+  width: 300px;
+  height: 100%;
+  padding: 20px 0;
+  border-right: 1px solid #999;
+  background-color: #e9eaed;
+}
+
+#middguard-packages-header {
+  margin-top: 0;
+  padding: 0 20px;
+}
+
+#middguard-packages .middguard-package {
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+#middguard-packages .middguard-package.active {
+  background-color: lightgreen;
+}

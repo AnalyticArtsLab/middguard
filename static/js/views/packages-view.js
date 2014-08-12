@@ -6,7 +6,7 @@ var middguard = middguard || {};
   middguard.PackagesView = Backbone.View.extend({
     id: 'middguard-packages',
     template: _.template(
-      '<div id="middguard-packages-header">Packages</div>' +
+      '<h2 id="middguard-packages-header">Modules</h2>' +
       '<div id="middguard-packages-list">' +
         '<div id="middguard-packages-modules"></div>' +
       '</div>'
@@ -47,17 +47,20 @@ var middguard = middguard || {};
     },
     render: function () {
       this.$el.html(this.template({name: this.model.get('name')}));
+      this.$el.toggleClass('active', this.active);
       return this;
     },
     toggleActive: function () {
       if (this.active) {
         middguard.__modules[this.model.get('main')].live.remove();
+        middguard.__modules[this.model.get('main')].live = null;
       } else {
         var module = new middguard.__modules[this.model.get('main')].ctor;
         middguard.__modules[this.model.get('main')].live = module;
         $('body').append(module.render().el);
       }
       this.active = !this.active;
+      this.render();
     }
   })
 })();
