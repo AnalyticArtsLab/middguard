@@ -2,6 +2,7 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     connectCookieParser = require('cookie-parser'),
     session = require('express-session'),
+    SQLiteStore = require('connect-sqlite3')(session),
     path = require('path'),
     settings = require('./settings');
 
@@ -14,7 +15,10 @@ module.exports = function (app) {
   app.use('/static', express.static(path.join(root, '/static')));
   app.use('/modules', express.static(path.join(root, modulesPath)));
 
-  var sessionStore = new session.MemoryStore();
+  var sessionStore = new SQLiteStore({
+    db: settings.db.substr(0, 9),
+    dir: settings.root
+  });
   app.set('sessionStore', sessionStore);
 
   var cookieParser = connectCookieParser(settings.SECRET);
@@ -26,7 +30,8 @@ module.exports = function (app) {
     store: sessionStore,
     secret: settings.SECRET_KEY,
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: {maxAge: 7 * 24 * 60 * 60 * 1000 } // 1 week
   }));
 
   app.set('views', path.join(root, 'middguard/views'));
