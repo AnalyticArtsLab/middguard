@@ -3,6 +3,9 @@
   "main": "BarChartMessagesView",
   "version": "0.0.1",
   "js": [
-    "bar-chart-message-view.js"
+    "bar-chart-messages-view.js"
+  ],
+  "css": [
+    "bar-chart-messages-styles.css"
   ]
 }
