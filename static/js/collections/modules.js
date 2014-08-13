@@ -3,7 +3,7 @@ var middguard = middguard || {};
 (function () {
   var Modules = Backbone.Collection.extend({
     url: 'modules',
-    module: middguard.Module
+    model: middguard.Module
   });
 
   middguard.Modules = new Modules();

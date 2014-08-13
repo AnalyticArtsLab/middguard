@@ -20,27 +20,48 @@ module.exports = function (err, socket, session) {
     var name = modelAttrs.get('name');
     var model = Bookshelf.model(name);
 
-    var _initialize = model.prototype.initialize;
+    if (!model.prototype._emitting) {
+      var _initialize = model.prototype.initialize;
 
-    model.prototype.initialize = _.wrap(_initialize, function (init) {
-      var args = Array.prototype.slice.call(arguments, 1);
-      init.apply(args);
+      model.prototype.initialize = function () {
+        var args = Array.prototype.slice.call(arguments);
+        _initialize.apply(args);
 
-      this.on('created', function (data) {
-        socket.emit(pluralize(name) + ':create', data);
-      });
+        this.on('created', function (model, attrs, options) {
+          // If the model was created on the client, we don't want to emit a
+          // create event, since we need to assign an id on the creator via
+          // a callback and do a broadcast.emit for everyone else.
+          // The create listener will take care of this.
+          if (!options.clientCreate) {
+            socket.emit(name + ':create', model.toJSON());
+          }
+        });
 
-      this.on('updated', function (data) {
-        socket.emit(name + ':update', data);
-      });
+        this.on('updated', function (model) {
+          socket.emit(name + ':update', model.toJSON());
+        });
 
-      this.on('destroyed', function (data) {
-        socket.emit(name + ':delete', data);
-      });
-    });
+        this.on('destroyed', function (model) {
+          socket.emit(name + ':delete', model.toJSON());
+        });
+      };
+
+      model.prototype._emitting = true;
+    }
 
     socket.on(pluralize(name) + ':create', function (data, callback) {
-      new model(data).save();
+      // Pass clientCreate to save so the model won't emit anything on the
+      // created event and confuse the client.
+      // Create is a special case since the model on the creating client doesn't
+      // have an id yet.
+      new model().save(data, {clientCreate: true})
+        .then(function (newModel) {
+          callback(null, newModel.toJSON());
+          socket.broadcast.emit(name + ':create', newModel.toJSON());
+        })
+        .catch(function (error) {
+          throw new Error(error);
+        })
     });
 
     socket.on(name + ':update', function (data, callback) {
