@@ -5,6 +5,7 @@ module.exports = {
     'underscore/underscore.js',
     'moment/moment.js',
     'd3/d3.js',
+    'pluralize/pluralize.js',
     'socket.io-client/socket.io.js',
     'backbone/backbone.js',
     'backbone.iobind/dist/backbone.iosync.js',
