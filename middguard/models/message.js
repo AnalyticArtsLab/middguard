@@ -6,9 +6,6 @@ var Message = Bookshelf.Model.extend({
   defaults: {
     timestamp: new Date().toISOString()
   },
-  initialize: function () {
-
-  },
   analyst: function () {
     return this.belongsTo('Analyst');
   }
