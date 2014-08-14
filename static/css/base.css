@@ -105,13 +105,17 @@ body {
   background-color: #e9eaed;
 }
 
-#middguard-packages-header {
-  margin-top: 0;
+#middguard-packages h1,
+#middguard-packages h2,
+#middguard-packages h3 {
   padding: 0 20px;
 }
 
 #middguard-packages .middguard-package {
   padding: 10px 20px;
+}
+
+#middguard-packages .middguard-package.module {
   cursor: pointer;
 }
 

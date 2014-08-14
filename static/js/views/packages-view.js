@@ -6,31 +6,73 @@ var middguard = middguard || {};
   middguard.PackagesView = Backbone.View.extend({
     id: 'middguard-packages',
     template: _.template(
-      '<h2 id="middguard-packages-header">Modules</h2>' +
+      '<h1 id="middguard-header">MiddGuard</h1>' +
       '<div id="middguard-packages-list">' +
-        '<div id="middguard-packages-modules"></div>' +
+        '<h3>Modules</h3><div id="middguard-packages-modules"></div>' +
+        '<h3>Models</h3><div id="middguard-packages-models"></div>' +
+        '<h3>Analytics</h3><div id="middguard-packages-analytics"></div>' +
       '</div>'
     ),
     initialize: function () {
-      _.bindAll(this, 'addOne', 'addAll');
+      _.bindAll(this,
+        'addAllModules',
+        'addAllModels',
+        'addAllAnalytics',
+        'addAll');
 
-      this.listenTo(middguard.Modules, 'reset', this.addAll);
+      this.listenTo(middguard.Modules, 'reset', this.addAllModules);
+      this.listenTo(middguard.PackagedModels, 'reset', this.addAllModels);
+      this.listenTo(middguard.PackagedAnalytics, 'reset', this.addAllAnalytics);
+
+      this.listenTo(middguard.PackagedModels, 'reset', this.createCollections);
 
       middguard.Modules.fetch({reset: true});
+      middguard.PackagedModels.fetch({reset: true});
+      middguard.PackagedAnalytics.fetch({reset: true});
     },
     render: function () {
       this.$el.html(this.template());
       this.$modules = this.$('#middguard-packages-modules');
+      this.$models = this.$('#middguard-packages-models');
+      this.$analytics = this.$('#middguard-packages-analytics');
       return this;
     },
-    addOne: function (model) {
-      var view = new middguard.PackageView({model: model});
-      this.$modules.append(view.render().el);
+    addAllModules: function () {
+      this.addAll(middguard.Modules, 'module', this.$modules);
     },
-    addAll: function () {
-      middguard.Modules.each(this.addOne);
+    addAllModels: function () {
+      this.addAll(middguard.PackagedModels, 'model', this.$models);
+    },
+    addAllAnalytics: function () {
+      this.addAll(middguard.PackagedAnalytics, 'analytics', this.$analytics);
+    },
+    addAll: function (collection, type, container) {
+      collection.each(_.bind(function (model) {
+        var view = new middguard.PackageView({model: model}, {type: type});
+        container.append(view.render().el);
+      }, this));
+    },
+    createCollections: function () {
+      middguard.PackagedModels.each(function (model) {
+        var name = model.get('name');
+        var capital = capitalize(name);
+        var plural = pluralize(name);
+        var capitalPlural = capitalize(plural);
+
+        middguard.entities[capital] = Backbone.Model;
+        middguard.entities[capitalPlural] = new middguard.EntityCollection([], {
+          url: plural,
+          model: middguard.entities[capital]
+        });
+
+        middguard.entities[capitalPlural].fetch();
+      });
     }
   });
+
+  var capitalize = function (string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
 
   middguard.PackageView = Backbone.View.extend({
     className: 'middguard-package',
@@ -40,17 +82,22 @@ var middguard = middguard || {};
     events: {
       'click': 'toggleActive'
     },
-    initialize: function () {
+    initialize: function (model, options) {
       this.active = false;
+
+      this.type = _.result(options, 'type');
 
       _.bindAll(this, 'toggleActive');
     },
     render: function () {
       this.$el.html(this.template({name: this.model.get('name')}));
       this.$el.toggleClass('active', this.active);
+      this.$el.addClass(this.type);
       return this;
     },
     toggleActive: function () {
+      if (this.type !== 'module') return;
+
       if (this.active) {
         middguard.__modules[this.model.get('main')].live.remove();
         middguard.__modules[this.model.get('main')].live = null;
@@ -62,5 +109,5 @@ var middguard = middguard || {};
       this.active = !this.active;
       this.render();
     }
-  })
+  });
 })();

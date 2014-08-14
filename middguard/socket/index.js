@@ -1,7 +1,9 @@
 var _ = require('lodash'),
     pluralize = require('pluralize'),
     analyst = require('./analyst'),
+    analytics = require('./analytics'),
     message = require('./message'),
+    models = require('./models'),
     modules = require('./modules'),
     Bookshelf = require('../../app').get('bookshelf');
 
@@ -11,7 +13,9 @@ module.exports = function (err, socket, session) {
   socket.on('messages:create', socketContext(message.create, socket, session));
   socket.on('messages:read', _.bind(message.readAll, socket));
 
-  socket.on('modules:read', _.bind(modules.readAll, socket));
+  socket.on('modules:read', modules.readAll);
+  socket.on('models:read', models.readAll);
+  socket.on('analytics:read', analytics.readAll);
 
   socket.on('analyst:read', _.bind(analyst.read, socket));
   socket.on('analysts:read', _.bind(analyst.readAll, socket));

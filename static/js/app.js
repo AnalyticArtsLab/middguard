@@ -37,26 +37,6 @@ $(function () {
     return middguard.collections[entity.model].findWhere({id: entity.id});
   };
 
-  $.ajax({
-    url: '/models',
-    success: function (models) {
-      models.forEach(function (model) {
-        var capital = capitalize(model.name);
-        var plural = pluralize(model.name);
-        var capitalPlural = capitalize(plural);
 
-        middguard.entities[capital] = Backbone.Model;
-        middguard.entities[capitalPlural] = new middguard.EntityCollection([], {
-          url: plural,
-          model: middguard.entities[capital]
-        });
-      });
-
-      middguard.app = new middguard.AppView();
-    }
-  });
-
-  var capitalize = function (string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  };
+  middguard.app = new middguard.AppView();
 });

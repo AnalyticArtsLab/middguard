@@ -7,11 +7,15 @@ module.exports = {
     'models/message.js',
     'models/relationship.js',
     'models/module.js',
+    'models/packaged-model.js',
+    'models/packaged-analytics.js',
 
     'collections/analysts.js',
     'collections/messages.js',
     'collections/relationships.js',
     'collections/modules.js',
+    'collections/packaged-models.js',
+    'collections/packaged-analytics.js',
 
     'views/packages-view.js',
     'views/chat-view.js',
