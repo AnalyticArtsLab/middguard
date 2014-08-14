@@ -20,13 +20,13 @@ var middguard = middguard || {};
         'addAllAnalytics',
         'addAll');
 
-      this.listenTo(middguard.Modules, 'reset', this.addAllModules);
+      this.listenTo(middguard.PackagedModules, 'reset', this.addAllModules);
       this.listenTo(middguard.PackagedModels, 'reset', this.addAllModels);
       this.listenTo(middguard.PackagedAnalytics, 'reset', this.addAllAnalytics);
 
       this.listenTo(middguard.PackagedModels, 'reset', this.createCollections);
 
-      middguard.Modules.fetch({reset: true});
+      middguard.PackagedModules.fetch({reset: true});
       middguard.PackagedModels.fetch({reset: true});
       middguard.PackagedAnalytics.fetch({reset: true});
     },
@@ -38,7 +38,7 @@ var middguard = middguard || {};
       return this;
     },
     addAllModules: function () {
-      this.addAll(middguard.Modules, 'module', this.$modules);
+      this.addAll(middguard.PackagedModules, 'module', this.$modules);
     },
     addAllModels: function () {
       this.addAll(middguard.PackagedModels, 'model', this.$models);
