@@ -8,7 +8,6 @@ var middguard = middguard || {};
       this.$body = $('body');
       this.packages = new middguard.PackagesView();
       this.chat = new middguard.ChatView();
-
       this.render();
     },
     render: function () {

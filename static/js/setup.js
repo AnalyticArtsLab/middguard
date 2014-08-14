@@ -14,6 +14,14 @@ var middguard = middguard || {};
     }
   };
 
+  middguard.analytics = function (name, data) {
+    if (middguard.PackagedAnalytics.findWhere({name: name})) {
+      middguard.socket.emit('analytics:' + name, data);
+    } else {
+      throw new Error('Analytics package ' + name + ' not found');
+    }
+  };
+
   middguard.entities = {};
 
   middguard.EntityCollection = Backbone.Collection.extend({

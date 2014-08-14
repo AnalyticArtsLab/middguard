@@ -8,8 +8,10 @@ var _ = require('lodash'),
     Bookshelf = require('../../app').get('bookshelf');
 
 module.exports = function (err, socket, session) {
+  // Only set up sockets if we have a logged in user
   if (!session || !session.user) return;
 
+  // Set up sockets middguard internal sockets
   socket.on('messages:create', socketContext(message.create, socket, session));
   socket.on('messages:read', _.bind(message.readAll, socket));
 
@@ -20,6 +22,7 @@ module.exports = function (err, socket, session) {
   socket.on('analyst:read', _.bind(analyst.read, socket));
   socket.on('analysts:read', _.bind(analyst.readAll, socket));
 
+  // Patch models to emit socket events on create, update, delete
   Bookshelf.collection('models').each(function (modelAttrs) {
     var name = modelAttrs.get('name');
     var model = Bookshelf.model(name);
@@ -53,6 +56,7 @@ module.exports = function (err, socket, session) {
       model.prototype._emitting = true;
     }
 
+    // Set up create, read, update, delete sockets for each model
     socket.on(pluralize(name) + ':create', function (data, callback) {
       // Pass clientCreate to save so the model won't emit anything on the
       // created event and confuse the client.
@@ -99,6 +103,17 @@ module.exports = function (err, socket, session) {
           callback(error);
         });
     })
+  });
+
+  // Set up sockets to call analytics from client
+  // Patched models will automatically emit create, update, and delete events
+  Bookshelf.collection('analytics').each(function (analyticsAttrs) {
+    var name = analyticsAttrs.get('name');
+    var requirePath = analyticsAttrs.get('requirePath');
+
+    socket.on('analytics:' + name, function (data, callback) {
+      require(requirePath)(Bookshelf, data);
+    });
   });
 };
 
