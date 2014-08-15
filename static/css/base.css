@@ -100,14 +100,28 @@ body {
   float: left;
   width: 300px;
   height: 100%;
-  padding: 20px 0;
   border-right: 1px solid #999;
   background-color: #e9eaed;
 }
 
+.logout {
+  display: inline-block;
+  margin-left: 20px;
+}
+
+.logout input {
+  font-size: inherit;
+  outline: none;
+  border: none;
+  text-decoration: underline;
+  background-color: #e9eaed;
+  cursor: pointer;
+}
+
 #middguard-packages h1,
 #middguard-packages h2,
-#middguard-packages h3 {
+#middguard-packages h3,
+#middguard-packages #middguard-user {
   padding: 0 20px;
 }
 

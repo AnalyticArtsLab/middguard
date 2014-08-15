@@ -7,6 +7,10 @@ var middguard = middguard || {};
     id: 'middguard-packages',
     template: _.template(
       '<h1 id="middguard-header">MiddGuard</h1>' +
+      '<div id="middguard-user"><% print(middguard.user.username) %>' +
+        '<form class="logout" action="/logout" method="post">' +
+          '<input type="submit" value="Logout">' +
+        '</form></div>' +
       '<div id="middguard-packages-list">' +
         '<h3>Modules</h3><div id="middguard-packages-modules"></div>' +
         '<h3>Models</h3><div id="middguard-packages-models"></div>' +

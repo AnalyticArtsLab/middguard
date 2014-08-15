@@ -77,6 +77,12 @@ exports.login = function (req, res) {
     })
 };
 
+exports.logout = function (req, res) {
+  req.session.destroy(function (err) {
+    res.redirect('auth');
+  });
+};
+
 function UniqueConstraintError (err) {
   if (!err) return false;
   var re = /UNIQUE constraint failed/;
