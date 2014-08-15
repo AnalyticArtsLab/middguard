@@ -10,7 +10,7 @@ var middguard = middguard || {};
     },
     modelOne: function () {
       var type = this.get('type_1');
-      var id = +this.('id_1');
+      var id = +this.get('id_1');
 
       return middguard.entities[capitalize(pluralize(type))].get(id);
     },
