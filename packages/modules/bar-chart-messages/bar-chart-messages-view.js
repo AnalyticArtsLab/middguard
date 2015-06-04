@@ -41,7 +41,7 @@ var middguard = middguard || {};
     },
     render: function () {
       var data = middguard.Messages.messagesPerUser();
-
+			debugger;
       this.x.domain(data.map(function (d) { return d.key; }));
       this.y.domain([0, d3.max(data, function (d) { return d.value; })]);
 

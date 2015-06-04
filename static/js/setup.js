@@ -24,12 +24,20 @@ var middguard = middguard || {};
 
     // Set the state using an object with optional keys *selections*,
     // *workingSet*, *timeRange.start*, and *timeRange.end*. Write modules
-    // to listen to changes on these objects to they update when other modules
+    // to listen to changes on these objects so they update when other modules
     // set the state.
     set: function (state) {
+			debugger;
+			//NOTE: "selections" is a Backbone collection when referenced as a property of
+			//"this", but it can be anything
+			//(i.e. it's whatever the value field is for the "selections" key in the "state" object parameter)
+			
+			
       var hasOwnProperty = Object.prototype.hasOwnProperty;
 
       if (hasOwnProperty.call(state, 'selections'))
+				//idea: replace current middguard.state.selections Backbone collection
+				// with the list of models referenced by the state.selections
         this.selections.reset(state.selections.map(getModel));
 
       if (hasOwnProperty.call(state, 'workingSet'))
@@ -56,6 +64,7 @@ var middguard = middguard || {};
   };
 
   var getModel = function (entity) {
+		//get first model instance whose id matches "entity"
     return middguard.collections[entity.model].findWhere({id: entity.id});
   };
 
