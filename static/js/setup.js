@@ -27,7 +27,7 @@ var middguard = middguard || {};
     // to listen to changes on these objects to they update when other modules
     // set the state.
     set: function (state) {
-      var hasOwnProperty = Object.prototype.hashOwnProperty;
+      var hasOwnProperty = Object.prototype.hasOwnProperty;
 
       if (hasOwnProperty.call(state, 'selections'))
         this.selections.reset(state.selections.map(getModel));
