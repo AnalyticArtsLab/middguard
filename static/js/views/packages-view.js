@@ -70,8 +70,10 @@ var middguard = middguard || {};
           url: plural,
           model: middguard.entities[capital]
         });
-
-        middguard.entities[capitalPlural].fetch();
+				//here each entityCollection, which is a Backbone collection, adds the appropriate models to itself
+        middguard.state[capitalPlural] = {selections: new Backbone.Collection(),
+																					workingSet: new Backbone.Collection()};
+				middguard.entities[capitalPlural].fetch();
       });
     }
   });

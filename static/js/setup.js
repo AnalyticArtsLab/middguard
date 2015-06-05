@@ -8,9 +8,10 @@ var middguard = middguard || {};
       start: Number.NEGATIVE_INFINITY,
       end: Number.POSITIVE_INFINITY
     }, Backbone.Events),
+		
     selections: new Backbone.Collection(),
     workingSet: new Backbone.Collection(),
-
+		
     // Encode the state as JSON to save in a message
     toJSON: function () {
       var selectionsEncoding = getModelIdentifiers(this.selections);
@@ -27,7 +28,6 @@ var middguard = middguard || {};
     // to listen to changes on these objects so they update when other modules
     // set the state.
     set: function (state) {
-			debugger;
 			//NOTE: "selections" is a Backbone collection when referenced as a property of
 			//"this", but it can be anything
 			//(i.e. it's whatever the value field is for the "selections" key in the "state" object parameter)
@@ -43,7 +43,7 @@ var middguard = middguard || {};
       if (hasOwnProperty.call(state, 'workingSet'))
         this.workingSet.reset(state.workingSet.map(getModel));
 
-      if (hashOwnProperty.call(state, 'timeRange')) {
+      if (hasOwnProperty.call(state, 'timeRange')) {
         if (hasOwnProperty.call(state.timeRange, 'start')) {
           this.timeRange.start = state.timeRange.start;
           this.timeRange.trigger('change', this.timeRange);

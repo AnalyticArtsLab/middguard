@@ -10,7 +10,7 @@ var middguard = middguard || {};
       this.margin = {top: 20, right: 20, bottom: 30, left: 40};
       this.height = 300 - this.margin.top - this.margin.bottom;
       this.width = 500 - this.margin.left - this.margin.right;
-
+			
       // Setup elements for the view
       this.d3el = d3.select(this.el);
       this.svg = this.d3el.append('svg')
@@ -41,7 +41,7 @@ var middguard = middguard || {};
     },
     render: function () {
       var data = middguard.Messages.messagesPerUser();
-			debugger;
+			
       this.x.domain(data.map(function (d) { return d.key; }));
       this.y.domain([0, d3.max(data, function (d) { return d.value; })]);
 

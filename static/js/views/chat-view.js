@@ -113,7 +113,10 @@ var middguard = middguard || {};
     },
     restoreState: function () {
       var state = JSON.parse(this.model.get('state'));
-      middguard.state.set(state);
+      //middguard.state.set(state)
+			middguard.state.set({'timeRange' : {'start' : new Date("2014-01-08"),
+																			'end' : new Date("2014-01-20")}
+													});
     }
   });
 })();
