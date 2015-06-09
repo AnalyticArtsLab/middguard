@@ -4,11 +4,12 @@
   "description": "Modular, multiperson analytics.",
   "main": "app.js",
   "scripts": {
+	  "start": "node app.js",
     "jshint": "jshint app.js middguard/*"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/danasilver/middguard.git"
+    "url": "https://github.com/ProfBlack/middguard.git"
   },
   "keywords": [
     "analytics",
@@ -20,9 +21,9 @@
     "email": "dsilver@middlebury.edu"
   },
   "bugs": {
-    "url": "https://github.com/danasilver/middguard/issues"
+    "url": "https://github.com/ProfBlack/middguard/issues"
   },
-  "homepage": "https://github.com/danasilver/middguard",
+  "homepage": "https://github.com/ProfBlack/middguard",
   "dependencies": {
     "bcrypt": "^0.8.0",
     "bluebird": "^2.2.2",
