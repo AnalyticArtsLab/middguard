@@ -66,7 +66,7 @@ var middguard = middguard || {};
 		updateDateRange: function(){
 			this.dateRange = [middguard.state.timeRange.start, middguard.state.timeRange.end];
 			this.mainBrush.extent(this.dateRange);
-			if ( this.timeScale(this.dateRange[0]) && this.timeScale(this.dateRange[1])){
+			if ( (this.timeScale(this.dateRange[0]) >= 0 && this.timeScale(this.dateRange[0]) <= this.width) && (this.timeScale(this.dateRange[1]) >= 0 && this.timeScale(this.dateRange[1]) <= this.width) ){
 				//make sure both items in this.dateRange are valid
 				this.brushG.call(this.mainBrush);
 				this.makeTriangle(this.dateRange);
@@ -74,12 +74,11 @@ var middguard = middguard || {};
 		},
 		
 		intervalChanged: function (){
+			this.dateRange = this.mainBrush.extent()
+			middguard.state.set({'timeRange' : {'start' : this.dateRange[0],
+			'end' : this.dateRange[1]}
+														});
 			
-			if (! this.mainBrush.empty()){
-				this.dateRange = this.mainBrush.extent()
-				middguard.state.set({'timeRange' : {'start' : this.dateRange[0],
-																				'end' : this.dateRange[1]}});
-			}
 		},
 		
 		makeTriangle: function(extent){
