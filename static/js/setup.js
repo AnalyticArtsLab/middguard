@@ -24,12 +24,11 @@ var middguard = middguard || {};
 					
 		      var selectionsEncoding = getModelIdentifiers(this[dataSet].selections.models);
 		      var workingSetEncoding = getModelIdentifiers(this[dataSet].workingSet.models);
-					returnObj[dataSet] = {selections: selectionsEncoding,
-        															workingSet: workingSetEncoding
+					returnObj[dataSet] = {selections: this[dataSet].selections.reset(selectionsEncoding),
+        															workingSet: this[dataSet].workingSet.reset(workingSetEncoding)
 																		};
 				}
 			}
-      
       return returnObj;
     },
 
@@ -56,10 +55,24 @@ var middguard = middguard || {};
 						_.extend(this[prop], Backbone.Events);
 					}
 					if (hasOwnProperty.call(state[prop], 'workingSet')){
-						this[prop].workingSet.reset(getModelIdentifiers(state[prop].workingSet.models));
+						//if workingSet is a Backbone collection
+						if (hasOwnProperty.call(state[prop].workingSet, 'models')){
+							this[prop].workingSet.reset(getModelIdentifiers(state[prop].workingSet.models));
+						} else {
+							//if workingSet is just an array (i.e. if a JSON object is being decoded)
+
+							this[prop].workingSet.reset(getModelIdentifiers(state[prop].workingSet));
+						}
 					}
 					if (hasOwnProperty.call(state[prop], 'selections')){
-						this[prop].selections.reset(getModelIdentifiers(state[prop].selections.models));
+						if (hasOwnProperty.call(state[prop].selections, 'models')){
+							//if selections is a Backbone collection
+							this[prop].selections.reset(getModelIdentifiers(state[prop].selections.models));
+						} else {
+							//if selections is just an array (i.e. if a JSON object is being decoded)
+
+							this[prop].selections.reset(getModelIdentifiers(state[prop].selections));
+						}
 					}
 					this[prop].trigger('change', this[prop]);
 				} else {
@@ -104,11 +117,16 @@ var middguard = middguard || {};
 
   var getModelIdentifiers = function (collection) {
 		if (collection.length == 0){
-			return [];
+			return collection;
 		} else{
 	    return _.map(collection, function (model) {
-				
-	      return {id: model.get('id')};
+				if (model.attributes && model.cid){
+					//if 'model' is an actual Backbone model
+					return {id: model.get('id')};
+				} else {
+					//if 'model' is just a regular JS object
+					return {id: model.id};
+				}
 	    });
 		}
   };

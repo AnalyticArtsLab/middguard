@@ -3,8 +3,12 @@ var express = require('express'),
     connectCookieParser = require('cookie-parser'),
     session = require('express-session'),
     SQLiteStore = require('connect-sqlite3')(session),
+		KnexSessionStore = require('connect-session-knex')(session);
     path = require('path'),
-    settings = require('./settings');
+    settings = require('./settings'),
+		env = require('./settings').env,
+		knexConfig = require('./knex')[env]
+		knex = require('knex')(knexConfig);
 
 var root = settings.root;
 var modulesPath = settings.modulesPath;
@@ -15,10 +19,17 @@ module.exports = function (app) {
   app.use('/static', express.static(path.join(root, '/static')));
   app.use('/modules', express.static(path.join(root, modulesPath)));
 
-  var sessionStore = new SQLiteStore({
-    db: settings.db.substr(0, 9),
-    dir: settings.root
-  });
+  if (knexConfig.client == 'sqlite3'){
+		var sessionStore = new SQLiteStore({
+    	db: settings.db.substr(0, 9),
+    	dir: settings.root
+  	});
+	} else {
+		//if dbType == 'postgres'
+		var sessionStore = new KnexSessionStore({
+			knex: knex
+		});
+	}
   app.set('sessionStore', sessionStore);
 
   var cookieParser = connectCookieParser(settings.SECRET);
