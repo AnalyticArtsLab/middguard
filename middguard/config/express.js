@@ -5,9 +5,9 @@ var express = require('express'),
     SQLiteStore = require('connect-sqlite3')(session),
 		KnexSessionStore = require('connect-session-knex')(session);
     path = require('path'),
-    settings = require('./settings'),
+		settings = require('./settings'),
 		env = require('./settings').env,
-		knexConfig = require('./knex')[env]
+		knexConfig = require('./knex')[env],
 		knex = require('knex')(knexConfig);
 
 var root = settings.root;
@@ -19,13 +19,13 @@ module.exports = function (app) {
   app.use('/static', express.static(path.join(root, '/static')));
   app.use('/modules', express.static(path.join(root, modulesPath)));
 
-  if (knexConfig.client == 'sqlite3'){
+  if (settings.dbType == 'sqlite3'){
 		var sessionStore = new SQLiteStore({
     	db: settings.db.substr(0, 9),
     	dir: settings.root
   	});
 	} else {
-		//if dbType == 'postgres'
+		//if dbType == 'pg'
 		var sessionStore = new KnexSessionStore({
 			knex: knex
 		});

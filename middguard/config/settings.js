@@ -18,6 +18,7 @@ module.exports = {
 
   // The name of the SQLite database, stored at the root
   db: 'middguard.db',
+	dbType: 'pg', //USE 'pg' FOR POSTGRES DB OR 'sqlite' FOR SQLITE DB
 
   SECRET_KEY: process.env.SECRET_KEY || 'turn down for what'
 };
