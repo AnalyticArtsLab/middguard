@@ -82,9 +82,9 @@ differently, add *model_path* to your *manifest.json*.
 
 ### Database and migrations
 
-MiddGuard can operate on either a SQLite database or a PostgreSQL database. If you choose to use SQLite, MiddGuard will operate on a single SQLite database called *middguard.db* stored at
-the project root.  It will be automatically created when you run your first
-migration. Alternatively, if you would like to use a PostgreSQL database, fill in the appropriate information in the ./middguard/config/knex.js file to connect to a PostgreSQL database you have already set up.
+MiddGuard can operate on either a SQLite database or a PostgreSQL database. To ensure that middguard is configured to work with the type of database you are using, *make sure that you set the "db" field in the ./middguard/config/settings.js file appropriately.* (There are guidelines in the file). If you choose to use SQLite, MiddGuard will operate on a single SQLite database called *middguard.db* stored at
+the project root.  It will automatically be created when you run your first
+migration. Alternatively, if you would like to use a PostgreSQL database, fill in the appropriate information *in the ./middguard/config/knex.js file* to connect to a PostgreSQL database you have already set up.
 
 #### Make a MiddGuard migration
 
