@@ -15,10 +15,11 @@ if (dbType == 'sqlite'){
 	var development = {
 	  client: 'pg',
 	  connection: {
+			//INSERT APPROPRIATE INFORMATION HERE
 			host     : '127.0.0.1',
-	    user     : 'jabillings',
+	    user     : 'user1',
 	    password : '',
-	    database: 'middguard2.db'
+	    database: 'middguard'
 	  }
 	};
 }
