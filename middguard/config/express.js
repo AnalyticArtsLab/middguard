@@ -19,7 +19,7 @@ module.exports = function (app) {
   app.use('/static', express.static(path.join(root, '/static')));
   app.use('/modules', express.static(path.join(root, modulesPath)));
 
-  if (settings.dbType == 'sqlite3'){
+  if (settings.dbType == 'sqlite'){
 		var sessionStore = new SQLiteStore({
     	db: settings.db.substr(0, 9),
     	dir: settings.root
