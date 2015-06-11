@@ -39,7 +39,7 @@
     "jade": "^1.5.0",
     "knex": "^0.6.22",
     "lodash": "^2.4.1",
-		"node-postgres": "^4.4.0",
+		"pg": "^4.4.0",
     "pluralize": "0.0.11",
     "socket.io": "^1.0.6",
     "sqlite3": "^3.0.0"
