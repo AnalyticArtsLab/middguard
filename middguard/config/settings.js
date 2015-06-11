@@ -18,7 +18,25 @@ module.exports = {
 
   // The name of the SQLite database, stored at the root
   db: 'middguard.db',
-	dbType: 'pg', //USE 'pg' FOR POSTGRES DB OR 'sqlite' FOR SQLITE DB
-
+  
+  //Set dbConfig appropriately for either an SQLite DB or a PostgreSQL DB
+  //SQLITE EXAMPLE (DEFAULT)
+	dbConfig: {
+	 client: 'sqlite3',      // or 'pg',
+	 connection: {          // or the various connection settings for pg
+		 filename: 'middguard.db'
+	  }
+	},
+  /* //POSTGRESQL EXAMPLE
+  dbConfig: {
+  	  client: 'pg',
+  	  connection: {	
+  			host     : '127.0.0.1',
+  	    user     : 'user1',
+  	    password : '',
+  	    database: 'db1'
+  		}
+  	}
+  */
   SECRET_KEY: process.env.SECRET_KEY || 'turn down for what'
 };
