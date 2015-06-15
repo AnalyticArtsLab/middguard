@@ -77,6 +77,7 @@ var middguard = middguard || {};
 				
 				//here each entityCollection, which is a Backbone collection, adds the appropriate models to itself
         //if its name is not contained in the customLoads variable
+    
         if (!model.get('customLoad')){
           middguard.entities[capitalPlural].fetch();
         }
