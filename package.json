@@ -4,7 +4,7 @@
   "description": "Modular, multiperson analytics.",
   "main": "app.js",
   "scripts": {
-	  "start": "node app.js",
+    "start": "node app.js",
     "jshint": "jshint app.js middguard/*"
   },
   "repository": {
