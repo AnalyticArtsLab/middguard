@@ -105,13 +105,14 @@ function setupSocketEvents(socket, modelName, model) {
 
   socket.on(pluralize(modelName) + ':read', function (data, callback) {
     
-    //first check whether any limits/offsets need to be used in querying the DB
-    if (data.limit){
-      var fetched = new model().query({limit: data.limit, offset: data.offset}).fetchAll()
+    
+    if (data){
+      var fetchData = new model().query(data).fetchAll();
     } else {
-      var fetched = new model().fetchAll()
+      //if fetching all models at once
+      var fetchData = new model().fetchAll();
     }
-    fetched
+    fetchData
       .then(function (collection) {
         callback(null, collection.toJSON());
       })
@@ -123,7 +124,6 @@ function setupSocketEvents(socket, modelName, model) {
   socket.on(modelName + ':read', function (data, callback) {
     new model({id: _.result(data, 'id')}).fetch({require: true})
       .then(function (fetchedModel) {
-        console.log('fetch1');
         callback(null, fetchedModel.toJSON());
       })
       .catch(model.NotFoundError, function () {
