@@ -1,5 +1,6 @@
 {
-  "name": "Movement Trace",
+  "name": "movementTrace",
   "model": "movement-trace.js",
+  "customLoad": true,
   "version": "0.0.1"
 }
