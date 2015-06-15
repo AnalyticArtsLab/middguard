@@ -1,5 +1,6 @@
 		#middguard-timeline{
 			margin: 0 60px 0 15px;
+			height: 100px;
 		}
 		.slider axis{
 			stroke: black;
@@ -20,6 +21,11 @@
 		#timeTriangle {
 			fill: red;
 			stroke:none;
+			}
+		#timeMarker{
+			fill: red;
+			stroke: red;
+			z-index: 5;
 		}
 		.axis path{
 		  
