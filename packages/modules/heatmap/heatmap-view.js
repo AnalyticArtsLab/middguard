@@ -29,6 +29,9 @@ var middguard = middguard || {};
         .attr('width', 1000);
       this.yinc = 6; //margin at top
       this.xinc = 2; //margin at left
+      
+      _.extend(this, Backbone.Events);
+      this.listenTo(middguard.state.timeRange, "change", this.render);
 			
     },
     render: function () {
@@ -45,18 +48,33 @@ var middguard = middguard || {};
       var yinc = this.yinc;
       var xinc = this.xinc;
       var colorScale = ["#fff7ec","#fee8c8","#fdd49e","#fdbb84","#fc8d59","#ef6548","#d7301f","#b30000","#7f0000"];
-      checkinData.forEach(function(column){
-        column.forEach(function(row){
+      var dim = 100;
+      for (var row = 0; row < dim; row++){
+        for (var col = 0; col < dim; col++){
   			  svg.append('rect')
   				.attr({
   					'x': (row*10),
-  					'y': ((100-column)*10),
+  					'y': ((100-col)*10)-yinc,
   					'height': 10,
   					'width': 10,
-            'fill': colorScale[Math.floor(checkinData[row][column]/divisor)]
+            'fill': function(){
+              if (checkinData[row][col] > 0){
+                return colorScale[Math.floor(checkinData[row][col]/divisor)];
+              } else {
+                return 'none';
+              }
+            },
+            'stroke': function(){
+              if (checkinData[row][col] > 0){
+                return colorScale[Math.floor(checkinData[row][col]/divisor)];
+              } else {
+                return 'none';
+              }
+            }
   				});
-        });
-      });
+        }
+      }    
+      
       return this;
     },
     
@@ -99,6 +117,7 @@ var middguard = middguard || {};
       
       var heatmapData = [];
       for (var i = 0; i < 100; i++){
+        heatmapData[i] = [];
         for (var j = 0; j < 100; j++){
           heatmapData[i][j] = 0;
         }
@@ -107,8 +126,7 @@ var middguard = middguard || {};
       var curIndex = 0;
       var x;
       var y;
-      while (new Date(curIndex) <= tsDate){
-        
+      while (new Date(dataArray[curIndex].attributes.timestamp) <= tsDate){
         x = dataArray[curIndex].attributes.x;
         y = dataArray[curIndex].attributes.y;
         heatmapData[x][y] = dataArray[curIndex].attributes.count;
