@@ -17,7 +17,7 @@ var middguard = middguard || {};
       this.mapWidth = 800;
       this.mapHeight = 800;
       this.cells = 100;
-      this.tracked = [];
+      this.tracked = new Set();
       
       _.bindAll(this, 'render', 'addPerson', 'changePerson', 'clearAll');
       
@@ -34,30 +34,29 @@ var middguard = middguard || {};
     addPerson: function(){
       // add a new person to the tracked set
       var pid = document.getElementById('trace-query').value;
-      middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}, remove:false});
-      this.tracked.push(pid);
+      if (! this.tracked.has(pid)){
+        middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}, remove:false});
+        this.tracked.add(pid);
+      }
+      
     },
     
     changePerson: function(){
       // replace the current set of tracked people with a new one
       var pid = document.getElementById('trace-query').value;
       middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}});
-      this.tracked = [pid];
+      this.tracked.clear();
+      this.tracked.add(pid);
     },
     
     clearAll: function(){
       // clear all of the tracked ids
       middguard.entities.Movementtraces.reset();
-      this.tracked = [];
+      this.tracked.clear();
     },
 		
     render: function () {
       var v = this;
-
-      
-      
-      console.log(middguard.state.timeRange.start, middguard.state.timeRange.end)
-      
       
       var canvas = d3.select('#movement-trace-paths');
       
@@ -73,13 +72,27 @@ var middguard = middguard || {};
       .y(function(d){ return v.mapHeight - (d.get('Y') + .5) *(v.mapHeight/v.cells);})
       .interpolate("basis");
       
-     var routes = canvas.selectAll('path').data(v.tracked);
+      var pids = [];
+      v.tracked.forEach(function(pid) {pids.push(pid);});
+  
+      var routes = canvas.selectAll('path').data(pids);
      routes.exit().remove();
      routes.enter()
      .append("path");
      
      
-     routes.attr("d", function(d){return routePath(middguard.entities.Movementtraces.where({person_id:+d}))})
+     routes.attr("d", function(d){
+       var traces = middguard.entities.Movementtraces.where({person_id:+d})
+       .filter(function (t){
+         var timestamp = new Date(t.get('Timestamp'));
+         var start = middguard.state.timeRange.start;
+         var end = middguard.state.timeRange.end;
+
+         return (start === Number.NEGATIVE_INFINITY || timestamp >= start) && (end === Number.POSITIVE_INFINITY || timestamp <= end);
+  
+       });
+ 
+       return routePath(traces);})
      .attr("stroke", function(d){return color(d)})
      .attr("stroke-width", "2")
      .attr("fill", "none");

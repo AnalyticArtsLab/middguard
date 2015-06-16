@@ -11,6 +11,8 @@ html, body {
 
 body {
   font-family: "Helvetica Neue", Helvetica, Tahoma;
+  height:100%;
+ 
 }
 
 #middguard-chat {
@@ -141,4 +143,5 @@ body {
   float: left;
   height: 100%;
   overflow-y: auto;
+  overflow-x: auto;
 }
