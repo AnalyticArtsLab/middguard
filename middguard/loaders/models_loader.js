@@ -16,7 +16,7 @@ module.exports = function (app) {
     var manifestPath = path.join(modelsAbsPath, model, 'manifest.json');
     var manifest = JSON.parse(fs.readFileSync(manifestPath));
 
-    var _name, _model;
+    var _name, _model, _load;
 
     if (hasOwnProperty.call(manifest, 'name') && manifest.name !== '') {
       _name = manifest.name;
@@ -28,11 +28,16 @@ module.exports = function (app) {
       _model = path.join('../../', modelsPath, model);
     }
 
+    if (hasOwnProperty.call(manifest, 'customLoad') && manifest.customLoad !== '') {
+      _load = manifest.customLoad;
+    }
+
     Bookshelf.model(_name, require(_model)(Bookshelf));
 
     register.add(new ModelPackage({
       name: _name,
-      requirePath: path.join(modelsAbsPath, model, _model)
+      requirePath: path.join(modelsAbsPath, model, _model),
+      customLoad: _load
     }))
   })
 }

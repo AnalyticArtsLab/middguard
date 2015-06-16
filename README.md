@@ -35,7 +35,8 @@ Three tables are built into the system:
 A package is either a client-side module, a model with a schema, getters, and
 setters, or an analytic tool.  Models and analytic tools run on the server.
 Packages may depend on each other and should raise errors if a dependency is not
-found.
+found. Any client-side module should be able to run properly given only the information
+contained in a given state. (See static/js/setup.js for more detail on states)
 
 #### Structure
 
@@ -81,9 +82,9 @@ differently, add *model_path* to your *manifest.json*.
 
 ### Database and migrations
 
-MiddGuard operates on a single SQLite database called *middguard.db* stored at
-the project root.  It will be automatically created when you run your first
-migration.
+MiddGuard can operate on either a SQLite database or a PostgreSQL database. To ensure that middguard is configured to work with the type of database you are using, *make sure that you set the "dbConfig" field in the ./middguard/config/settings.js file appropriately.* (There are guidelines in the file). If you choose to use SQLite, MiddGuard will operate on a single SQLite database called *middguard.db* stored at
+the project root.  It will automatically be created when you run your first
+migration. Alternatively, if you would like to use a PostgreSQL database, fill in the appropriate information *in the ./middguard/config/settings.js file* to connect to a PostgreSQL database you have already set up.
 
 #### Make a MiddGuard migration
 

@@ -1,18 +1,12 @@
 var path = require('path'),
-    settings = require('./settings');
+settings = require('./settings');
+		
 
-// Add `debug: true` to the config to log SQL statements
-var development = {
-  client: 'sqlite3',
-  connection: {
-    filename: path.join(settings.root, settings.db)
-  }
-};
 
 module.exports = {
-  development: development,
+  development: settings.dbConfig,
 
   // For now, use the same setting for all envs
-  staging: development,
-  production: development
+  staging: settings.dbConfig,
+  production: settings.dbConfig
 };

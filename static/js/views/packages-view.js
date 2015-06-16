@@ -70,8 +70,17 @@ var middguard = middguard || {};
           url: plural,
           model: middguard.entities[capital]
         });
-
-        middguard.entities[capitalPlural].fetch();
+				
+        middguard.state[capitalPlural] = {selections: new Backbone.Collection(),
+																					workingSet: new Backbone.Collection()};
+				_.extend(middguard.state[capitalPlural], Backbone.Events);
+				
+				//here each entityCollection, which is a Backbone collection, adds the appropriate models to itself
+        //if its name is not contained in the customLoads variable
+    
+        if (!model.get('customLoad')){
+          middguard.entities[capitalPlural].fetch();
+        }
       });
     }
   });
