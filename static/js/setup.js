@@ -8,29 +8,41 @@ var middguard = middguard || {};
       start: Number.NEGATIVE_INFINITY,
       end: Number.POSITIVE_INFINITY
     }, Backbone.Events),
-    selections: new Backbone.Collection(),
-    workingSet: new Backbone.Collection(),
-
+		//other properties of middguard.state are initialized in the packages-view.js file
+		
+		
+    //selections: new Backbone.Collection(),
+    //workingSet: new Backbone.Collection(),
+		
     // Encode the state as JSON to save in a message
     toJSON: function () {
-      var selectionsEncoding = getModelIdentifiers(this.selections);
-      var workingSetEncoding = getModelIdentifiers(this.workingSet);
-      return {
-        timeRange: {start: this.timeRange.start, end: this.timeRange.end},
-        selections: selectionsEncoding,
-        workingSet: workingSetEncoding
-      };
+			var returnObj = {timeRange: {start: this.timeRange.start, end: this.timeRange.end}};
+			
+			for (dataSet in this){
+				if (typeof this[dataSet] == 'object' && dataSet != 'timeRange'){
+					//only data is encoded, not functions
+					
+		      var selectionsEncoding = getModelIdentifiers(this[dataSet].selections.models);
+		      var workingSetEncoding = getModelIdentifiers(this[dataSet].workingSet.models);
+					returnObj[dataSet] = {selections: this[dataSet].selections.reset(selectionsEncoding),
+        															workingSet: this[dataSet].workingSet.reset(workingSetEncoding)
+																		};
+				}
+			}
+      return returnObj;
     },
 
-    // Set the state using an object with optional keys *selections*,
-    // *workingSet*, *timeRange.start*, and *timeRange.end*. Write modules
-    // to listen to changes on these objects to they update when other modules
-    // set the state.
+    // Add properties to/update the state using an object of the form: 
+		// {Dataset/Collection Name: 
+		//		{'workingSet': Backbone collection of data to be displayed, 
+		//		'selections': selected data among the workingSet data, also a Backbone collection},
+		// ...
+		//	}
+		//
+		// IMPORTANT: Write modules to listen to changes on these 'state' objects so they update
+		// when other modules set the state.
+		
     set: function (state) {
-<<<<<<< Updated upstream
-      var hasOwnProperty = Object.prototype.hashOwnProperty;
-
-=======
 			
 			
       var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -67,16 +79,12 @@ var middguard = middguard || {};
 					//if prop == 'timeRange'
 	        if (hasOwnProperty.call(state.timeRange, 'start')) {
 	          this.timeRange.start = state.timeRange.start;
-            if (! state.timeRange.noTrigger){
-              this.timeRange.trigger('change', this.timeRange);
-            }
+	          this.timeRange.trigger('change', this.timeRange);
 	        }
 
 	        if (hasOwnProperty.call(state.timeRange, 'end')) {
 	          this.timeRange.end = state.timeRange.end;
-            if (! state.timeRange.noTrigger){
-              this.timeRange.trigger('change', this.timeRange);
-            }
+	          this.timeRange.trigger('change', this.timeRange);
 	        }
 				}
 			}
@@ -85,14 +93,15 @@ var middguard = middguard || {};
 			//"this", but it can be anything
 			//(i.e. it's whatever the value field is for the "selections" key in the "state" object parameter)
 			
->>>>>>> Stashed changes
       if (hasOwnProperty.call(state, 'selections'))
+				//idea: replace current middguard.state.selections Backbone collection
+				// with the list of models referenced by the state.selections
         this.selections.reset(state.selections.map(getModel));
 
       if (hasOwnProperty.call(state, 'workingSet'))
         this.workingSet.reset(state.workingSet.map(getModel));
-
-      if (hashOwnProperty.call(state, 'timeRange')) {
+			
+      if (hasOwnProperty.call(state, 'timeRange')) {
         if (hasOwnProperty.call(state.timeRange, 'start')) {
           this.timeRange.start = state.timeRange.start;
           this.timeRange.trigger('change', this.timeRange);
@@ -102,18 +111,29 @@ var middguard = middguard || {};
           this.timeRange.end = state.timeRange.end;
           this.timeRange.trigger('change', this.timeRange);
         }
-      }
+      }*/
     }
   };
 
   var getModelIdentifiers = function (collection) {
-    return collection.map(function (model) {
-      return {type: model.get('type'), id: model.get('id')};
-    });
+		if (collection.length == 0){
+			return collection;
+		} else{
+	    return _.map(collection, function (model) {
+				if (model.attributes && model.cid){
+					//if 'model' is an actual Backbone model
+					return {id: model.get('id')};
+				} else {
+					//if 'model' is just a regular JS object
+					return {id: model.id};
+				}
+	    });
+		}
   };
 
   var getModel = function (entity) {
-    return middguard.collections[entity.model].findWhere({id: entity.id});
+		//get first model instance whose id matches "entity"
+    return middguard.entities[entity.model].findWhere({id: entity.id});
   };
 
   // Internal hash of module views
@@ -136,7 +156,7 @@ var middguard = middguard || {};
   };
 
   middguard.entities = {};
-  middguard.files = {'mapImg': '../map.jpg'};
+
   middguard.EntityCollection = Backbone.Collection.extend({
     initialize: function (models, options) {
       this.url = _.result(options, 'url');

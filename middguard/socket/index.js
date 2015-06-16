@@ -104,7 +104,15 @@ function setupSocketEvents(socket, modelName, model) {
   });
 
   socket.on(pluralize(modelName) + ':read', function (data, callback) {
-    new model().fetchAll()
+    
+    
+    if (data){
+      var fetchData = new model().query(data).fetchAll();
+    } else {
+      //if fetching all models at once
+      var fetchData = new model().fetchAll();
+    }
+    fetchData
       .then(function (collection) {
         callback(null, collection.toJSON());
       })

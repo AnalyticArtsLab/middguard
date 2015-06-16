@@ -1,0 +1,23 @@
+		#middguard-movement-trace{
+			margin: 15px;
+		}
+
+    #movement-trace-svg {
+      width:800px;
+      height: 800px;
+      
+    }
+
+
+    #movement-trace-map {
+      width:800px;
+      height: 800px;
+      
+    }
+    
+    
+    #middguard-movement-trace .point{
+      fill:#ff0000;
+      
+      
+      } 

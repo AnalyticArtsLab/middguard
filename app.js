@@ -9,7 +9,7 @@ var express = require('express'),
 var app = express();
 module.exports = app;
 
-expressConfig(app);
+expressConfig(app); 
 
 var server = http.createServer(app);
 var io = socketio(server);

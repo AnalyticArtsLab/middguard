@@ -52,6 +52,9 @@ var middguard = middguard || {};
         event.preventDefault();
         var message = middguard.Messages.create(this.messageContents());
         this.$input.val('');
+				//scroll to bottom when a message is entered
+				var messageHeight = document.getElementsByClassName('middguard-chat-message')[0].clientHeight;
+				document.getElementById('middguard-chat-log').scrollTop = document.getElementsByClassName('middguard-chat-message').length*messageHeight
         return false;
       }
     },
@@ -113,7 +116,12 @@ var middguard = middguard || {};
     },
     restoreState: function () {
       var state = JSON.parse(this.model.get('state'));
-      middguard.state.set(state);
+      middguard.state.set(state)
+			/*
+			middguard.state.set({'timeRange' : {'start' : new Date("2014-01-08"),
+																			'end' : new Date("2014-01-20")}
+													});
+			*/
     }
   });
 })();
