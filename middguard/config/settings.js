@@ -17,7 +17,31 @@ module.exports = {
   analyticsPath: 'packages/analytics',
 
   // The name of the SQLite database, stored at the root
+<<<<<<< Updated upstream
   db: 'middguard.db',
 
+=======
+  db: 'vast_challenge_2015_#2.db',
+  
+  //Set dbConfig appropriately for either an SQLite DB or a PostgreSQL DB
+  //SQLITE EXAMPLE (DEFAULT)
+	dbConfig: {
+	 client: 'sqlite3',      // or 'pg',
+	 connection: {          // or the various connection settings for pg
+		 filename: 'vast_challenge_2015_#2.db'
+	  }
+	},
+  /* //POSTGRESQL EXAMPLE
+  dbConfig: {
+  	  client: 'pg',
+  	  connection: {	
+  			host     : '127.0.0.1',
+  	    user     : 'user1',
+  	    password : '',
+  	    database: 'db1'
+  		}
+  	}
+  */
+>>>>>>> Stashed changes
   SECRET_KEY: process.env.SECRET_KEY || 'turn down for what'
 };
