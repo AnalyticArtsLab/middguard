@@ -26,7 +26,7 @@ var middguard = middguard || {};
       
       this.listenTo(middguard.entities.Movementtraces, 'sync', this.render);
       this.listenTo(middguard.entities.Movementtraces, 'reset', this.render);
-      this.listenTo(middguard.state.timeRange, 'intervalChange',this.render);
+      this.listenTo(middguard.state.timeRange, 'change',this.render);
 
 			
     },
