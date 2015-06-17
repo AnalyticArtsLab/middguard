@@ -46,6 +46,7 @@ var middguard = middguard || {};
     
     getData: function(){
       //This function gets the data at a certain timestamp. Its execution will trigger the rendering.
+      
       try {
         var dateString = this.outputDate(middguard.state.timeRange.start);
       } catch(err){
@@ -61,15 +62,15 @@ var middguard = middguard || {};
     },
     
     render: function () {
-      
+
       var dateString = this.outputDate(middguard.state.timeRange.start);
       var curTime = new Date(dateString);
       var start = new Date("2014-06-06 08:00:19");
       var end = new Date("2014-06-08 23:20:16");
-      var processData = this.processData;
+      var processData = this.processDataOpt;
       var draw = this.draw;
       
-      var locCountData = processData(middguard.entities['Locationcounts'].models, dateString, start, end);
+      var locCountData = processData(middguard.entities['Locationcounts'].models, dateString, start, end, 1361);
       draw(locCountData);
         
       return this;
@@ -138,6 +139,7 @@ var middguard = middguard || {};
     
     processData: function(dataArray, timestamp, start, end){
       //create heatmap data at a certain timestamp
+      
       var tsDate = new Date(timestamp);
       if (tsDate > end || tsDate < start){
         console.log(Error('Timestamp out of range'));
@@ -161,6 +163,36 @@ var middguard = middguard || {};
       return heatmapData;
       
       
+    },
+    
+    processDataOpt: function(dataArray, timestamp, start, end, distincts){
+      //distincts represents the number of distinct x,y pairs we need before we can exit
+      
+      var heatmapData = [];
+      for (var i = 0; i < 100; i++){
+        heatmapData[i] = [];
+        for (var j = 0; j < 100; j++){
+          heatmapData[i][j] = 0;
+        }
+      }
+      
+      var used = new Object();
+      used.items = 0;
+      var curIndex = dataArray.length-1;
+      var x, y;
+      while (curIndex >= 0 && used.items < distincts){
+        //while not every x,y pair has had a value found for it and the array has not been fully traversed
+        x = dataArray[curIndex].attributes.x;
+        y = dataArray[curIndex].attributes.y;
+        if (! used[x + ',' + y]){
+          //if x,y pair is unencountered
+          used[x + ',' + y] = true;
+          heatmapData[x][y] = dataArray[curIndex].attributes.count;
+          used.items++;
+        }
+        curIndex--;
+      }
+      return heatmapData;
     }
     
   });
