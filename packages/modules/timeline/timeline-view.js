@@ -26,9 +26,16 @@ var middguard = middguard || {};
 					.attr("width", this.width);
       this.slider = this.svg.append('g')
 					.attr('transform','translate(' + this.margin.left +',' + this.margin.top + ')');
-			this.axisEl = d3.svg.axis();
+          
+      var format = d3.time.format('%Y-%m-%d %H:%M:%S');
+          
+      this.dateList = [new Date("2014-06-06 08:00:00"), new Date("2014-06-06 12:00:00"), new Date("2014-06-06 16:00:00"), new Date("2014-06-06 20:00:00"), new Date("2014-06-07 00:00:00"),
+        new Date("2014-06-07 04:00:00"), new Date("2014-06-07 08:00:00"), new Date("2014-06-07 12:00:00"), new Date("2014-06-07 16:00:00"), new Date("2014-06-07 20:00:00"), new Date("2014-06-08 00:00:00"),
+        new Date("2014-06-08 04:00:00"), new Date("2014-06-08 08:00:00"), new Date("2014-06-08 12:00:00"), new Date("2014-06-08 16:00:00"), new Date("2014-06-08 20:00:00"), new Date("2014-06-09 00:00:00")];
+        
+			this.axisEl = d3.svg.axis().tickValues(this.dateList);
       
-			this.timeScale = d3.time.scale.utc().domain(this.dateRangeFull);
+			this.timeScale = d3.time.scale().domain(this.dateRangeFull);
 			this.timeScale.range([0,this.width-this.margin.left*3]);
 			this.axisEl.scale(this.timeScale)
 				.orient('bottom')

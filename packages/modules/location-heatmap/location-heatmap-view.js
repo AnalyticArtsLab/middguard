@@ -13,7 +13,7 @@ var middguard = middguard || {};
       this.width = 1000;
 			this.img = new Image(1000, 1000);
 			this.img.src = '/modules/heatmap/images/map.jpg';
-			console.log(this.img);
+			
       this.d3el = d3.select(this.el);
 			//document.body.appendChild(this.img);
       this.svg = this.d3el.append('svg')
@@ -39,7 +39,8 @@ var middguard = middguard || {};
       this.listenTo(middguard.state.timeRange, "change", this.getData);
       this.listenTo(middguard.entities['Locationcounts'], 'sync', this.render);
       this.listenTo(middguard.entities['Locationcounts'], 'reset', this.render);
-      
+      this.dataStore = {};
+      this.dataStoreList = [];
       this.getData();
 			
     },
@@ -48,17 +49,36 @@ var middguard = middguard || {};
       //This function gets the data at a certain timestamp. Its execution will trigger the rendering.
       
       try {
+        if (middguard.state.timeRange.start == Number.NEGATIVE_INFINITY){
+          middguard.state.timeRange.start = new Date("2014-06-06 08:00:19");
+        }
         var dateString = this.outputDate(middguard.state.timeRange.start);
       } catch(err){
         console.log(err);
       }
-      var curTime = new Date(dateString);
       var start = new Date("2014-06-06 08:00:19");
       var end = new Date("2014-06-08 23:20:16");
       var processData = this.processData;
       var draw = this.draw;
-      
-      middguard.entities["Locationcounts"].fetch({data: {where: ['timestamp', '<', dateString]}});
+      if (this.dataStoreList.length > 0){
+        //utilize cached heatmap data
+        var closest = this.binarySearch(this.dataStoreList, 0, this.dataStoreList.length-1, middguard.state.timeRange.start.valueOf());
+        var startVal = middguard.state.timeRange.start.valueOf();
+        var closestDateString = this.outputDate(new Date(closest));
+        if (startVal > closest){
+          middguard.entities["Locationcounts"].fetch({reset: true, data: {where: ['timestamp', '<', dateString]},
+                andWhere: ['timestamp', '>', closestDateString]});
+        } else if (startVal < closest){
+          middguard.entities["Locationcounts"].fetch({reset: true, data: {where: ['timestamp', '>', dateString]},
+                andWhere: ['timestamp', '<', closestDateString]});
+        } else {
+          //if startVal == closest
+          draw(this.dataStore[closest]);
+        } 
+        
+      } else {
+          middguard.entities["Locationcounts"].fetch({data: {where: ['timestamp', '<', dateString]}});
+      }
     },
     
     render: function () {
@@ -72,7 +92,10 @@ var middguard = middguard || {};
       
       var locCountData = processData(middguard.entities['Locationcounts'].models, dateString, start, end, 1361);
       draw(locCountData);
-        
+      if (locCountData)
+      this.dataStore[middguard.state.timeRange.start.valueOf()] = locCountData;
+      this.dataStoreList.push(middguard.state.timeRange.start.valueOf());
+      console.log(this.dataStore);
       return this;
     },
     
@@ -82,31 +105,51 @@ var middguard = middguard || {};
       var yinc = this.yinc;
       var colorScale = this.colorScale;
       var dim = 100;
-      for (var row = 0; row < dim; row++){
-        for (var col = 0; col < dim; col++){
-  			  svg.append('rect')
-  				.attr({
-  					'x': (row*10),
+      d3.selectAll('.heatRect').remove();
+      
+      data.forEach(function(item, col){
+        svg.selectAll('.col'+col)
+          .data(item)
+          .enter()
+          .append('rect')
+          .attr({
+            'x': function (d, row){
+              return row*10;
+            },
   					'y': ((100-col)*10)-yinc,
   					'height': 10,
   					'width': 10,
-            'fill': function(){
-              if (data[row][col] > 0){
-                return colors[colorScale(data[row][col])];
+            'fill': function (d, row){
+              if (d[2] && d[2] > 0){
+               return colors[colorScale(d[2])]; 
               } else {
                 return 'none';
               }
             },
-            'stroke': function(){
-              if (data[row][col] > 0){
-                return colors[colorScale(data[row][col])];
+            'stroke': function (d, row){
+              if (d[2] && d[2] > 0){
+               return colors[colorScale(d[2])]; 
               } else {
                 return 'none';
               }
+            },
+            'class': 'heatRect col'+col,
+            'id': function (d, row){
+              return 'heatmapr'+row+'c'+col;
             }
-  				});
-        }
-      }
+          });
+      });
+      d3.selectAll('.heatRect')
+      .on('mouseover', function(d){
+        svg.append('text')
+          .attr('x', 750)
+          .attr('y', 970)
+          .attr('fill', '#CC0000')
+          .attr('class', 'tooltip')
+        .text('x: ' + d[0] + ', y: ' + d[1] + ', count: ' + d[2]);
+      }).on('mouseout', function(d){
+        d3.selectAll('.tooltip').remove();
+      });
     },
     
     outputDate: function(date){
@@ -187,13 +230,42 @@ var middguard = middguard || {};
         if (! used[x + ',' + y]){
           //if x,y pair is unencountered
           used[x + ',' + y] = true;
-          heatmapData[x][y] = dataArray[curIndex].attributes.count;
+          heatmapData[y][x] = [x, y, dataArray[curIndex].attributes.count];
           used.items++;
         }
         curIndex--;
       }
       return heatmapData;
-    }
+    },
+    
+    binarySearch: function(array, first, last, val){
+      var mdpt;
+      if (last <= first){
+        return first;
+      }
+      while (first < last){
+        if (last == first+1){
+          //if val appears between 2 indices in list or is beyond one end of the list
+          firstDiff = Math.abs(val-array[first]);
+          lastDiff = Math.abs(val-array[last]);
+          if (lastDiff < firstDiff){
+            return last;
+          } else {
+            //if val is closer to the 'first' index or value is equidistant from 'first' and 'last'
+            return first;
+          }
+        }
+        mdpt = first+((last-first)/2)
+        if (array[mdpt] == val){
+          return mdpt;
+        } else if (array[mdpt] > val){
+          last = mdpt;
+        } else {
+          //if array[mdpt] < val
+          first = mdpt;
+        }
+      }
+    },
     
   });
 
