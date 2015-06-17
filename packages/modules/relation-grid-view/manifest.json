@@ -1,0 +1,11 @@
+{
+  "name": "Relations",
+  "main": "RelationGridView",
+  "version": "0.0.1",
+  "js": [
+    "relation-grid-view.js"
+  ],
+  "css": [
+    "relation-grid-styles.css"
+  ]
+}
