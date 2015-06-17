@@ -68,8 +68,8 @@ var middguard = middguard || {};
       // .range(colorbrewer.Set1[9])
 
       var routePath = d3.svg.line()
-      .x(function(d){return (d.get('X') + .5) *(v.mapWidth/v.cells);})
-      .y(function(d){ return v.mapHeight - (d.get('Y') + .5) *(v.mapHeight/v.cells);})
+      .x(function(d){return (d.get('x') + .5) *(v.mapWidth/v.cells);})
+      .y(function(d){ return v.mapHeight - (d.get('y') + .5) *(v.mapHeight/v.cells);})
       .interpolate("basis");
       
       var pids = [];
@@ -84,14 +84,14 @@ var middguard = middguard || {};
      routes.attr("d", function(d){
        var traces = middguard.entities.Movementtraces.where({person_id:+d})
        .filter(function (t){
-         var timestamp = new Date(t.get('Timestamp'));
+         var timestamp = new Date(t.get('timestamp'));
          var start = middguard.state.timeRange.start;
          var end = middguard.state.timeRange.end;
 
          return (start === Number.NEGATIVE_INFINITY || timestamp >= start) && (end === Number.POSITIVE_INFINITY || timestamp <= end);
-  
+
        });
- 
+
        return routePath(traces);})
      .attr("stroke", function(d){return color(d)})
      .attr("stroke-width", "2")
