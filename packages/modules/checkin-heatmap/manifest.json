@@ -1,0 +1,11 @@
+{
+  "name": "Checkin Heatmap",
+  "main": "CheckinHeatmap",
+  "version": "0.0.1",
+  "js": [
+    "checkin-heatmap-view.js"
+  ],
+  "css": [
+    "checkin-heatmap-styles.css"
+  ]
+}

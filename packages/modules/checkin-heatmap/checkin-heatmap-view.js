@@ -3,7 +3,7 @@ var middguard = middguard || {};
 (function () {
   'use strict';
 
-  var Heatmap = middguard.View.extend({
+  var CheckinHeatmap = middguard.View.extend({
     id: 'heatmap',
     initialize: function () {
       
@@ -24,7 +24,7 @@ var middguard = middguard || {};
 				.attr('stroke', 'black');
       var svg = this.svg;
       this.svg.append('image')
-        .attr('xlink:href', '/modules/heatmap/images/map.jpg')
+        .attr('xlink:href', '/modules/checkin-heatmap/images/map.jpg')
         .attr('height', 1000)
         .attr('width', 1000);
       this.yinc = 6; //margin at top
@@ -138,5 +138,5 @@ var middguard = middguard || {};
     
   });
 
-  middguard.addModule('Heatmap', Heatmap);
+  middguard.addModule('CheckinHeatmap', CheckinHeatmap);
 })();
