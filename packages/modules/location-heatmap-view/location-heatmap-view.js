@@ -18,21 +18,27 @@ var middguard = middguard || {};
       this.choice = 'all';
       
       this.$el.html(this.template);
-      this.yinc = 6; //margin at top
+      this.yinc = 6; //margin at top--not a generalized value
       
       this.colorScale = d3.scale.linear();
-      this.colorScale.domain([0, 1000]);
-      this.colorScale.rangeRound([0, 8]);
-      this.areaScale = d3.scale.linear().range([0, Math.PI*9]);
+      this.colorScale.domain([0, 1000]); //1000 is a deliberate, specific choice
+      this.colorScale.range(['#fee8c8', '#e34a33']);
+      this.areaScale = d3.scale.linear().range([0, Math.PI*9]); //9 is a specific, deliberate choice
       
       _.extend(this, Backbone.Events);
-      _.bindAll(this, 'render', 'drawLoc', 'drawCheckin', 'processDataOpt', 'getData', 'selectChange');
+      _.bindAll(this, 'render', 'drawLoc', 'drawCheckin', 'processDataCheckin', 'processDataAll', 'getData', 'selectChange');
       
       this.listenTo(middguard.state.timeRange, "change", this.selectChange);
       this.listenTo(middguard.entities['Locationcounts'], 'sync', this.render);
       this.listenTo(middguard.entities['Check-ins'], 'sync', this.render);
       //this.listenTo(middguard.entities['Locationcounts'], 'reset', this.render);
       this.$('#heatmap-choice')[0].onchange=this.selectChange;
+      this.distinctCheckins = new Set([
+        '42$37', '34$68', '67$37', '73$79', '81$77', '92$81', '73$84', '85$86', '87$63', '28$66',
+        '38$90', '87$48', '79$89', '16$49', '23$54', '99$77', '86$44', '63$99', '83$88', '78$48', '27$15', '50$57',
+        '87$81', '79$87', '78$37', '76$22', '43$56', '69$44', '26$59', '6$43', '82$80', '76$88', '47$11', '16$66', '17$43',
+        '43$78', '45$24', '32$33', '60$37', '0$67', '17$67', '48$87'
+      ]);
       this.dataStore = {};
       this.dataStoreList = [];
       this.getData();
@@ -73,16 +79,21 @@ var middguard = middguard || {};
         //if data is being pulled for all locations
         
         //use data from minute floor as base to get data for a specific time
-        var minuteFloor = dateString.slice(0, 17) + '00';
-        middguard.entities['Locationcounts'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString],
-              andWhere: ['timestamp', '>=', minuteFloor]}});  
+      var minuteFloor = dateString.slice(0, 17) + '00';
+      middguard.entities['Locationcounts'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString],
+            andWhere: ['timestamp', '>=', minuteFloor]}});  
       } else {
-        middguard.entities['Check-ins'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString]}});
-        /*middguard.entities['Check-ins'].fetch({reset: true, data: { whereIn: [['x', 'y'], function(){
+        /*middguard.entities['Check-ins'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString]}});
+        //debugger;
+        middguard.entities['Check-ins'].fetch({reset: true, data: { whereIn: [['x', 'y'], function(){
           distinct(['x', 'y']);
-        }]
-          andwhere: ['timestamp', '=', dateString]},
-        });*/
+        }],
+          andWhere: ['timestamp', '=', dateString]},
+        });
+        */
+        var minuteFloor = dateString.slice(0, 17) + '00';
+        middguard.entities['Check-ins'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString],
+              andWhere: ['timestamp', '>=', minuteFloor]}});
       }
       
       
@@ -116,7 +127,7 @@ var middguard = middguard || {};
         var dateString = this.outputDate(middguard.state.timeRange.start);
         var start = new Date("2014-06-06 08:00:19");
         var end = new Date("2014-06-08 23:20:16");
-        var processData = this.processDataOpt;
+        var processData = this.processDataAll;
       
         var locCountData = processData(middguard.entities['Locationcounts'].models, dateString, start, end, 1361);
         this.drawLoc(locCountData);
@@ -144,7 +155,7 @@ var middguard = middguard || {};
       var colors = ["#fff7ec","#fee8c8","#fdd49e","#fdbb84","#fc8d59","#ef6548","#d7301f","#b30000","#7f0000"];
       var svg = d3.select("#heatmap-svg");
       var yinc = this.yinc;
-      var colorScale = this.colorScale.domain([0, 345]);
+      var colorScale = this.colorScale.domain([0, 345]); //345 is a specific, deliberate choice
       var areaScale = this.areaScale;
       d3.selectAll('.heatRect').remove();
       d3.selectAll('.heatCircle').remove();
@@ -169,7 +180,7 @@ var middguard = middguard || {};
             },
             'fill': function (d, row){
               if (d[2] && d[2] > 0){
-               return colors[colorScale(d[2])]; 
+               return colorScale(d[2]); 
               } else {
                 return 'none';
               }
@@ -184,7 +195,7 @@ var middguard = middguard || {};
       d3.selectAll('.heatCircle')
       .on('mouseover', function(d){
         svg.append('text')
-          .attr('x', 750)
+          .attr('x', 750) //750 and 950 are specific, deliberate choices
           .attr('y', 970)
           .attr('fill', '#CC0000')
           .attr('class', 'tooltip')
@@ -219,14 +230,14 @@ var middguard = middguard || {};
   					'width': 10,
             'fill': function (d, row){
               if (d[2] && d[2] > 0){
-               return colors[colorScale(d[2])]; 
+               return colorScale(d[2]); 
               } else {
                 return 'none';
               }
             },
             'stroke': function (d, row){
               if (d[2] && d[2] > 0){
-               return colors[colorScale(d[2])]; 
+               return colorScale(d[2]); 
               } else {
                 return 'none';
               }
@@ -301,7 +312,9 @@ var middguard = middguard || {};
       for (var i = 0; i < daLength; i++){
         x = dataArray[i].attributes.x;
         y = dataArray[i].attributes.y;
-        heatmapData[y][x] = [x, y, dataArray[i].attributes.count];
+        if (this.distinctCheckins.has(x + '$' + y)){
+          heatmapData[y][x] = [x, y, dataArray[i].attributes.count];
+        }
         i++;
       }
       return heatmapData;
@@ -309,7 +322,7 @@ var middguard = middguard || {};
       
     },
     
-    processDataOpt: function(dataArray, timestamp, start, end, distincts){
+    processDataAll: function(dataArray, timestamp, start, end, distincts){
       //process data for location heatmap
       //distincts represents the number of distinct x,y pairs we need before we can exit
       

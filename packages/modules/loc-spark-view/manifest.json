@@ -1,0 +1,11 @@
+{
+  "name": "Location Sparklines",
+  "main": "LocSpark",
+  "version": "0.0.1",
+  "js": [
+    "loc-spark-view.js"
+  ],
+  "css": [
+    "loc-spark-styles.css"
+  ]
+}

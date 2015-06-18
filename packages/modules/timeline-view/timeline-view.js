@@ -5,6 +5,7 @@ var middguard = middguard || {};
 
   var TimelineView = middguard.View.extend({
     id: 'middguard-timeline',
+    //dateRange and dateRange full are specific dates for the current project. They're not generalized (obviously)
 		dateRangeFull: [new Date("2014-06-06 08:00:19"), new Date("2014-06-08 23:20:16")], // maximum range
 		dateRange : [new Date("2014-06-06 08:00:19"), new Date("2014-06-08 23:20:16")], // currently displayed range
     initialize: function () {
