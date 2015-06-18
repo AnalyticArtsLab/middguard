@@ -18,17 +18,22 @@ var middguard = middguard || {};
       
       v.$el.html(v.template);
       
+      // add a metric to the Person records
+      middguard.entities.People.models.forEach(function(m){
+        m.set({id:m.get('person_id'),metric:0})
+      });
       
-      middguard.entities.Pairs.comparator = function(m){
-        return m.get('delta');
-      };
+      middguard.entities.People.comparator = function(m){return -m.get('metric');};
+      
+      // make sure the pairs are ordered by delta to make finding the max easy
+      middguard.entities.Pairs.comparator = function(m){return m.get('delta');};
       
       
       
       // set up the color scale
       v.colors = d3.scale.linear()
-      .domain([0,0])
-      .range(['white', 'blue']);
+      .domain([0,0,0])
+      .range(['white', 'grey', 'blue']);
       
       
       // the data for People should be pre-fetched on load
@@ -55,7 +60,18 @@ var middguard = middguard || {};
           error:function(c,r,o){console.log(r)}, 
           success:function(c,r,o){
             var max = c.models[c.length - 1].get('delta');
-            v.colors.domain([0,max]);
+            v.colors.domain([0,max*.1, max]);
+            
+            middguard.entities.People.models.forEach(function(m){m.set({metric:0});});
+            c.models.forEach(function(m){
+              var id2 = m.get('id1') === pid ? m.get('id2') : m.get('id1');
+              var p = middguard.entities.People.get(id2);
+              p.set({metric:m.get('delta')}); 
+            });
+            middguard.entities.People.get(pid).set({metric:max});
+            
+            middguard.entities.People.sort();
+            
             v.render();
           }});
 
@@ -66,9 +82,8 @@ var middguard = middguard || {};
     render: function () {
       var v = this;
       
-      console.log('render');
-      
-      v.cells.attr('fill', function(d){return v.colors(v.cellValue(d));});
+      v.cells.data(middguard.entities.People.models)
+      .attr('fill', function(d){return v.colors(d.get('metric'));});
       
       
      
