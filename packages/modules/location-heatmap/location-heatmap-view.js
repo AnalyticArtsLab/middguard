@@ -23,14 +23,16 @@ var middguard = middguard || {};
       this.colorScale = d3.scale.linear();
       this.colorScale.domain([0, 1000]);
       this.colorScale.rangeRound([0, 8]);
-      this.areaScale = d3.scale.linear().range([0, Math.PI*400]);
+      this.areaScale = d3.scale.linear().range([0, Math.PI*9]);
       
       _.extend(this, Backbone.Events);
       _.bindAll(this, 'render', 'drawLoc', 'drawCheckin', 'processDataOpt', 'getData', 'selectChange');
       
-      this.listenTo(middguard.state.timeRange, "change", this.getData);
+      this.listenTo(middguard.state.timeRange, "change", this.selectChange);
       this.listenTo(middguard.entities['Locationcounts'], 'sync', this.render);
+      this.listenTo(middguard.entities['Check-ins'], 'sync', this.render);
       //this.listenTo(middguard.entities['Locationcounts'], 'reset', this.render);
+      this.$('#heatmap-choice')[0].onchange=this.selectChange;
       this.dataStore = {};
       this.dataStoreList = [];
       this.getData();
@@ -38,7 +40,7 @@ var middguard = middguard || {};
     },
     
     selectChange: function(){
-      this.choice = document.getElementById('heatmap-choice');
+      this.choice = document.getElementById('heatmap-choice').value;
       this.getData();
     },
     
@@ -47,7 +49,9 @@ var middguard = middguard || {};
       
       try {
         if (middguard.state.timeRange.start == Number.NEGATIVE_INFINITY){
+          this.stopListening(middguard.state.timeRange, "change", this.selectChange);
           middguard.state.timeRange.start = new Date("2014-06-06 08:02:00");
+          this.listenTo(middguard.state.timeRange, "change", this.selectChange);
         }
         var dateString = this.outputDate(middguard.state.timeRange.start);
       } catch(err) {
@@ -56,10 +60,14 @@ var middguard = middguard || {};
       var start = new Date("2014-06-06 08:02:00");
       var end = new Date("2014-06-08 23:20:16");
       if (middguard.state.timeRange.start < start){
+        this.stopListening(middguard.state.timeRange, "change", this.selectChange);
         middguard.state.timeRange.start = start;
+        this.listenTo(middguard.state.timeRange, "change", this.selectChange);
       }
       if (middguard.state.timeRange.start > end){
+        this.stopListening(middguard.state.timeRange, "change", this.selectChange);
         middguard.state.timeRange.start = end;
+        this.listenTo(middguard.state.timeRange, "change", this.selectChange);
       }
       if (this.choice == 'all'){
         //if data is being pulled for all locations
@@ -70,6 +78,11 @@ var middguard = middguard || {};
               andWhere: ['timestamp', '>=', minuteFloor]}});  
       } else {
         middguard.entities['Check-ins'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString]}});
+        /*middguard.entities['Check-ins'].fetch({reset: true, data: { whereIn: [['x', 'y'], function(){
+          distinct(['x', 'y']);
+        }]
+          andwhere: ['timestamp', '=', dateString]},
+        });*/
       }
       
       
@@ -97,16 +110,16 @@ var middguard = middguard || {};
     },
     
     render: function () {
+      
       if (this.choice == 'all'){
         //if location heatmap
         var dateString = this.outputDate(middguard.state.timeRange.start);
         var start = new Date("2014-06-06 08:00:19");
         var end = new Date("2014-06-08 23:20:16");
         var processData = this.processDataOpt;
-        var draw = this.draw;
       
         var locCountData = processData(middguard.entities['Locationcounts'].models, dateString, start, end, 1361);
-        drawLoc(locCountData);
+        this.drawLoc(locCountData);
         
         //this.dataStore[middguard.state.timeRange.start.valueOf()] = locCountData;
         //this.dataStoreList.push(middguard.state.timeRange.start.valueOf());
@@ -118,38 +131,8 @@ var middguard = middguard || {};
         var end = new Date("2014-06-08 23:20:16");
       
         var checkinData = this.processDataCheckin(middguard.entities['Check-ins'].models, dateString, start, end);
-      
-        var divisor = 345/9;
-        var svg = d3.select("#heatmap-svg");
-        var yinc = this.yinc;
-        var xinc = this.xinc;
-        var colorScale = ["#fff7ec","#fee8c8","#fdd49e","#fdbb84","#fc8d59","#ef6548","#d7301f","#b30000","#7f0000"];
-        var dim = 100;
-        for (var row = 0; row < dim; row++){
-          for (var col = 0; col < dim; col++){
-    			  svg.append('rect')
-    				.attr({
-    					'x': (row*10),
-    					'y': ((100-col)*10)-yinc,
-    					'height': 10,
-    					'width': 10,
-              'fill': function(){
-                if (checkinData[row][col] > 0){
-                  return colorScale[Math.floor(checkinData[row][col]/divisor)];
-                } else {
-                  return 'none';
-                }
-              },
-              'stroke': function(){
-                if (checkinData[row][col] > 0){
-                  return colorScale[Math.floor(checkinData[row][col]/divisor)];
-                } else {
-                  return 'none';
-                }
-              }
-    				});
-          }
-        }    
+        
+        this.drawCheckin(checkinData);
       }
       return this;
     },
@@ -157,11 +140,14 @@ var middguard = middguard || {};
     drawCheckin: function(data){
       //draw checkin data on map
       //var divisor = 345/9;
+      
       var colors = ["#fff7ec","#fee8c8","#fdd49e","#fdbb84","#fc8d59","#ef6548","#d7301f","#b30000","#7f0000"];
       var svg = d3.select("#heatmap-svg");
       var yinc = this.yinc;
       var colorScale = this.colorScale.domain([0, 345]);
       var areaScale = this.areaScale;
+      d3.selectAll('.heatRect').remove();
+      d3.selectAll('.heatCircle').remove();
       
       data.forEach(function(item, col){
         svg.selectAll('.col'+col)
@@ -174,13 +160,13 @@ var middguard = middguard || {};
               return (row*10)+5;
             },
   					'cy': ((100-col)*10)-yinc+5,
-            'radius': function(d, row){
+            'r': function(d, row){
               if (d[2] && d[2] > 0){
                 return Math.pow(areaScale(d[2])/Math.PI, 0.5);
               } else {
                 return 0;
               }
-            }
+            },
             'fill': function (d, row){
               if (d[2] && d[2] > 0){
                return colors[colorScale(d[2])]; 
@@ -188,13 +174,7 @@ var middguard = middguard || {};
                 return 'none';
               }
             },
-            'stroke': function (d, row){
-              if (d[2] && d[2] > 0){
-               return colors[colorScale(d[2])]; 
-              } else {
-                return 'none';
-              }
-            },
+            'stroke': 'black',
             'class': 'heatCircle col'+col,
             'id': function (d, row){
               return 'heatmapr'+row+'c'+col;
@@ -212,7 +192,7 @@ var middguard = middguard || {};
       }).on('mouseout', function(d){
         d3.selectAll('.tooltip').remove();
       });
-    }
+    },
     
     drawLoc: function(data){
       //draw location data on map
@@ -223,6 +203,7 @@ var middguard = middguard || {};
       var colorScale = this.colorScale;
       var dim = 100;
       d3.selectAll('.heatRect').remove();
+      d3.selectAll('.heatCircle').remove();
       
       data.forEach(function(item, col){
         svg.selectAll('.col'+col)
@@ -314,14 +295,14 @@ var middguard = middguard || {};
         }
       }
       
-      var curIndex = 0;
+      var daLength = dataArray.length-1;
       var x;
       var y;
-      while (new Date(dataArray[curIndex].attributes.timestamp) <= tsDate){
-        x = dataArray[curIndex].attributes.x;
-        y = dataArray[curIndex].attributes.y;
-        heatmapData[y][x] = [x, y, dataArray[curIndex].attributes.count];
-        curIndex++;
+      for (var i = 0; i < daLength; i++){
+        x = dataArray[i].attributes.x;
+        y = dataArray[i].attributes.y;
+        heatmapData[y][x] = [x, y, dataArray[i].attributes.count];
+        i++;
       }
       return heatmapData;
       
@@ -360,7 +341,7 @@ var middguard = middguard || {};
         }
         curIndex--;
       }
-      this.colorScale.domain([0, countMax]);
+      //this.colorScale.domain([0, countMax]);
       return heatmapData;
     },
     
