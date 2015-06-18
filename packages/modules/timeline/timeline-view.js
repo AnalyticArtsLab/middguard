@@ -137,16 +137,16 @@ var middguard = middguard || {};
     onKD: function(event){
 			if (event.keyCode == 39){
 				//if right arrow
-				var newStart = new Date (middguard.state.timeRange.start.setSeconds(middguard.state.timeRange.start.getSeconds() + 10));
-				var newEnd = new Date(middguard.state.timeRange.start.setSeconds(middguard.state.timeRange.start.getSeconds() + 10));
+				var newStart = new Date (middguard.state.timeRange.start.setSeconds(middguard.state.timeRange.start.getSeconds() + 60));
+				var newEnd = new Date(middguard.state.timeRange.start.setSeconds(middguard.state.timeRange.start.getSeconds() + 60));
         
   			middguard.state.set({'timeRange' : {'start' : newStart,
   			    'end' : newEnd}
   				});
 			} else if (event.keyCode == 37){
 				//if left arrow
-				var newStart = new Date (middguard.state.timeRange.start.setSeconds(middguard.state.timeRange.start.getSeconds() - 10));
-				var newEnd = new Date (middguard.state.timeRange.start.setSeconds(middguard.state.timeRange.start.getSeconds() - 10));
+				var newStart = new Date (middguard.state.timeRange.start.setSeconds(middguard.state.timeRange.start.getSeconds() - 60));
+				var newEnd = new Date (middguard.state.timeRange.start.setSeconds(middguard.state.timeRange.start.getSeconds() - 60));
         
   			middguard.state.set({'timeRange' : {'start' : newStart,
   			    'end' : newEnd}

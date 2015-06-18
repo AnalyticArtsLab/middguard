@@ -5,44 +5,43 @@ var middguard = middguard || {};
 
   var LocationHeatmap = middguard.View.extend({
     id: 'heatmap',
+    
+    template: _.template('<svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><select id="heatmap-choice"><option value="all">All Locations</option><option value="checkins">Check-In Locations</option></select>'),
+    
+    events:{
+      "change #heatmap-choice":"getData"
+    },
+    
     initialize: function () {
       
-			middguard.socket.emit('query', {'a sql query': 'right here'});
-      this.margin = {top: 20, right: 20, bottom: 30, left: 40};
-      this.height = 1000;
-      this.width = 1000;
-			this.img = new Image(1000, 1000);
-			this.img.src = '/modules/heatmap/images/map.jpg';
-			
-      this.d3el = d3.select(this.el);
-			//document.body.appendChild(this.img);
-      this.svg = this.d3el.append('svg')
-      	.attr('height', this.height)
-				.attr('width', this.width)
-				.attr('transform', 'translate(' + this.margin.left + ','
-        	+ this.margin.top + ')')
-				.attr('stroke', 'black');
-      var svg = this.svg;
-      this.svg.append('image')
-        .attr('xlink:href', '/modules/location-heatmap/images/map.jpg')
-        .attr('height', 1000)
-        .attr('width', 1000);
+      //this.choice will switch between "all" and "checkins"
+      this.choice = 'all';
+      
+      this.$el.html(this.template);
       this.yinc = 6; //margin at top
       
       this.colorScale = d3.scale.linear();
-      this.colorScale.domain([0, 2355]);
+      this.colorScale.domain([0, 1000]);
       this.colorScale.rangeRound([0, 8]);
+      this.areaScale = d3.scale.linear().range([0, Math.PI*9]);
       
       _.extend(this, Backbone.Events);
-      _.bindAll(this, 'render', 'draw');
+      _.bindAll(this, 'render', 'drawLoc', 'drawCheckin', 'processDataOpt', 'getData', 'selectChange');
       
-      this.listenTo(middguard.state.timeRange, "change", this.getData);
+      this.listenTo(middguard.state.timeRange, "change", this.selectChange);
       this.listenTo(middguard.entities['Locationcounts'], 'sync', this.render);
-      this.listenTo(middguard.entities['Locationcounts'], 'reset', this.render);
+      this.listenTo(middguard.entities['Check-ins'], 'sync', this.render);
+      //this.listenTo(middguard.entities['Locationcounts'], 'reset', this.render);
+      this.$('#heatmap-choice')[0].onchange=this.selectChange;
       this.dataStore = {};
       this.dataStoreList = [];
       this.getData();
 			
+    },
+    
+    selectChange: function(){
+      this.choice = document.getElementById('heatmap-choice').value;
+      this.getData();
     },
     
     getData: function(){
@@ -50,16 +49,44 @@ var middguard = middguard || {};
       
       try {
         if (middguard.state.timeRange.start == Number.NEGATIVE_INFINITY){
-          middguard.state.timeRange.start = new Date("2014-06-06 08:00:19");
+          this.stopListening(middguard.state.timeRange, "change", this.selectChange);
+          middguard.state.timeRange.start = new Date("2014-06-06 08:02:00");
+          this.listenTo(middguard.state.timeRange, "change", this.selectChange);
         }
         var dateString = this.outputDate(middguard.state.timeRange.start);
-      } catch(err){
+      } catch(err) {
         console.log(err);
       }
-      var start = new Date("2014-06-06 08:00:19");
+      var start = new Date("2014-06-06 08:02:00");
       var end = new Date("2014-06-08 23:20:16");
-      var processData = this.processData;
-      var draw = this.draw;
+      if (middguard.state.timeRange.start < start){
+        this.stopListening(middguard.state.timeRange, "change", this.selectChange);
+        middguard.state.timeRange.start = start;
+        this.listenTo(middguard.state.timeRange, "change", this.selectChange);
+      }
+      if (middguard.state.timeRange.start > end){
+        this.stopListening(middguard.state.timeRange, "change", this.selectChange);
+        middguard.state.timeRange.start = end;
+        this.listenTo(middguard.state.timeRange, "change", this.selectChange);
+      }
+      if (this.choice == 'all'){
+        //if data is being pulled for all locations
+        
+        //use data from minute floor as base to get data for a specific time
+        var minuteFloor = dateString.slice(0, 17) + '00';
+        middguard.entities['Locationcounts'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString],
+              andWhere: ['timestamp', '>=', minuteFloor]}});  
+      } else {
+        middguard.entities['Check-ins'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString]}});
+        /*middguard.entities['Check-ins'].fetch({reset: true, data: { whereIn: [['x', 'y'], function(){
+          distinct(['x', 'y']);
+        }]
+          andwhere: ['timestamp', '=', dateString]},
+        });*/
+      }
+      
+      
+      /*
       if (this.dataStoreList.length > 0){
         //utilize cached heatmap data
         var closest = this.binarySearch(this.dataStoreList, 0, this.dataStoreList.length-1, middguard.state.timeRange.start.valueOf());
@@ -79,33 +106,104 @@ var middguard = middguard || {};
       } else {
           middguard.entities["Locationcounts"].fetch({data: {where: ['timestamp', '<', dateString]}});
       }
+      */
     },
     
     render: function () {
-
-      var dateString = this.outputDate(middguard.state.timeRange.start);
-      var curTime = new Date(dateString);
-      var start = new Date("2014-06-06 08:00:19");
-      var end = new Date("2014-06-08 23:20:16");
-      var processData = this.processDataOpt;
-      var draw = this.draw;
       
-      var locCountData = processData(middguard.entities['Locationcounts'].models, dateString, start, end, 1361);
-      draw(locCountData);
-      if (locCountData)
-      this.dataStore[middguard.state.timeRange.start.valueOf()] = locCountData;
-      this.dataStoreList.push(middguard.state.timeRange.start.valueOf());
-      console.log(this.dataStore);
+      if (this.choice == 'all'){
+        //if location heatmap
+        var dateString = this.outputDate(middguard.state.timeRange.start);
+        var start = new Date("2014-06-06 08:00:19");
+        var end = new Date("2014-06-08 23:20:16");
+        var processData = this.processDataOpt;
+      
+        var locCountData = processData(middguard.entities['Locationcounts'].models, dateString, start, end, 1361);
+        this.drawLoc(locCountData);
+        
+        //this.dataStore[middguard.state.timeRange.start.valueOf()] = locCountData;
+        //this.dataStoreList.push(middguard.state.timeRange.start.valueOf());
+      } else {
+        //if checkin heatmap
+        var dateString = this.outputDate(middguard.state.timeRange.start);
+        var curTime = new Date(dateString);
+        var start = new Date("2014-06-06 08:00:19");
+        var end = new Date("2014-06-08 23:20:16");
+      
+        var checkinData = this.processDataCheckin(middguard.entities['Check-ins'].models, dateString, start, end);
+        
+        this.drawCheckin(checkinData);
+      }
       return this;
     },
     
-    draw: function(data){
+    drawCheckin: function(data){
+      //draw checkin data on map
+      //var divisor = 345/9;
+      
       var colors = ["#fff7ec","#fee8c8","#fdd49e","#fdbb84","#fc8d59","#ef6548","#d7301f","#b30000","#7f0000"];
-      var svg = this.svg;
+      var svg = d3.select("#heatmap-svg");
+      var yinc = this.yinc;
+      var colorScale = this.colorScale.domain([0, 345]);
+      var areaScale = this.areaScale;
+      d3.selectAll('.heatRect').remove();
+      d3.selectAll('.heatCircle').remove();
+      
+      data.forEach(function(item, col){
+        svg.selectAll('.col'+col)
+          .data(item)
+          .enter()
+          .append('circle')
+          .attr({
+            'cx': function (d, row){
+              //add 5 to x and y to guarantee that circle is in middle of square
+              return (row*10)+5;
+            },
+  					'cy': ((100-col)*10)-yinc+5,
+            'r': function(d, row){
+              if (d[2] && d[2] > 0){
+                return Math.pow(areaScale(d[2])/Math.PI, 0.5);
+              } else {
+                return 0;
+              }
+            },
+            'fill': function (d, row){
+              if (d[2] && d[2] > 0){
+               return colors[colorScale(d[2])]; 
+              } else {
+                return 'none';
+              }
+            },
+            'stroke': 'black',
+            'class': 'heatCircle col'+col,
+            'id': function (d, row){
+              return 'heatmapr'+row+'c'+col;
+            }
+          });
+      });
+      d3.selectAll('.heatCircle')
+      .on('mouseover', function(d){
+        svg.append('text')
+          .attr('x', 750)
+          .attr('y', 970)
+          .attr('fill', '#CC0000')
+          .attr('class', 'tooltip')
+        .text('x: ' + d[0] + ', y: ' + d[1] + ', count: ' + d[2]);
+      }).on('mouseout', function(d){
+        d3.selectAll('.tooltip').remove();
+      });
+    },
+    
+    drawLoc: function(data){
+      //draw location data on map
+      
+      var colors = ["#fff7ec","#fee8c8","#fdd49e","#fdbb84","#fc8d59","#ef6548","#d7301f","#b30000","#7f0000"];
+      var svg = d3.select("#heatmap-svg");
       var yinc = this.yinc;
       var colorScale = this.colorScale;
       var dim = 100;
       d3.selectAll('.heatRect').remove();
+      d3.selectAll('.heatCircle').remove();
       
       data.forEach(function(item, col){
         svg.selectAll('.col'+col)
@@ -180,12 +278,12 @@ var middguard = middguard || {};
       return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
     },
     
-    processData: function(dataArray, timestamp, start, end){
-      //create heatmap data at a certain timestamp
+    processDataCheckin: function(dataArray, timestamp, start, end){
+      //process data for checkin heatmap
       
       var tsDate = new Date(timestamp);
       if (tsDate > end || tsDate < start){
-        console.log(Error('Timestamp out of range'));
+        console.log("Error: Timestamp out of range");
         return null;
       }
       
@@ -196,12 +294,15 @@ var middguard = middguard || {};
           heatmapData[i][j] = 0;
         }
       }
-      var dataLen = dataArray.length;
-      var x, y;
-      for (var curIndex = 0; curIndex < dataLen; curIndex++){
-        x = dataArray[curIndex].attributes.x;
-        y = dataArray[curIndex].attributes.y;
-        heatmapData[x][y] = dataArray[curIndex].attributes.count;
+      
+      var daLength = dataArray.length-1;
+      var x;
+      var y;
+      for (var i = 0; i < daLength; i++){
+        x = dataArray[i].attributes.x;
+        y = dataArray[i].attributes.y;
+        heatmapData[y][x] = [x, y, dataArray[i].attributes.count];
+        i++;
       }
       return heatmapData;
       
@@ -209,6 +310,7 @@ var middguard = middguard || {};
     },
     
     processDataOpt: function(dataArray, timestamp, start, end, distincts){
+      //process data for location heatmap
       //distincts represents the number of distinct x,y pairs we need before we can exit
       
       var heatmapData = [];
@@ -223,6 +325,7 @@ var middguard = middguard || {};
       used.items = 0;
       var curIndex = dataArray.length-1;
       var x, y;
+      //var countMax = 0;
       while (curIndex >= 0 && used.items < distincts){
         //while not every x,y pair has had a value found for it and the array has not been fully traversed
         x = dataArray[curIndex].attributes.x;
@@ -231,10 +334,14 @@ var middguard = middguard || {};
           //if x,y pair is unencountered
           used[x + ',' + y] = true;
           heatmapData[y][x] = [x, y, dataArray[curIndex].attributes.count];
+          /*if (dataArray[curIndex].attributes.count > countMax){
+            countMax = dataArray[curIndex].attributes.count;
+          }*/
           used.items++;
         }
         curIndex--;
       }
+      //this.colorScale.domain([0, countMax]);
       return heatmapData;
     },
     
