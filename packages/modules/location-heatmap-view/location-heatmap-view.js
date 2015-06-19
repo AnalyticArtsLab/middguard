@@ -6,10 +6,12 @@ var middguard = middguard || {};
   var LocationHeatmap = middguard.View.extend({
     id: 'heatmap',
     
-    template: _.template('<svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><select id="heatmap-choice"><option value="all">All Locations</option><option value="checkins">Check-In Locations</option></select>'),
+    template: _.template('<svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><div><select id="heatmap-choice"><option value="all">All Locations</option><option value="checkins">Check-In Locations</option></select><p>Attraction Type Filter: </><input type="checkbox" class="filter" id="ThrillRides">Thrill Rides</input><input type="checkbox" class="filter" id="KiddieRides">Kiddie Rides</input><input type="checkbox" class="filter" id="RidesforEveryone">Rides for Everyone</input><input type="checkbox" class="filter" id="Shows&Entertainment">Shows & Entertainment</input><input type="checkbox" class="filter" id="Information&Assistance">Information & Assistance</input><input type="checkbox" class="filter" id="Entrance">Entrance</input><input type="checkbox" class="filter" id="Unknown">Unknown</input></div>'),
     
     events:{
-      "change #heatmap-choice":"getData"
+      "change #heatmap-choice":"userChange",
+      "change .filter": "userChange"
+      
     },
     
     initialize: function () {
@@ -26,9 +28,9 @@ var middguard = middguard || {};
       this.areaScale = d3.scale.linear().range([0, Math.PI*9]); //9 is a specific, deliberate choice
       
       _.extend(this, Backbone.Events);
-      _.bindAll(this, 'render', 'drawLoc', 'drawCheckin', 'processDataCheckin', 'processDataAll', 'getData', 'selectChange');
+      _.bindAll(this, 'render', 'drawLoc', 'drawCheckin', 'processDataCheckin', 'processDataAll', 'getData', 'userChange');
       
-      this.listenTo(middguard.state.timeRange, "change", this.selectChange);
+      this.listenTo(middguard.state.timeRange, "change", this.getData);
       this.listenTo(middguard.entities['Locationcounts'], 'sync', this.render);
       this.listenTo(middguard.entities['Check-ins'], 'sync', this.render);
       //this.listenTo(middguard.entities['Locationcounts'], 'reset', this.render);
@@ -39,14 +41,42 @@ var middguard = middguard || {};
         '87$81', '79$87', '78$37', '76$22', '43$56', '69$44', '26$59', '6$43', '82$80', '76$88', '47$11', '16$66', '17$43',
         '43$78', '45$24', '32$33', '60$37', '0$67', '17$67', '48$87'
       ]);
+      this.attractionTypes = {};
       this.dataStore = {};
       this.dataStoreList = [];
       this.getData();
 			
     },
     
-    selectChange: function(){
+    userChange: function(){
       this.choice = document.getElementById('heatmap-choice').value;
+      var attractionTypes = {};
+      var filterSet = new Set();
+      var x, y, type, elmnts, numElmnts;
+      elmnts = document.getElementsByClassName('filter');
+      console.log(elmnts);
+      numElmnts = elmnts.length;
+      for (var i = 0; i < numElmnts; i++){
+        if (elmnts[i].checked){
+          filterSet.add(elmnts[i].id);
+        }
+      }
+      middguard.entities["Pois"].forEach(function(model){
+        //Add all types of attractions to a data structure for filtering later.
+        //Break up data structure (a dictionary) into different sets whose keys are based on the name of 
+        //the attraction type in case we need to easily find out which attraction types have been selected
+        
+        x = model.get('x');
+        y = model.get('y');
+        type = model.get('type').replace(/\s+/g, '');
+        if (x && y && filterSet.has(type)){
+          if (! attractionTypes[type]){
+            attractionTypes[type] = new Set();
+          }
+          attractionTypes[type].add(x + ',' + y);
+        }
+      });
+      this.attractionTypes = attractionTypes;
       this.getData();
     },
     
@@ -128,7 +158,7 @@ var middguard = middguard || {};
         var start = new Date("2014-06-06 08:00:19");
         var end = new Date("2014-06-08 23:20:16");
         var processData = this.processDataAll;
-      
+        
         var locCountData = processData(middguard.entities['Locationcounts'].models, dateString, start, end, 1361);
         this.drawLoc(locCountData);
         
@@ -306,17 +336,41 @@ var middguard = middguard || {};
         }
       }
       
-      var daLength = dataArray.length-1;
-      var x;
-      var y;
-      for (var i = 0; i < daLength; i++){
-        x = dataArray[i].attributes.x;
-        y = dataArray[i].attributes.y;
-        if (this.distinctCheckins.has(x + '$' + y)){
-          heatmapData[y][x] = [x, y, dataArray[i].attributes.count];
+      if (Object.keys(this.attractionTypes).length){
+        //if filters have been applied
+        //debugger;
+        var desiredSet = new Set();
+        this.attractionTypes.forEach(function(set){
+          set.forEach(function(item){
+            desiredSet.add(item);
+          })
+        })
+      
+        var daLength = dataArray.length-1;
+        var x;
+        var y;
+        for (var i = 0; i < daLength; i++){
+          x = dataArray[i].attributes.x;
+          y = dataArray[i].attributes.y;
+          if (this.distinctCheckins.has(x + '$' + y) && desiredSet.has(x + '$' + y)){
+            heatmapData[y][x] = [x, y, dataArray[i].attributes.count];
+          }
+          i++;
         }
-        i++;
+      } else {
+        var daLength = dataArray.length-1;
+        var x;
+        var y;
+        for (var i = 0; i < daLength; i++){
+          x = dataArray[i].attributes.x;
+          y = dataArray[i].attributes.y;
+          if (this.distinctCheckins.has(x + '$' + y)){
+            heatmapData[y][x] = [x, y, dataArray[i].attributes.count];
+          }
+          i++;
+        }
       }
+      
       return heatmapData;
       
       
@@ -338,22 +392,49 @@ var middguard = middguard || {};
       used.items = 0;
       var curIndex = dataArray.length-1;
       var x, y;
-      //var countMax = 0;
-      while (curIndex >= 0 && used.items < distincts){
-        //while not every x,y pair has had a value found for it and the array has not been fully traversed
-        x = dataArray[curIndex].attributes.x;
-        y = dataArray[curIndex].attributes.y;
-        if (! used[x + ',' + y]){
-          //if x,y pair is unencountered
-          used[x + ',' + y] = true;
-          heatmapData[y][x] = [x, y, dataArray[curIndex].attributes.count];
-          /*if (dataArray[curIndex].attributes.count > countMax){
-            countMax = dataArray[curIndex].attributes.count;
-          }*/
-          used.items++;
+      
+      if (Object.keys(this.attractionTypes).length){
+        //if filters have been applied
+        var desiredSet = new Set();
+        this.attractionTypes.forEach(function(set){
+          set.forEach(function(item){
+            desiredSet.add(item);
+          })
+        })
+        
+        while (curIndex >= 0 && used.items < distincts){
+          //while not every x,y pair has had a value found for it and the array has not been fully traversed
+          x = dataArray[curIndex].attributes.x;
+          y = dataArray[curIndex].attributes.y;
+          if (! used[x + ',' + y] && desiredSet.has(x + ',' + y)){
+            //if x,y pair is unencountered
+            used[x + ',' + y] = true;
+            heatmapData[y][x] = [x, y, dataArray[curIndex].attributes.count];
+            /*if (dataArray[curIndex].attributes.count > countMax){
+              countMax = dataArray[curIndex].attributes.count;
+            }*/
+            used.items++;
+          }
+          curIndex--;
         }
-        curIndex--;
+      } else {
+        while (curIndex >= 0 && used.items < distincts){
+          //while not every x,y pair has had a value found for it and the array has not been fully traversed
+          x = dataArray[curIndex].attributes.x;
+          y = dataArray[curIndex].attributes.y;
+          if (! used[x + ',' + y]){
+            //if x,y pair is unencountered
+            used[x + ',' + y] = true;
+            heatmapData[y][x] = [x, y, dataArray[curIndex].attributes.count];
+            /*if (dataArray[curIndex].attributes.count > countMax){
+              countMax = dataArray[curIndex].attributes.count;
+            }*/
+            used.items++;
+          }
+          curIndex--;
+        }
       }
+      
       //this.colorScale.domain([0, countMax]);
       return heatmapData;
     },
