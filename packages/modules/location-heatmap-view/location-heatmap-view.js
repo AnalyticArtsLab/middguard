@@ -6,7 +6,7 @@ var middguard = middguard || {};
   var LocationHeatmap = middguard.View.extend({
     id: 'heatmap',
     
-    template: _.template('<svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><div><select id="heatmap-choice"><option value="all">All Locations</option><option value="checkins">Check-In Locations</option></select><p>Attraction Type Filter: </><input type="checkbox" class="filter" id="ThrillRides">Thrill Rides</input><input type="checkbox" class="filter" id="KiddieRides">Kiddie Rides</input><input type="checkbox" class="filter" id="RidesforEveryone">Rides for Everyone</input><input type="checkbox" class="filter" id="Shows&Entertainment">Shows & Entertainment</input><input type="checkbox" class="filter" id="Information&Assistance">Information & Assistance</input><input type="checkbox" class="filter" id="Entrance">Entrance</input><input type="checkbox" class="filter" id="Unknown">Unknown</input></div>'),
+    template: _.template('<svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><div><select id="heatmap-choice"><option value="all">All Locations</option><option value="checkins">Check-In Locations</option></select><p>Attraction Type Filter: </><input type="checkbox" class="filter" id="NoFilter">No Filter</input><input type="checkbox" class="filter" id="ThrillRides">Thrill Rides</input><input type="checkbox" class="filter" id="KiddieRides">Kiddie Rides</input><input type="checkbox" class="filter" id="RidesforEveryone">Rides for Everyone</input><input type="checkbox" class="filter" id="Shows&Entertainment">Shows & Entertainment</input><input type="checkbox" class="filter" id="Information&Assistance">Information & Assistance</input><input type="checkbox" class="filter" id="Entrance">Entrance</input><input type="checkbox" class="filter" id="Unknown">Unknown</input></div>'),
     
     events:{
       "change #heatmap-choice":"userChange",
@@ -54,29 +54,35 @@ var middguard = middguard || {};
       var filterSet = new Set();
       var x, y, type, elmnts, numElmnts;
       elmnts = document.getElementsByClassName('filter');
-      console.log(elmnts);
       numElmnts = elmnts.length;
       for (var i = 0; i < numElmnts; i++){
         if (elmnts[i].checked){
           filterSet.add(elmnts[i].id);
         }
       }
-      middguard.entities["Pois"].forEach(function(model){
-        //Add all types of attractions to a data structure for filtering later.
-        //Break up data structure (a dictionary) into different sets whose keys are based on the name of 
-        //the attraction type in case we need to easily find out which attraction types have been selected
+      if (filterSet.size > 0 && ! document.getElementById('NoFilter').checked){
+        middguard.entities["Pois"].forEach(function(model){
+          //Add all types of attractions to a data structure for filtering later.
+          //Break up data structure (a dictionary) into different sets whose keys
+          //are based on the name of the attraction type in case we need to 
+          //easily find out which attraction types have been selected
         
-        x = model.get('x');
-        y = model.get('y');
-        type = model.get('type').replace(/\s+/g, '');
-        if (x && y && filterSet.has(type)){
-          if (! attractionTypes[type]){
-            attractionTypes[type] = new Set();
+          x = model.get('x');
+          y = model.get('y');
+          type = model.get('type').replace(/\s+/g, '');
+          if (x && y && filterSet.has(type)){
+            if (! attractionTypes[type]){
+              attractionTypes[type] = new Set();
+            }
+            attractionTypes[type].add(x + ',' + y);
           }
-          attractionTypes[type].add(x + ',' + y);
-        }
-      });
-      this.attractionTypes = attractionTypes;
+        });
+        this.attractionTypes = attractionTypes;
+      } else {
+        document.getElementById('NoFilter').checked = true;
+        this.attractionTypes = {};
+      }
+      
       this.getData();
     },
     
