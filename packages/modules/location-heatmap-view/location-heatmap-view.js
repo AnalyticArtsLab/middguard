@@ -61,7 +61,7 @@ var middguard = middguard || {};
         }
       }
       if (filterSet.size > 0 && ! document.getElementById('NoFilter').checked){
-        middguard.entities["Pois"].forEach(function(model){
+        middguard.entities['Pois'].forEach(function(model){
           //Add all types of attractions to a data structure for filtering later.
           //Break up data structure (a dictionary) into different sets whose keys
           //are based on the name of the attraction type in case we need to 
@@ -90,14 +90,15 @@ var middguard = middguard || {};
       //This function gets the data at a certain timestamp. Its execution will trigger the rendering.
       
       try {
+        
         if (middguard.state.timeRange.start == Number.NEGATIVE_INFINITY){
-          this.stopListening(middguard.state.timeRange, "change", this.selectChange);
+          //this.stopListening(middguard.state.timeRange, "change", this.selectChange);
           middguard.state.timeRange.start = new Date("2014-06-06 08:02:00");
-          this.listenTo(middguard.state.timeRange, "change", this.selectChange);
+          //this.listenTo(middguard.state.timeRange, "change", this.selectChange);
         }
         var dateString = this.outputDate(middguard.state.timeRange.start);
       } catch(err) {
-        console.log(err);
+        console.log(Error(err));
       }
       var start = new Date("2014-06-06 08:02:00");
       var end = new Date("2014-06-08 23:20:16");
@@ -115,8 +116,8 @@ var middguard = middguard || {};
         //if data is being pulled for all locations
         
         //use data from minute floor as base to get data for a specific time
-      var minuteFloor = dateString.slice(0, 17) + '00';
-      middguard.entities['Locationcounts'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString],
+        var minuteFloor = dateString.slice(0, 17) + '00';
+        middguard.entities['Locationcounts'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString],
             andWhere: ['timestamp', '>=', minuteFloor]}});  
       } else {
         /*middguard.entities['Check-ins'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString]}});
@@ -127,8 +128,8 @@ var middguard = middguard || {};
           andWhere: ['timestamp', '=', dateString]},
         });
         */
-        var minuteFloor = dateString.slice(0, 17) + '00';
-        middguard.entities['Check-ins'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString],
+          var minuteFloor = dateString.slice(0, 17) + '00';
+          middguard.entities['Check-ins'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString],
               andWhere: ['timestamp', '>=', minuteFloor]}});
       }
       
@@ -166,6 +167,7 @@ var middguard = middguard || {};
         var processData = this.processDataAll;
         
         var locCountData = processData(middguard.entities['Locationcounts'].models, dateString, start, end, 1361);
+        //middguard.state.set({'Locationcounts': {'workingSet': middguard.entities['Locationcounts']}});
         this.drawLoc(locCountData);
         
         //this.dataStore[middguard.state.timeRange.start.valueOf()] = locCountData;
@@ -178,7 +180,7 @@ var middguard = middguard || {};
         var end = new Date("2014-06-08 23:20:16");
       
         var checkinData = this.processDataCheckin(middguard.entities['Check-ins'].models, dateString, start, end);
-        
+        //middguard.state.set({'Check-ins': {'workingSet': middguard.entities['Check-ins']}});
         this.drawCheckin(checkinData);
       }
       return this;
@@ -208,15 +210,15 @@ var middguard = middguard || {};
             },
   					'cy': ((100-col)*10)-yinc+5,
             'r': function(d, row){
-              if (d[2] && d[2] > 0){
-                return Math.pow(areaScale(d[2])/Math.PI, 0.5);
+              if (d.attributes && d.get('count') > 0){
+                return Math.pow(areaScale(d.get('count'))/Math.PI, 0.5);
               } else {
                 return 0;
               }
             },
             'fill': function (d, row){
-              if (d[2] && d[2] > 0){
-               return colorScale(d[2]); 
+              if (d.attributes && d.get('count') > 0){
+               return colorScale(d.get('count')); 
               } else {
                 return 'none';
               }
@@ -235,7 +237,7 @@ var middguard = middguard || {};
           .attr('y', 970)
           .attr('fill', '#CC0000')
           .attr('class', 'tooltip')
-        .text('x: ' + d[0] + ', y: ' + d[1] + ', count: ' + d[2]);
+        .text('x: ' + d.get('x') + ', y: ' + d.get('y') + ', count: ' + d.get('count'));
       }).on('mouseout', function(d){
         d3.selectAll('.tooltip').remove();
       });
@@ -265,15 +267,15 @@ var middguard = middguard || {};
   					'height': 10,
   					'width': 10,
             'fill': function (d, row){
-              if (d[2] && d[2] > 0){
-               return colorScale(d[2]); 
+              if (d.attributes && d.get('count') > 0){
+               return colorScale(d.get('count')); 
               } else {
                 return 'none';
               }
             },
             'stroke': function (d, row){
-              if (d[2] && d[2] > 0){
-               return colorScale(d[2]); 
+              if (d.attributes && d.get('count') > 0){
+               return colorScale(d.get('count')); 
               } else {
                 return 'none';
               }
@@ -291,9 +293,11 @@ var middguard = middguard || {};
           .attr('y', 970)
           .attr('fill', '#CC0000')
           .attr('class', 'tooltip')
-        .text('x: ' + d[0] + ', y: ' + d[1] + ', count: ' + d[2]);
+        .text('x: ' + d.get('x') + ', y: ' + d.get('y') + ', count: ' + d.get('count'));
       }).on('mouseout', function(d){
         d3.selectAll('.tooltip').remove();
+      }).on('click', function(d){
+        middguard.state.Locationcounts.selections.add(d);
       });
     },
     
@@ -351,7 +355,7 @@ var middguard = middguard || {};
             desiredSet.add(item);
           })
         }
-        console.log(desiredSet);
+
         var daLength = dataArray.length-1;
         var x;
         var y;
@@ -359,7 +363,7 @@ var middguard = middguard || {};
           x = dataArray[i].attributes.x;
           y = dataArray[i].attributes.y;
           if (this.distinctCheckins.has(x + '$' + y) && desiredSet.has(x + ',' + y)){
-            heatmapData[y][x] = [x, y, dataArray[i].attributes.count];
+            heatmapData[y][x] = dataArray[i]; //[x, y, dataArray[i].attributes.count];
           }
           i++;
         }
@@ -371,7 +375,7 @@ var middguard = middguard || {};
           x = dataArray[i].attributes.x;
           y = dataArray[i].attributes.y;
           if (this.distinctCheckins.has(x + '$' + y)){
-            heatmapData[y][x] = [x, y, dataArray[i].attributes.count];
+            heatmapData[y][x] = dataArray[i];//[x, y, dataArray[i].attributes.count];
           }
           i++;
         }
@@ -399,46 +403,21 @@ var middguard = middguard || {};
       var curIndex = dataArray.length-1;
       var x, y;
       
-      if (Object.keys(this.attractionTypes).length){
-        //if filters have been applied
-        var desiredSet = new Set();
-        this.attractionTypes.forEach(function(set){
-          set.forEach(function(item){
-            desiredSet.add(item);
-          })
-        })
-        
-        while (curIndex >= 0 && used.items < distincts){
-          //while not every x,y pair has had a value found for it and the array has not been fully traversed
-          x = dataArray[curIndex].attributes.x;
-          y = dataArray[curIndex].attributes.y;
-          if (! used[x + ',' + y] && desiredSet.has(x + ',' + y)){
-            //if x,y pair is unencountered
-            used[x + ',' + y] = true;
-            heatmapData[y][x] = [x, y, dataArray[curIndex].attributes.count];
-            /*if (dataArray[curIndex].attributes.count > countMax){
-              countMax = dataArray[curIndex].attributes.count;
-            }*/
-            used.items++;
-          }
-          curIndex--;
+      
+      while (curIndex >= 0 && used.items < distincts){
+        //while not every x,y pair has had a value found for it and the array has not been fully traversed
+        x = dataArray[curIndex].attributes.x;
+        y = dataArray[curIndex].attributes.y;
+        if (! used[x + ',' + y]){
+          //if x,y pair is unencountered
+          used[x + ',' + y] = true;
+          heatmapData[y][x] = dataArray[curIndex]; //[x, y, dataArray[curIndex].attributes.count];
+          /*if (dataArray[curIndex].attributes.count > countMax){
+            countMax = dataArray[curIndex].attributes.count;
+          }*/
+          used.items++;
         }
-      } else {
-        while (curIndex >= 0 && used.items < distincts){
-          //while not every x,y pair has had a value found for it and the array has not been fully traversed
-          x = dataArray[curIndex].attributes.x;
-          y = dataArray[curIndex].attributes.y;
-          if (! used[x + ',' + y]){
-            //if x,y pair is unencountered
-            used[x + ',' + y] = true;
-            heatmapData[y][x] = [x, y, dataArray[curIndex].attributes.count];
-            /*if (dataArray[curIndex].attributes.count > countMax){
-              countMax = dataArray[curIndex].attributes.count;
-            }*/
-            used.items++;
-          }
-          curIndex--;
-        }
+        curIndex--;
       }
       
       //this.colorScale.domain([0, countMax]);

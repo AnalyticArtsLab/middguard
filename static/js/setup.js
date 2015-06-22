@@ -44,7 +44,6 @@ var middguard = middguard || {};
 		
     set: function (state) {
 			
-			
       var hasOwnProperty = Object.prototype.hasOwnProperty;
 			for (prop in state){
 				if (prop != 'timeRange'){
@@ -57,21 +56,26 @@ var middguard = middguard || {};
 					if (hasOwnProperty.call(state[prop], 'workingSet')){
 						//if workingSet is a Backbone collection
 						if (hasOwnProperty.call(state[prop].workingSet, 'models')){
-							this[prop].workingSet.reset(getModelIdentifiers(state[prop].workingSet.models));
+							//this[prop].workingSet.reset(getModelIdentifiers(state[prop].workingSet.models));
+              this[prop].workingSet.reset(state[prop].workingSet.models);
 						} else {
 							//if workingSet is just an array (i.e. if a JSON object is being decoded)
 
-							this[prop].workingSet.reset(getModelIdentifiers(state[prop].workingSet));
+							//this[prop].workingSet.reset(getModelIdentifiers(state[prop].workingSet));
+              this[prop].workingSet.reset(state[prop].workingSet);
 						}
 					}
 					if (hasOwnProperty.call(state[prop], 'selections')){
 						if (hasOwnProperty.call(state[prop].selections, 'models')){
 							//if selections is a Backbone collection
-							this[prop].selections.reset(getModelIdentifiers(state[prop].selections.models));
+							//this[prop].selections.reset(getModelIdentifiers(state[prop].selections.models));
+              this[prop].selections.reset(state[prop].selections.models);
 						} else {
 							//if selections is just an array (i.e. if a JSON object is being decoded)
 
-							this[prop].selections.reset(getModelIdentifiers(state[prop].selections));
+							//this[prop].selections.reset(getModelIdentifiers(state[prop].selections));
+              this[prop].selections.reset(state[prop].selections);
+              
 						}
 					}
 					this[prop].trigger('change', this[prop]);
