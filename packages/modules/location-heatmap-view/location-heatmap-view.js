@@ -338,21 +338,21 @@ var middguard = middguard || {};
       
       if (Object.keys(this.attractionTypes).length){
         //if filters have been applied
-        //debugger;
+        
         var desiredSet = new Set();
-        this.attractionTypes.forEach(function(set){
-          set.forEach(function(item){
+        for (prop in this.attractionTypes) {
+          this.attractionTypes[prop].forEach(function(item){
             desiredSet.add(item);
           })
-        })
-      
+        }
+        console.log(desiredSet);
         var daLength = dataArray.length-1;
         var x;
         var y;
         for (var i = 0; i < daLength; i++){
           x = dataArray[i].attributes.x;
           y = dataArray[i].attributes.y;
-          if (this.distinctCheckins.has(x + '$' + y) && desiredSet.has(x + '$' + y)){
+          if (this.distinctCheckins.has(x + '$' + y) && desiredSet.has(x + ',' + y)){
             heatmapData[y][x] = [x, y, dataArray[i].attributes.count];
           }
           i++;
