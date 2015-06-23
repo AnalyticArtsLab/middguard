@@ -124,46 +124,17 @@ var middguard = middguard || {};
         middguard.entities['Locationcounts'].fetch({source: 'heatmap', reset: true, data: {where: ['timestamp', '<=', dateString],
             andWhere: ['timestamp', '>=', minuteFloor]}});  
       } else {
-        /*middguard.entities['Check-ins'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString]}});
-        //debugger;
-        middguard.entities['Check-ins'].fetch({reset: true, data: { whereIn: [['x', 'y'], function(){
-          distinct(['x', 'y']);
-        }],
-          andWhere: ['timestamp', '=', dateString]},
-        });
-        */
           var minuteFloor = dateString.slice(0, 17) + '00';
           middguard.entities['Check-ins'].fetch({source: 'heatmap', reset: true, data: {where: ['timestamp', '<=', dateString],
               andWhere: ['timestamp', '>=', minuteFloor]}});
       }
       
-      
-      /*
-      if (this.dataStoreList.length > 0){
-        //utilize cached heatmap data
-        var closest = this.binarySearch(this.dataStoreList, 0, this.dataStoreList.length-1, middguard.state.timeRange.start.valueOf());
-        var startVal = middguard.state.timeRange.start.valueOf();
-        var closestDateString = this.outputDate(new Date(closest));
-        if (startVal > closest){
-          middguard.entities["Locationcounts"].fetch({reset: true, data: {where: ['timestamp', '<', dateString]},
-                andWhere: ['timestamp', '>', closestDateString]});
-        } else if (startVal < closest){
-          middguard.entities["Locationcounts"].fetch({reset: true, data: {where: ['timestamp', '>', dateString]},
-                andWhere: ['timestamp', '<', closestDateString]});
-        } else {
-          //if startVal == closest
-          draw(this.dataStore[closest]);
-        } 
-        
-      } else {
-          middguard.entities["Locationcounts"].fetch({data: {where: ['timestamp', '<', dateString]}});
-      }
-      */
     },
     
     render: function (col, resp, opt) {
+      //render the heatmap
       
-      if (opt && opt.source === 'spark'){
+      if (opt && opt.source !== 'heatmap'){
         return this;
       }
       if (this.choice == 'all'){
