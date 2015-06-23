@@ -1,0 +1,15 @@
+		#middguard-individual-timelines{
+			margin: 15px;
+		}
+
+    #individual-timeline-rect {
+      width:800px;
+      height: 1000px;
+      overflow: auto;
+    }
+
+    .individual-timeline {
+      width: 200px;
+      height:1200px;
+      border:1px solid black;
+    }

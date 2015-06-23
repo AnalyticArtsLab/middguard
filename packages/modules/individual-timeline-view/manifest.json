@@ -1,0 +1,11 @@
+{
+  "name": "Individual Timelines",
+  "main": "IndividualTimelinesView",
+  "version": "0.0.1",
+  "js": [
+    "individual-timeline-view.js"
+  ],
+  "css": [
+    "individual-timeline-styles.css"
+  ]
+}
