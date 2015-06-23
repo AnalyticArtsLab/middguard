@@ -31,8 +31,12 @@ var middguard = middguard || {};
       _.bindAll(this, 'render', 'drawLoc', 'drawCheckin', 'processDataCheckin', 'processDataAll', 'getData', 'userChange');
       
       this.listenTo(middguard.state.timeRange, "change", this.getData);
-      this.listenTo(middguard.entities['Locationcounts'], 'sync', this.render);
-      this.listenTo(middguard.entities['Check-ins'], 'sync', this.render);
+      this.listenTo(middguard.entities['Locationcounts'], 'sync', function(col, resp, opt){
+        this.render(col, resp, opt);
+      });
+      this.listenTo(middguard.entities['Check-ins'], 'sync', function(col, resp, opt){
+        this.render(col, resp, opt);
+      });
       //this.listenTo(middguard.entities['Locationcounts'], 'reset', this.render);
       this.$('#heatmap-choice')[0].onchange=this.selectChange;
       this.distinctCheckins = new Set([
@@ -117,7 +121,7 @@ var middguard = middguard || {};
         
         //use data from minute floor as base to get data for a specific time
         var minuteFloor = dateString.slice(0, 17) + '00';
-        middguard.entities['Locationcounts'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString],
+        middguard.entities['Locationcounts'].fetch({source: 'heatmap', reset: true, data: {where: ['timestamp', '<=', dateString],
             andWhere: ['timestamp', '>=', minuteFloor]}});  
       } else {
         /*middguard.entities['Check-ins'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString]}});
@@ -129,7 +133,7 @@ var middguard = middguard || {};
         });
         */
           var minuteFloor = dateString.slice(0, 17) + '00';
-          middguard.entities['Check-ins'].fetch({reset: true, data: {where: ['timestamp', '<=', dateString],
+          middguard.entities['Check-ins'].fetch({source: 'heatmap', reset: true, data: {where: ['timestamp', '<=', dateString],
               andWhere: ['timestamp', '>=', minuteFloor]}});
       }
       
@@ -157,8 +161,11 @@ var middguard = middguard || {};
       */
     },
     
-    render: function () {
+    render: function (col, resp, opt) {
       
+      if (opt && opt.source === 'spark'){
+        return this;
+      }
       if (this.choice == 'all'){
         //if location heatmap
         var dateString = this.outputDate(middguard.state.timeRange.start);
@@ -169,6 +176,7 @@ var middguard = middguard || {};
         var locCountData = processData(middguard.entities['Locationcounts'].models, dateString, start, end, 1361);
         //middguard.state.set({'Locationcounts': {'workingSet': middguard.entities['Locationcounts']}});
         this.drawLoc(locCountData);
+        return this;
         
         //this.dataStore[middguard.state.timeRange.start.valueOf()] = locCountData;
         //this.dataStoreList.push(middguard.state.timeRange.start.valueOf());
@@ -182,8 +190,8 @@ var middguard = middguard || {};
         var checkinData = this.processDataCheckin(middguard.entities['Check-ins'].models, dateString, start, end);
         //middguard.state.set({'Check-ins': {'workingSet': middguard.entities['Check-ins']}});
         this.drawCheckin(checkinData);
+        return this;
       }
-      return this;
     },
     
     drawCheckin: function(data){
