@@ -26,17 +26,24 @@ var middguard = middguard || {};
       
       this.listenTo(middguard.entities.Movementtraces, 'sync', this.render);
       this.listenTo(middguard.entities.Movementtraces, 'reset', this.render);
+      this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.update)
       this.listenTo(middguard.state.timeRange, 'change',this.render);
 
-			
+      var v = this;
+			middguard.state.People.workingSet.forEach(function(m){
+        var pid = m.get('id');
+        v.tracked.add(pid);
+        middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}, remove:false,  error:function(c,r,o){console.log(r);}});
+      });
+
     },
     
     addPerson: function(){
       // add a new person to the tracked set
       var pid = +document.getElementById('trace-query').value;
       if (! this.tracked.has(pid)){
-        middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}, remove:false});
-        this.tracked.add(pid);
+        middguard.state.People.workingSet.add({id:pid});
+        middguard.state.People.selections.reset({id:pid});
       }
       
     },
@@ -44,20 +51,40 @@ var middguard = middguard || {};
     changePerson: function(){
       // replace the current set of tracked people with a new one
       var pid = +document.getElementById('trace-query').value;
-      middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}});
-      this.tracked.clear();
-      this.tracked.add(pid);
+      middguard.state.People.workingSet.reset({id:pid});
+      middguard.state.People.selections.reset({id:pid});
     },
     
     clearAll: function(){
       // clear all of the tracked ids
-      middguard.entities.Movementtraces.reset();
-      this.tracked.clear();
+      middguard.state.People.workingSet.reset();
+      middguard.state.People.selections.reset();
     },
+    
+    update: function(model, collection, options){
+      var v = this;
+      if (options && options.add){
+
+        var pid = model.get('id');
+        v.tracked.add(pid);
+        middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}, remove:false,  error:function(c,r,o){console.log(r);}});
+      }else{
+        middguard.entities.Movementtraces.reset();
+        v.tracked.clear();
+        middguard.state.People.workingSet.forEach(function(m){
+          var pid = m.get('id');
+          v.tracked.add(pid);
+          middguard.entities.Movementtraces.fetch({data:{where:{person_id:m.get('id')}}, remove:false});
+          
+        }) 
+      }
+    },
+    
+    
 		
     render: function () {
       var v = this;
-      
+  
       var canvas = d3.select('#movement-trace-paths');
       
       // use color brewer set1[9] for coloring

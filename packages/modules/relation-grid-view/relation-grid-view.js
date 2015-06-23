@@ -13,10 +13,13 @@ var middguard = middguard || {};
     
     initialize: function () {
       
-      _.bindAll(this, 'render');
+      _.bindAll(this, 'render', 'update');
       var v = this;
       
       v.$el.html(v.template);
+      
+      
+      
       
       // add a metric to the Person records
       middguard.entities.People.models.forEach(function(m){
@@ -55,27 +58,40 @@ var middguard = middguard || {};
       
       this.cells.on('click', function(){
         var pid = d3.select(this).data()[0].get('person_id');
-        var query = 'id1='+pid+' or id2='+pid;
-        middguard.entities.Pairs.fetch({data:{whereRaw:query},
-          error:function(c,r,o){console.log(r)}, 
-          success:function(c,r,o){
-            var max = c.models[c.length - 1].get('delta');
-            v.colors.domain([0,max*.1, max]);
-            
-            middguard.entities.People.models.forEach(function(m){m.set({metric:0});});
-            c.models.forEach(function(m){
-              var id2 = m.get('id1') === pid ? m.get('id2') : m.get('id1');
-              var p = middguard.entities.People.get(id2);
-              p.set({metric:m.get('delta')}); 
-            });
-            middguard.entities.People.get(pid).set({metric:max});
-            
-            middguard.entities.People.sort();
-            
-            v.render();
-          }});
-
+        middguard.state.People.selections.reset({id:pid});
+        middguard.state.People.workingSet.reset({id:pid});
+        
       });
+      
+      
+      this.listenTo(middguard.state.People.selections, 'add remove reset', this.update)
+    },
+
+    update: function(){
+      var v = this;
+      var pid = middguard.state.People.selections.models[0].get('id');
+      var query = 'id1='+pid+' or id2='+pid;
+      middguard.entities.Pairs.fetch({data:{whereRaw:query},
+        error:function(c,r,o){console.log(r)}, 
+        success:function(c,r,o){
+          var max = c.models[c.length - 1].get('delta');
+          v.colors.domain([0,max*.15, max]);
+          
+          middguard.entities.People.models.forEach(function(m){m.set({metric:0});});
+          c.models.forEach(function(m){
+            var id2 = m.get('id1') === pid ? m.get('id2') : m.get('id1');
+            var p = middguard.entities.People.get(id2);
+            p.set({metric:m.get('delta')}); 
+          });
+          middguard.entities.People.get(pid).set({metric:max});
+          
+          //middguard.entities.People.sort();
+          
+          v.render();
+        }});
+      
+      
+      
     },
 
 		
