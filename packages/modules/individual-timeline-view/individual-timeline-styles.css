@@ -1,15 +1,33 @@
 		#middguard-individual-timelines{
 			margin: 15px;
+      overflow: auto;
 		}
 
     #individual-timeline-rect {
       width:800px;
-      height: 1000px;
-      overflow: auto;
+      height: 1200px;
+      
+    }
+    
+    #individual-timeline-rect h1{
+      font-family:"Helvetica Neue", Helvetica, Tahoma;
+      font-size: 14pt;
+      margin: 5px;
+
     }
 
     .individual-timeline {
-      width: 200px;
-      height:1200px;
       border:1px solid black;
+    }
+    
+		.individual-timeline .axis path,
+		.individual-timeline .axis line{
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+		}
+    
+    
+    .individual-timeline .tick text{
+      font-size: 7pt;
     }
