@@ -6,82 +6,128 @@ var middguard = middguard || {};
   var LocSpark = middguard.View.extend({
     id: 'loc-spark',
     
+    //template: _.template('<input type="submit" id=\'locSpark-clear\'>Clear</input>'),
     
+    events:{
+      "click .heatRect":"coordChange",
+      "click .heatCircle": "coordChange"
+      
+    },
     
     initialize: function () {
       var globalThis = this;
       this.current = 0;
       this.d3el = d3.select(this.el);
-      _.bindAll(this, 'processData', 'goFetch');
-      var current = middguard.state.Locationcounts.selections.pop();
-      var x = current.get('x');
-      var y = current.get('y');
+      _.bindAll(this, 'processData', 'goFetch', 'coordChange');
+      
+      _.extend(this, Backbone.Events);
+      
+      this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
+        this.processData(col, resp, opt);
+      });
+      this.listenTo(middguard.entities['Check-ins'], 'sync', function(col, resp, opt){
+        this.processData(col, resp, opt);
+      });
+      this.d3el.append('input')
+        .attr('type', 'submit')
+        .attr('value', 'Clear')
+        .on('click', function(){
+          var choice = document.getElementById('heatmap-choice');
+          //remove items from selection as well when their spark lines are removed
+          if (choice.value == 'all'){
+            middguard.state.Locationcounts.selections.reset([]);
+          } else {
+            //if choice.value = 'checkins'
+            middguard.state['Check-ins'].selections.reset([]);
+          }
+          d3.selectAll('.sparkline').remove();
+        })
+      this.listenTo(middguard.state['Check-ins'].selections, 'add', this.coordChange);
+      this.listenTo(middguard.state.Locationcounts.selections, 'add', this.coordChange);
+      this.coordChange();
+    
+    },
+    
+    coordChange: function(){
+      //function called whenever new coordinates/locations have been clicked
+      var poiName;
+      var choice = document.getElementById('heatmap-choice');
+      if (choice.value == 'all'){
+        var currentModel = middguard.state.Locationcounts.selections.at(middguard.state.Locationcounts.selections.length-1);
+        if (!currentModel){
+          return false;
+        }
+        var x = currentModel.get('x');
+        var y = currentModel.get('y');
+      } else {
+        var currentModel = middguard.state['Check-ins'].selections.at(middguard.state['Check-ins'].selections.length-1);
+        if (!currentModel){
+          return false;
+        }
+        var x = currentModel.get('x');
+        var y = currentModel.get('y');
+        poiName = middguard.entities.Pois.findWhere({x: x, y: y}).get('name');
+          
+      }
+      this.x = x;
+      this.y = y;
       this.fetches = [
         {source: 'spark', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp <= \'2014-06-07 00:00:00\' '}},
         {source: 'spark', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp >= \'2014-06-07 01:00:00\' AND timestamp <= \'2014-06-08 01:00:00\'  '}},
         {source: 'spark', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp >= \'2014-06-08 01:00:00\' AND timestamp <= \'2014-06-09 01:00:00\'  '}}
       ]
-      _.extend(this, Backbone.Events);
-      
-      //dataFri,Sat, and Sun are specific, non-extensible variables
-      /*
-      middguard.entities.Locationcounts.fetch({source: 'spark', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp <= \'2014-06-07 00:00:00\' '},
-        success: function (col, resp, opt){
-          var newData = arrangeDailyData(new Date("2014-06-06 08:00:00"), new Date("2014-06-07 00:00:00"), resp, globalThis.outputDate);
-          globalThis.makeSparkline.call(globalThis, 50, 1000, newData.data, new Date("2014-06-06 08:00:00"), new Date("2014-06-07 00:00:00"), 0, newData.max);
-        }
-      });
-      middguard.entities.Locationcounts.fetch({source: 'spark', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp >= \'2014-06-07 01:00:00\' AND timestamp <= \'2014-06-08 01:00:00\'  '},
-        success: function (col, resp, opt){
-          var newData = globalThis.arrangeDailyData(new Date("2014-06-07 08:00:00"), new Date("2014-06-07 23:59:00"), resp, globalThis.outputDate);
-          globalThis.makeSparkline.call(globalThis, 50, 1000, newData.data, new Date("2014-06-07 08:00:00"), new Date("2014-06-07 23:59:00"), 0, newData.max);
-        }
-      });
-      var dataSat = middguard.entities.Locationcounts.fetch({source: 'spark', data: {whereRaw: 'x = ' + x +' y = ' + y + ' AND timestamp > 2014-06-07 01:00:00 AND timestamp < 2014-06-08 01:00:00'}});
-      var dataSun = middguard.entities.Locationcounts.fetch({source: 'spark', data: {whereRaw: 'x = ' + x +' y = ' + y + ' AND timestamp > 2014-06-08 01:00:00 AND timestamp < 2014-06-09 01:00:00'}});
-      var arrangeDailyData = this.arrangeDailyData;
-      var dataSat = middguard.entities.Locationcounts.fetch({source: 'spark', data: {whereRaw: 'x = ' + x +' y = ' + y + ' AND timestamp > 2014-06-07 01:00:00 AND timestamp < 2014-06-08 01:00:00'}});
-      */
-      this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
-        this.processData(col, resp, opt);
-      });
-      this.goFetch();
-    
+      this.goFetch(poiName);
+      return true;
     },
     
-    goFetch: function(){
+    goFetch: function(poiName){
       if (this.current == 3){
         this.current = 0;
       } else {
-        middguard.entities.Locationcounts.fetch(this.fetches[this.current]);
+        var choice = document.getElementById('heatmap-choice');
+        if (choice.value == 'all'){
+          middguard.entities.Locationcounts.fetch(this.fetches[this.current]);
+        } else {
+          //if choice == 'checkins'
+          var curFetch = new Object(this.fetches[this.current]);
+          curFetch.poi = poiName;
+          middguard.entities['Check-ins'].fetch(this.fetches[this.current]);
+        }
+        
       }
       
     },
     
     processData: function (col, resp, opt){
       //fetch the second 2 days' data after the first
-
-      var startTime, endTime;
-      switch(this.current){
-        case 0:
-          startTime = new Date("2014-06-06 08:00:00");
-          endTime = new Date("2014-06-07 00:00:00");
-          break;
-        case 1:
-          startTime = new Date("2014-06-07 08:00:00");
-          endTime = new Date("2014-06-08 00:00:00");
-          break;
-        case 2:
-          startTime = new Date("2014-06-08 08:00:00");
-          endTime = new Date("2014-06-09 00:00:00");
-          break;
+      if (opt.source === 'spark'){
+        var startTime, endTime, day;
+        switch(this.current){
+          case 0:
+            startTime = new Date("2014-06-06 08:00:00");
+            endTime = new Date("2014-06-07 00:00:00");
+            day = 'Fri';
+            break;
+          case 1:
+            startTime = new Date("2014-06-07 08:00:00");
+            endTime = new Date("2014-06-08 00:00:00");
+            day = 'Sat';
+            break;
+          case 2:
+            startTime = new Date("2014-06-08 08:00:00");
+            endTime = new Date("2014-06-09 00:00:00");
+            day = 'Sun';
+            break;
+        }
+        var newData = this.arrangeDailyData(startTime, endTime, resp, this.outputDate);
+        if (opt.poi){
+          this.makeSparkline.call(this, 50, 1000, newData.data, startTime, endTime, 0, newData.max, this.x, this.y, day, opt.poi);
+        } else {
+           this.makeSparkline.call(this, 50, 1000, newData.data, startTime, endTime, 0, newData.max, this.x, this.y, day);
+        }
+        this.current++;
+        this.goFetch(); 
       }
-      console.log(startTime, endTime);
-      var newData = this.arrangeDailyData(startTime, endTime, resp, this.outputDate);
-      console.log(startTime, endTime);
-      this.makeSparkline.call(this, 50, 1000, newData.data, startTime, endTime, 0, newData.max);
-      this.current++;
-      this.goFetch();
     },
     
     arrangeDailyData: function (start, end, fetchData, dateFunction){
@@ -94,31 +140,32 @@ var middguard = middguard || {};
       var index = 0;
       var max = 0;
       var current = new Date(start);
-      //console.log('start');
+
       while (current <= end){
-        //console.log(start);
-        if (current.getDate() == 8 && current.getHours() == 0 && current.getMinutes() == 0){
-          //debugger;
-        }
         tStamp = dateFunction(current);
         var newDate = new Date(current);
-        var minuteFloor = new Date(fetchData[index].timestamp);
-        if (minuteFloor.getSeconds() != 0){
-          minuteFloor.setSeconds(0);
-        }
-        minuteFloor = dateFunction(minuteFloor);
-        //console.log(tStamp, minuteFloor);
-        if (minuteFloor === tStamp){
-          finalArray.push([newDate, fetchData[index].count]);
-          if (fetchData[index].count > max){
-            max = fetchData[index].count;
-          }
-          index++;
-        } else {
+        if (index >= fetchData.length){
+          //if fetchData's bound has been passed
           finalArray.push([newDate, 0]);
+        } else {
+          var minuteFloor = new Date(fetchData[index].timestamp);
+          if (minuteFloor.getSeconds() != 0){
+            minuteFloor.setSeconds(0);
+          }
+          minuteFloor = dateFunction(minuteFloor);
+          if (minuteFloor === tStamp){
+            finalArray.push([newDate, fetchData[index].count]);
+            if (fetchData[index].count > max){
+              max = fetchData[index].count;
+            }
+            index++;
+          } else {
+            finalArray.push([newDate, 0]);
+          }
         }
         current.setMinutes(current.getMinutes() + 1);
       }
+      //console.log('finish');
       return {data: finalArray, max: max}
     },
     
@@ -150,16 +197,29 @@ var middguard = middguard || {};
       return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
     },
     
-    makeSparkline: function(borderHeight, borderWidth, allData, xMin, xMax, yMin, yMax){
-      //console.log('here');
-      debugger;
+    makeSparkline: function(borderHeight, borderWidth, allData, xMin, xMax, yMin, yMax, xCoord, yCoord, day, poi){
+      //function actually draws a sparkline
+      //function is specific, not particularly extensible
       
-      var canvas = this.d3el
+      var parentElmnt = this.d3el
+      .append('div')
+      .attr('class', 'sparkline');
+        
+      //if a place of interest is passed, include it in the header
+      if (poi){
+        var textHeader = 'X: ' + xCoord + ' Y: ' + yCoord + ' ' + day + ' Location Name: ' + poi;
+      } else {
+        var textHeader = 'X: ' + xCoord + ' Y: ' + yCoord + ' ' + day;
+      }
+      
+      parentElmnt
+      .append('p').text(textHeader);
+      
+      var canvas = parentElmnt
         .append('svg')
-        .attr('y', document.getElementById('loc-spark').children.length*borderHeight)
         .attr('height', borderHeight)
         .attr('width', borderWidth);
-      console.log(xMin, xMax);
+      
       var xScale = d3.time.scale()
         .domain([xMin, xMax])
         .range([0, borderWidth]);
@@ -173,6 +233,8 @@ var middguard = middguard || {};
         .y(function(d){return borderHeight - yScale(d[1])})
         .interpolate('basis');
         
+      //var axis = d3.svg.axis().
+        
       canvas
         .append('path')
         .datum(allData)
@@ -180,6 +242,8 @@ var middguard = middguard || {};
         .attr('stroke', 'blue')
         .attr('stroke-width', 2)
         .attr('fill', 'none');
+        
+      //parentElmnt.style('display', 'block');
     },
     
     render: function(){

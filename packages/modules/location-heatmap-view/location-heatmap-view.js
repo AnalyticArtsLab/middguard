@@ -6,7 +6,7 @@ var middguard = middguard || {};
   var LocationHeatmap = middguard.View.extend({
     id: 'heatmap',
     
-    template: _.template('<svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><div><select id="heatmap-choice"><option value="all">All Locations</option><option value="checkins">Check-In Locations</option></select><p>Attraction Type Filter: </><input type="checkbox" class="filter" id="NoFilter">No Filter</input><input type="checkbox" class="filter" id="ThrillRides">Thrill Rides</input><input type="checkbox" class="filter" id="KiddieRides">Kiddie Rides</input><input type="checkbox" class="filter" id="RidesforEveryone">Rides for Everyone</input><input type="checkbox" class="filter" id="Shows&Entertainment">Shows & Entertainment</input><input type="checkbox" class="filter" id="Information&Assistance">Information & Assistance</input><input type="checkbox" class="filter" id="Entrance">Entrance</input><input type="checkbox" class="filter" id="Unknown">Unknown</input></div>'),
+    template: _.template('<svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><div><select id="heatmap-choice"><option value="all">All Locations</option><option value="checkins">Check-In Locations</option></select><p id="atf">Attraction Type Filter: </><div id="filter1"><input type="checkbox" class="filter" id="NoFilter">No Filter</input><input type="checkbox" class="filter" id="ThrillRides">Thrill Rides</input><input type="checkbox" class="filter" id="KiddieRides">Kiddie Rides</input><input type="checkbox" class="filter" id="RidesforEveryone">Rides for Everyone</input></div><div id="filter2"><input type="checkbox" class="filter" id="Shows&Entertainment">Shows & Entertainment</input><input type="checkbox" class="filter" id="Information&Assistance">Information & Assistance</input><input type="checkbox" class="filter" id="Entrance">Entrance</input><input type="checkbox" class="filter" id="Unknown">Unknown</input></div></div>'),
     
     events:{
       "change #heatmap-choice":"userChange",
@@ -31,7 +31,7 @@ var middguard = middguard || {};
       _.bindAll(this, 'render', 'drawLoc', 'drawCheckin', 'processDataCheckin', 'processDataAll', 'getData', 'userChange');
       
       this.listenTo(middguard.state.timeRange, "change", this.getData);
-      this.listenTo(middguard.entities['Locationcounts'], 'sync', function(col, resp, opt){
+      this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
         this.render(col, resp, opt);
       });
       this.listenTo(middguard.entities['Check-ins'], 'sync', function(col, resp, opt){
@@ -219,6 +219,8 @@ var middguard = middguard || {};
         .text('x: ' + d.get('x') + ', y: ' + d.get('y') + ', count: ' + d.get('count'));
       }).on('mouseout', function(d){
         d3.selectAll('.tooltip').remove();
+      }).on('click', function(d){
+        middguard.state['Check-ins'].selections.add(d);
       });
     },
     
