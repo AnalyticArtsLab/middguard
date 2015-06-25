@@ -17,18 +17,18 @@ var middguard = middguard || {};
     initialize: function () {
       
       //this.choice will switch between "all" and "checkins"
-      this.choice = 'all';
+      middguard.state.heatmapChoice = 'all';
       
       this.$el.html(this.template);
       this.yinc = 6; //margin at top--not a generalized value
-      
+      this.svg = d3.select(this.el).select('#heatmap-svg');
       this.colorScale = d3.scale.linear();
       this.colorScale.domain([0, 1000]); //1000 is a deliberate, specific choice
       this.colorScale.range(['#fee8c8', '#e34a33']);
       this.areaScale = d3.scale.linear().range([0, Math.PI*9]); //9 is a specific, deliberate choice
       
       _.extend(this, Backbone.Events);
-      _.bindAll(this, 'render', 'drawLoc', 'drawCheckin', 'processDataCheckin', 'processDataAll', 'getData', 'userChange');
+      _.bindAll(this, 'render', 'processDataCheckin', 'processDataAll', 'getData', 'userChange');
       
       this.listenTo(middguard.state.timeRange, "change", this.getData);
       this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
@@ -53,7 +53,7 @@ var middguard = middguard || {};
     },
     
     userChange: function(){
-      this.choice = document.getElementById('heatmap-choice').value;
+      middguard.state.heatmapChoice = document.getElementById('heatmap-choice').value;
       var attractionTypes = {};
       var filterSet = new Set();
       var x, y, type, elmnts, numElmnts;
@@ -116,7 +116,7 @@ var middguard = middguard || {};
         middguard.state.timeRange.start = end;
         this.listenTo(middguard.state.timeRange, "change", this.selectChange);
       }
-      if (this.choice == 'all'){
+      if (middguard.state.heatmapChoice == 'all'){
         //if data is being pulled for all locations
         
         //use data from minute floor as base to get data for a specific time
@@ -124,6 +124,7 @@ var middguard = middguard || {};
         middguard.entities['Locationcounts'].fetch({source: 'heatmap', reset: true, data: {where: ['timestamp', '<=', dateString],
             andWhere: ['timestamp', '>=', minuteFloor]}});  
       } else {
+        //if data is being pulled for checkins
           var minuteFloor = dateString.slice(0, 17) + '00';
           middguard.entities['Check-ins'].fetch({source: 'heatmap', reset: true, data: {where: ['timestamp', '<=', dateString],
               andWhere: ['timestamp', '>=', minuteFloor]}});
@@ -134,152 +135,150 @@ var middguard = middguard || {};
     render: function (col, resp, opt) {
       //render the heatmap
       
-      if (opt && opt.source !== 'heatmap'){
+      //make sure the function call is coming from the right place
+      if (!opt || opt.source !== 'heatmap'){
         return this;
       }
-      if (this.choice == 'all'){
-        //if location heatmap
-        var dateString = this.outputDate(middguard.state.timeRange.start);
-        var start = new Date("2014-06-06 08:00:19");
-        var end = new Date("2014-06-08 23:20:16");
-        var processData = this.processDataAll;
-        
-        var locCountData = processData(middguard.entities['Locationcounts'].models, dateString, start, end, 1361);
-        //middguard.state.set({'Locationcounts': {'workingSet': middguard.entities['Locationcounts']}});
-        this.drawLoc(locCountData);
-        return this;
-        
-        //this.dataStore[middguard.state.timeRange.start.valueOf()] = locCountData;
-        //this.dataStoreList.push(middguard.state.timeRange.start.valueOf());
-      } else {
-        //if checkin heatmap
-        var dateString = this.outputDate(middguard.state.timeRange.start);
-        var curTime = new Date(dateString);
-        var start = new Date("2014-06-06 08:00:19");
-        var end = new Date("2014-06-08 23:20:16");
       
-        var checkinData = this.processDataCheckin(middguard.entities['Check-ins'].models, dateString, start, end);
-        //middguard.state.set({'Check-ins': {'workingSet': middguard.entities['Check-ins']}});
-        this.drawCheckin(checkinData);
-        return this;
-      }
-    },
-    
-    drawCheckin: function(data){
-      //draw checkin data on map
-      //var divisor = 345/9;
-      
-      var colors = ["#fff7ec","#fee8c8","#fdd49e","#fdbb84","#fc8d59","#ef6548","#d7301f","#b30000","#7f0000"];
-      var svg = d3.select("#heatmap-svg");
-      var yinc = this.yinc;
-      var colorScale = this.colorScale.domain([0, 345]); //345 is a specific, deliberate choice
-      var areaScale = this.areaScale;
-      d3.selectAll('.heatRect').remove();
-      d3.selectAll('.heatCircle').remove();
-      
-      data.forEach(function(item, col){
-        svg.selectAll('.col'+col)
-          .data(item)
-          .enter()
-          .append('circle')
-          .attr({
-            'cx': function (d, row){
-              //add 5 to x and y to guarantee that circle is in middle of square
-              return (row*10)+5;
-            },
-  					'cy': ((100-col)*10)-yinc+5,
-            'r': function(d, row){
-              if (d.attributes && d.get('count') > 0){
-                return Math.pow(areaScale(d.get('count'))/Math.PI, 0.5);
-              } else {
-                return 0;
-              }
-            },
-            'fill': function (d, row){
-              if (d.attributes && d.get('count') > 0){
-               return colorScale(d.get('count')); 
-              } else {
-                return 'none';
-              }
-            },
-            'stroke': 'black',
-            'class': 'heatCircle col'+col,
-            'id': function (d, row){
-              return 'heatmapr'+row+'c'+col;
-            }
-          });
-      });
-      d3.selectAll('.heatCircle')
-      .on('mouseover', function(d){
-        svg.append('text')
-          .attr('x', 750) //750 and 950 are specific, deliberate choices
-          .attr('y', 970)
-          .attr('fill', '#CC0000')
-          .attr('class', 'tooltip')
-        .text('x: ' + d.get('x') + ', y: ' + d.get('y') + ', count: ' + d.get('count'));
-      }).on('mouseout', function(d){
-        d3.selectAll('.tooltip').remove();
-      }).on('click', function(d){
-        middguard.state['Check-ins'].selections.add(d);
-      });
-    },
-    
-    drawLoc: function(data){
-      //draw location data on map
-      
-      var colors = ["#fff7ec","#fee8c8","#fdd49e","#fdbb84","#fc8d59","#ef6548","#d7301f","#b30000","#7f0000"];
-      var svg = d3.select("#heatmap-svg");
-      var yinc = this.yinc;
       var colorScale = this.colorScale;
-      var dim = 100;
-      d3.selectAll('.heatRect').remove();
-      d3.selectAll('.heatCircle').remove();
+      //console.log(resp);
+      var svg = this.svg;
       
-      data.forEach(function(item, col){
-        svg.selectAll('.col'+col)
-          .data(item)
+      if (middguard.state.heatmapChoice == 'all'){
+        //if location heatmap
+        
+        svg.selectAll('.heatCircle')
+        .attr('r', 0);
+        
+        
+        var rects = this.svg.selectAll('rect')
+          .data(resp)
+        
+        rects
+          .attr('x', function(d){return d.x*10;})
+          .attr('y', function(d){return 1000-(d.y*10)+6}) //+6 is a specific choice given the image we're working with
+          .attr('width', function(d){
+            if (d.count > 0){
+              return 10;
+            } else {
+              return 0;
+            }
+          })
+          .attr('height', function(d){
+            if (d.count > 0){
+              return 10;
+            } else {
+              return 0;
+            }
+          })
+          .attr('fill', function(d){return colorScale(d.count)})
+          .attr('stroke', function(d){return colorScale(d.count)})
+          .attr('class', 'heatRect');
+        
+        rects
           .enter()
           .append('rect')
-          .attr({
-            'x': function (d, row){
-              return row*10;
-            },
-  					'y': ((100-col)*10)-yinc,
-  					'height': 10,
-  					'width': 10,
-            'fill': function (d, row){
-              if (d.attributes && d.get('count') > 0){
-               return colorScale(d.get('count')); 
-              } else {
-                return 'none';
-              }
-            },
-            'stroke': function (d, row){
-              if (d.attributes && d.get('count') > 0){
-               return colorScale(d.get('count')); 
-              } else {
-                return 'none';
-              }
-            },
-            'class': 'heatRect col'+col,
-            'id': function (d, row){
-              return 'heatmapr'+row+'c'+col;
+          .attr('x', function(d){return d.x*10;})
+          .attr('y', function(d){return 1000-(d.y*10)+6}) //+6 is a specific choice given the image we're working with
+          .attr('width', function(d){
+            if (d.count > 0){
+              return 10;
+            } else {
+              return 0;
             }
+          })
+          .attr('height', function(d){
+            if (d.count > 0){
+              return 10;
+            } else {
+              return 0;
+            }
+          })
+          .attr('fill', function(d){return colorScale(d.count)})
+          .attr('stroke', function(d){return colorScale(d.count)})
+          .attr('class', 'heatRect');
+          
+        rects
+          .exit()
+          .attr('width', 0)
+          .attr('height', 0);
+          
+        rects
+          .on('mouseover', function(d){
+            svg.append('text')
+              .attr('x', 750) //750 and 950 are specific, deliberate choices
+              .attr('y', 970)
+              .attr('fill', '#CC0000')
+              .attr('class', 'tooltip')
+            .text('x: ' + d.x + ', y: ' + d.y + ', count: ' + d.count);
+          }).on('mouseout', function(d){
+            svg.selectAll('.tooltip').remove();
+          }).on('click', function(d){
+            middguard.state.Locationcounts.selections.add(d);
           });
-      });
-      d3.selectAll('.heatRect')
-      .on('mouseover', function(d){
-        svg.append('text')
-          .attr('x', 750)
-          .attr('y', 970)
-          .attr('fill', '#CC0000')
-          .attr('class', 'tooltip')
-        .text('x: ' + d.get('x') + ', y: ' + d.get('y') + ', count: ' + d.get('count'));
-      }).on('mouseout', function(d){
-        d3.selectAll('.tooltip').remove();
-      }).on('click', function(d){
-        middguard.state.Locationcounts.selections.add(d);
-      });
+          
+      } else {
+        //if checkin heatmap
+        
+        var areaScale = this.areaScale;
+        
+        svg.selectAll('.heatRect')
+        .attr('height', 0)
+        .attr('width', 0);
+        
+        
+        var circles = this.svg.selectAll('circle')
+          .data(resp)
+        
+        circles
+          .attr('cx', function(d){return d.x*10;})
+          .attr('cy', function(d){return 1000-(d.y*10)+6}) //+6 is a specific choice given the image we're working with
+          .attr('r', function(d){
+            if (d.count > 0){
+              return Math.pow(areaScale(d.count)/Math.PI, 0.5);
+            } else {
+              return 0;
+            }
+          })
+          .attr('fill', function(d){return colorScale(d.count)})
+          .attr('stroke', 'black')
+          .attr('class', 'heatCircle');
+      
+        circles
+          .enter()
+          .append('circle')
+          .attr('cx', function(d){return d.x*10;})
+          .attr('cy', function(d){return 1000-(d.y*10)+6}) //+6 is a specific choice given the image we're working with
+          .attr('r', function(d){
+            if (d.count > 0){
+              return Math.pow(areaScale(d.count)/Math.PI, 0.5);
+            } else {
+              return 0;
+            }
+          })
+          .attr('fill', function(d){return colorScale(d.count)})
+          .attr('stroke', 'black')
+          .attr('class', 'heatCircles');
+          
+        circles
+          .exit()
+          .attr('r', 0);
+            
+        circles
+          .on('mouseover', function(d){
+            svg.append('text')
+              .attr('x', 750) //750 and 950 are specific, deliberate choices
+              .attr('y', 970)
+              .attr('fill', '#CC0000')
+              .attr('class', 'tooltip')
+            .text('x: ' + d.x + ', y: ' + d.y + ', count: ' + d.count);
+          }).on('mouseout', function(d){
+            svg.selectAll('.tooltip').remove();
+          }).on('click', function(d){
+            middguard.state['Check-ins'].selections.add(d);
+          });
+      }
+      return this;
     },
     
     outputDate: function(date){

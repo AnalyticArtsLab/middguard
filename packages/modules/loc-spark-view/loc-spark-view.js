@@ -122,9 +122,9 @@ var middguard = middguard || {};
         }
         var newData = this.arrangeDailyData(startTime, endTime, resp, this.outputDate);
         if (opt.poi){
-          this.makeSparkline.call(this, 50, 1000, newData.leanData, newData.data, startTime, endTime, 0, newData.max, this.x, this.y, day, opt.poi);
+          this.makeSparkline.call(this, 50, 1000, newData.data, startTime, endTime, 0, newData.max, this.x, this.y, day, opt.poi);
         } else {
-          this.makeSparkline.call(this, 50, 1000, newData.leanData, newData.data, startTime, endTime, 0, newData.max, this.x, this.y, day);
+          this.makeSparkline.call(this, 50, 1000, newData.data, startTime, endTime, 0, newData.max, this.x, this.y, day);
         }
         this.current++;
         this.goFetch(); 
@@ -165,9 +165,6 @@ var middguard = middguard || {};
             finalArray.push([newDate, 0]);
           }
         }
-        if (masterIndex % 8 == 0){
-          leanArray.push(masterIndex);
-        }
         masterIndex++;
         current.setMinutes(current.getMinutes() + 1);
       }
@@ -203,7 +200,7 @@ var middguard = middguard || {};
       return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
     },
     
-    makeSparkline: function(borderHeight, borderWidth, partialData, allData, xMin, xMax, yMin, yMax, xCoord, yCoord, day, poi){
+    makeSparkline: function(borderHeight, borderWidth, allData, xMin, xMax, yMin, yMax, xCoord, yCoord, day, poi){
       //function actually draws a sparkline
       //function is specific, not particularly extensible
       
@@ -235,8 +232,8 @@ var middguard = middguard || {};
         .range([0, borderHeight]);
         
       var line = d3.svg.line()
-        .x(function(d){return xScale(allData[d][0]);})
-        .y(function(d){return borderHeight - yScale(allData[d][1]);})
+        .x(function(d){return xScale(d[0]);})
+        .y(function(d){return borderHeight - yScale(d[1]);})
         .interpolate('basis');
         
       var axis = d3.svg.axis()
@@ -245,7 +242,7 @@ var middguard = middguard || {};
         
       canvas
         .append('path')
-        .datum(partialData)
+        .datum(allData)
         .attr('d', line)
         .attr('stroke', 'blue')
         .attr('stroke-width', 2)
