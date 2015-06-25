@@ -40,7 +40,7 @@ var middguard = middguard || {};
             //if choice.value = 'checkins'
             middguard.state['Check-ins'].selections.reset([]);
           }
-          d3.selectAll('.sparkline').remove();
+          $('.sparkline').remove();
         })
       this.listenTo(middguard.state['Check-ins'].selections, 'add', this.coordChange);
       this.listenTo(middguard.state.Locationcounts.selections, 'add', this.coordChange);
@@ -50,6 +50,7 @@ var middguard = middguard || {};
     
     coordChange: function(){
       //function called whenever new coordinates/locations have been clicked
+      
       var poiName;
       var choice = document.getElementById('heatmap-choice');
       if (choice.value == 'all'){
@@ -123,7 +124,7 @@ var middguard = middguard || {};
         if (opt.poi){
           this.makeSparkline.call(this, 50, 1000, newData.data, startTime, endTime, 0, newData.max, this.x, this.y, day, opt.poi);
         } else {
-           this.makeSparkline.call(this, 50, 1000, newData.data, startTime, endTime, 0, newData.max, this.x, this.y, day);
+          this.makeSparkline.call(this, 50, 1000, newData.data, startTime, endTime, 0, newData.max, this.x, this.y, day);
         }
         this.current++;
         this.goFetch(); 
@@ -131,16 +132,17 @@ var middguard = middguard || {};
     },
     
     arrangeDailyData: function (start, end, fetchData, dateFunction){
-      //Function makes an array of the data from a day
-      //that can be passed into the makeSparkline function
+      //Function makes an small-space-consuming array containing indices/pointers to data to be used in the makeSparkline function (leanData)
+      //Function also makes an array containing the actual data to be used in makeSparkline (data)
       //'dateFunction' is used to pass in the this.outputDate function
 
       var tStamp;
       var finalArray = [];
+      var leanArray = [];
       var index = 0;
       var max = 0;
       var current = new Date(start);
-
+      var masterIndex = 0;
       while (current <= end){
         tStamp = dateFunction(current);
         var newDate = new Date(current);
@@ -163,10 +165,11 @@ var middguard = middguard || {};
             finalArray.push([newDate, 0]);
           }
         }
+        masterIndex++;
         current.setMinutes(current.getMinutes() + 1);
       }
       //console.log('finish');
-      return {data: finalArray, max: max}
+      return {data: finalArray, leanData: leanArray, max: max}
     },
     
     outputDate: function(date){
@@ -229,11 +232,13 @@ var middguard = middguard || {};
         .range([0, borderHeight]);
         
       var line = d3.svg.line()
-        .x(function(d){return xScale(d[0])})
-        .y(function(d){return borderHeight - yScale(d[1])})
+        .x(function(d){return xScale(d[0]);})
+        .y(function(d){return borderHeight - yScale(d[1]);})
         .interpolate('basis');
         
-      //var axis = d3.svg.axis().
+      var axis = d3.svg.axis()
+        .scale(xScale)
+        .orient('bottom');
         
       canvas
         .append('path')
@@ -242,6 +247,11 @@ var middguard = middguard || {};
         .attr('stroke', 'blue')
         .attr('stroke-width', 2)
         .attr('fill', 'none');
+        
+        //d3.selectAll('path').datum([]);
+      
+      //canvas
+        //.append(axis);
         
       //parentElmnt.style('display', 'block');
     },
