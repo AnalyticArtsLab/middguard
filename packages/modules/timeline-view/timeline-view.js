@@ -34,6 +34,11 @@ var middguard = middguard || {};
         new Date("2014-06-07 04:00:00"), new Date("2014-06-07 08:00:00"), new Date("2014-06-07 12:00:00"), new Date("2014-06-07 16:00:00"), new Date("2014-06-07 20:00:00"), new Date("2014-06-08 00:00:00"),
         new Date("2014-06-08 04:00:00"), new Date("2014-06-08 08:00:00"), new Date("2014-06-08 12:00:00"), new Date("2014-06-08 16:00:00"), new Date("2014-06-08 20:00:00"), new Date("2014-06-09 00:00:00")];
         
+  			
+  			middguard.state.set({timeRange : {start : this.dateRangeFull[0],
+        end : this.dateRangeFull[1],
+        current: this.dateRangeFull[0]}});
+  			
 			this.axisEl = d3.svg.axis().tickValues(this.dateList);
       
 			this.timeScale = d3.time.scale().domain(this.dateRangeFull);
@@ -73,7 +78,16 @@ var middguard = middguard || {};
       
     },
 		updateDateRange: function(){
-			this.dateRange = [middguard.state.timeRange.start, middguard.state.timeRange.end];
+      // system state has changed, change the drawing
+      
+			this.dateRange = [middguard.state.timeRange.current, middguard.state.timeRange.end];
+      
+      if (! (this.dateRange[0] <= middguard.state.timeRange.start && middguard.state.timeRange.start <= this.dateRange[0])){
+        // we have a single point, so the range is full, but we don't want to draw that
+        this.dateRange[1] = middguard.state.timeRange.current;
+      }
+      
+      
 			this.mainBrush.extent(this.dateRange);
 			if ( (this.timeScale(this.dateRange[0]) >= 0 && this.timeScale(this.dateRange[0]) <= this.width) && (this.timeScale(this.dateRange[1]) >= 0 && this.timeScale(this.dateRange[1]) <= this.width) ){
 				//make sure both items in this.dateRange are valid
@@ -84,11 +98,21 @@ var middguard = middguard || {};
 		},
 		
 		intervalChanged: function (){
-			this.dateRange = this.mainBrush.extent()
-			middguard.state.set({'timeRange' : {'start' : this.dateRange[0],
-			'end' : this.dateRange[1]}
-														});
-			
+      // the brush has changed, update the system state
+			var dateRange = this.mainBrush.extent();
+
+      // this somewhat mental conditional is because == and === doesn't work on dates for some
+      // reason, but <= does
+      if (dateRange[0] <= dateRange[1] && dateRange[1] <= dateRange[0]){
+  			middguard.state.set({timeRange : {start : this.dateRangeFull[0],
+        end : this.dateRangeFull[1],
+        current: dateRange[0]}});
+      }else{
+  			middguard.state.set({timeRange : {start : dateRange[0],
+        end : dateRange[1],
+        current: dateRange[0]}});
+      }
+      
 		},
 		line: d3.svg.line()
 				.x(function(d){ return d[0]})

@@ -4,12 +4,12 @@ var middguard = middguard || {};
   middguard.socket = Backbone.socket = io();
 
   middguard.state = {
-    timeRange: _.extend({
-      start: Number.NEGATIVE_INFINITY,
-      end: Number.POSITIVE_INFINITY
-    }, Backbone.Events),
-		//other properties of middguard.state are initialized in the packages-view.js file
-		
+    // timeRange: _.extend({
+//       start: Number.NEGATIVE_INFINITY,
+//       end: Number.POSITIVE_INFINITY
+//     }, Backbone.Events),
+//     //other properties of middguard.state are initialized in the packages-view.js file
+//
 		
     //selections: new Backbone.Collection(),
     //workingSet: new Backbone.Collection(),
@@ -32,91 +32,59 @@ var middguard = middguard || {};
       return returnObj;
     },
 
-    // Add properties to/update the state using an object of the form: 
-		// {Dataset/Collection Name: 
-		//		{'workingSet': Backbone collection of data to be displayed, 
-		//		'selections': selected data among the workingSet data, also a Backbone collection},
-		// ...
-		//	}
-		//
+    // Properties can be anything of the form 
+    // {Property name: {attribute1: value1, attribute2: value2, ...}}
+    //
+    // Setting a non-existent state variable creates a new variable
+    //
+    // For dataset/collections, we maintain two attributes: 
+    // - workingSet: the set of visible entities
+    // - selection: a highlighted entity or set of entities from the working set
+    // both of these should be set as Backbone Collection objects or as arrays of objects
+  
 		// IMPORTANT: Write modules to listen to changes on these 'state' objects so they update
 		// when other modules set the state.
 		
-    set: function (state) {
-			
+    set: function(state){
       var hasOwnProperty = Object.prototype.hasOwnProperty;
 			for (prop in state){
-				if (prop != 'timeRange'){
-					//replace old 'workingSet' and 'selections' collections with new groups of data for each dataset
-					//(i.e. collection of models) in the database
-					if (! this[prop].bind){
-						//if property is not yet extended to Backbone.events, bind it
-						_.extend(this[prop], Backbone.Events);
-					}
-					if (hasOwnProperty.call(state[prop], 'workingSet')){
-						//if workingSet is a Backbone collection
-						if (hasOwnProperty.call(state[prop].workingSet, 'models')){
-							//this[prop].workingSet.reset(getModelIdentifiers(state[prop].workingSet.models));
-              this[prop].workingSet.reset(state[prop].workingSet.models);
-						} else {
-							//if workingSet is just an array (i.e. if a JSON object is being decoded)
-
-							//this[prop].workingSet.reset(getModelIdentifiers(state[prop].workingSet));
-              this[prop].workingSet.reset(state[prop].workingSet);
-						}
-					}
-					if (hasOwnProperty.call(state[prop], 'selections')){
-						if (hasOwnProperty.call(state[prop].selections, 'models')){
-							//if selections is a Backbone collection
-							//this[prop].selections.reset(getModelIdentifiers(state[prop].selections.models));
-              this[prop].selections.reset(state[prop].selections.models);
-						} else {
-							//if selections is just an array (i.e. if a JSON object is being decoded)
-
-							//this[prop].selections.reset(getModelIdentifiers(state[prop].selections));
-              this[prop].selections.reset(state[prop].selections);
-              
-						}
-					}
-					this[prop].trigger('change', this[prop]);
-				} else {
-					//if prop == 'timeRange'
-	        if (hasOwnProperty.call(state.timeRange, 'start')) {
-	          this.timeRange.start = state.timeRange.start;
-	          this.timeRange.trigger('change', this.timeRange);
-	        }
-
-	        if (hasOwnProperty.call(state.timeRange, 'end')) {
-	          this.timeRange.end = state.timeRange.end;
-	          this.timeRange.trigger('change', this.timeRange);
-	        }
+				//replace old 'workingSet' and 'selections' collections with new groups of data for each dataset
+        // check to see if there is a property matching this on in the state
+        if (! this.hasOwnProperty(prop)){
+          this[prop] = {};
+        }
+        
+				//(i.e. collection of models) in the database
+				if (! this[prop].bind){
+					//if property is not yet extended to Backbone.events, bind it
+					_.extend(this[prop], Backbone.Events);
 				}
-			}
-			/*
-			//NOTE: "selections" is a Backbone collection when referenced as a property of
-			//"this", but it can be anything
-			//(i.e. it's whatever the value field is for the "selections" key in the "state" object parameter)
-			
-      if (hasOwnProperty.call(state, 'selections'))
-				//idea: replace current middguard.state.selections Backbone collection
-				// with the list of models referenced by the state.selections
-        this.selections.reset(state.selections.map(getModel));
+        
+        for (attribute in state[prop]){
+          if (attribute === 'workingSet' || attribute === 'selections'){
+  					if (hasOwnProperty.call(state[prop][attribute], 'models')){
+  						//this[prop].workingSet.reset(getModelIdentifiers(state[prop].workingSet.models));
+              this[prop][attribute].reset(state[prop][attribute].models);
+  					} else {
+  						//if workingSet is just an array (i.e. if a JSON object is being decoded)
 
-      if (hasOwnProperty.call(state, 'workingSet'))
-        this.workingSet.reset(state.workingSet.map(getModel));
-			
-      if (hasOwnProperty.call(state, 'timeRange')) {
-        if (hasOwnProperty.call(state.timeRange, 'start')) {
-          this.timeRange.start = state.timeRange.start;
-          this.timeRange.trigger('change', this.timeRange);
+  						//this[prop].workingSet.reset(getModelIdentifiers(state[prop].workingSet));
+              this[prop][attribute].reset(state[prop][attribute]);
+  					}
+          }else{
+            this[prop][attribute] = state[prop][attribute];
+            
+          }
+          
         }
-
-        if (hasOwnProperty.call(state.timeRange, 'end')) {
-          this.timeRange.end = state.timeRange.end;
-          this.timeRange.trigger('change', this.timeRange);
-        }
-      }*/
-    }
+        
+				this[prop].trigger('change', this[prop]);
+      }
+    },
+    
+      // //NOTE: "selections" is a Backbone collection when referenced as a property of
+      // //"this", but it can be anything
+      // //(i.e. it's whatever the value field is for the "selections" key in the "state" object 
   };
 
   var getModelIdentifiers = function (collection) {
