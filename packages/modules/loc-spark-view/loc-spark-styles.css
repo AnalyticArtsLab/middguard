@@ -1,3 +1,18 @@
 .path{
   stroke: blue;
 }
+.axis path,
+.axis line {
+  fill: none;
+  shape-rendering: crispEdges;
+  
+}
+.axis text{
+  font-size: 8px;
+}
+.textHeader{
+  font-size: 15px;
+  font-family:"Times New Roman",Times,serif;
+  position: relative;
+  left: 15px;
+}

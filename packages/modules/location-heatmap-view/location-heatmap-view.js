@@ -23,14 +23,14 @@ var middguard = middguard || {};
       this.yinc = 6; //margin at top--not a generalized value
       this.svg = d3.select(this.el).select('#heatmap-svg');
       this.colorScale = d3.scale.linear();
-      this.colorScale.domain([0, 1000]); //1000 is a deliberate, specific choice
+      this.colorScale.domain([0, 325]); //1000 is a deliberate, specific choice
       this.colorScale.range(['#fee8c8', '#e34a33']);
       this.areaScale = d3.scale.linear().range([0, Math.PI*9]); //9 is a specific, deliberate choice
       
       _.extend(this, Backbone.Events);
       _.bindAll(this, 'render', 'processDataCheckin', 'processDataAll', 'getData', 'userChange');
       
-      this.listenTo(middguard.state.timeRange, "change", this.getData);
+      this.listenTo(middguard.state.timeRange, 'all', this.getData); //this.getData
       this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
         this.render(col, resp, opt);
       });
@@ -92,30 +92,29 @@ var middguard = middguard || {};
     
     getData: function(){
       //This function gets the data at a certain timestamp. Its execution will trigger the rendering.
-      
       try {
-        
-        if (middguard.state.timeRange.start == Number.NEGATIVE_INFINITY){
+        if (middguard.state.timeRange.current == Number.NEGATIVE_INFINITY){
           //this.stopListening(middguard.state.timeRange, "change", this.selectChange);
-          middguard.state.timeRange.start = new Date("2014-06-06 08:02:00");
+          middguard.state.timeRange.current = new Date("2014-06-06 08:02:00");
           //this.listenTo(middguard.state.timeRange, "change", this.selectChange);
         }
-        var dateString = this.outputDate(middguard.state.timeRange.start);
       } catch(err) {
         console.log(Error(err));
       }
+      //start and end are specific, non-extensible dates
       var start = new Date("2014-06-06 08:02:00");
       var end = new Date("2014-06-08 23:20:16");
-      if (middguard.state.timeRange.start < start){
+      if (middguard.state.timeRange.current < start){
         this.stopListening(middguard.state.timeRange, "change", this.selectChange);
-        middguard.state.timeRange.start = start;
+        middguard.state.timeRange.current = start;
         this.listenTo(middguard.state.timeRange, "change", this.selectChange);
       }
-      if (middguard.state.timeRange.start > end){
+      if (middguard.state.timeRange.current > end){
         this.stopListening(middguard.state.timeRange, "change", this.selectChange);
-        middguard.state.timeRange.start = end;
+        middguard.state.timeRange.current = end;
         this.listenTo(middguard.state.timeRange, "change", this.selectChange);
       }
+      var dateString = this.outputDate(middguard.state.timeRange.current);
       if (middguard.state.heatmapChoice == 'all'){
         //if data is being pulled for all locations
         
@@ -140,16 +139,15 @@ var middguard = middguard || {};
         return this;
       }
       
-      var colorScale = this.colorScale;
-      //console.log(resp);
       var svg = this.svg;
       
       if (middguard.state.heatmapChoice == 'all'){
         //if location heatmap
         
+        var colorScale = this.colorScale;
+        
         svg.selectAll('.heatCircle')
         .attr('r', 0);
-        
         
         var rects = this.svg.selectAll('rect')
           .data(resp)
@@ -221,6 +219,7 @@ var middguard = middguard || {};
         //if checkin heatmap
         
         var areaScale = this.areaScale;
+        var colorScale = d3.scale.linear().domain([0, 1000]).range(['#fee8c8', '#e34a33']); //domain is a specific choice
         
         svg.selectAll('.heatRect')
         .attr('height', 0)
@@ -258,7 +257,7 @@ var middguard = middguard || {};
           })
           .attr('fill', function(d){return colorScale(d.count)})
           .attr('stroke', 'black')
-          .attr('class', 'heatCircles');
+          .attr('class', 'heatCircle');
           
         circles
           .exit()
