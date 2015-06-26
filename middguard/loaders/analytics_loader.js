@@ -10,7 +10,7 @@ module.exports = function (app) {
   var analyticsAbsPath = path.resolve(analyticsPath);
 
   fs.readdirSync(analyticsAbsPath).forEach(function (tool) {
-    if (tool[0] === '.'){
+    if (tool[0] === '.'|| !fs.lstatSync(path.join(modelsAbsPath, tool)).isDirectory()){
       // hidden directory, continue
       return;
     }

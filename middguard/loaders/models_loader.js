@@ -13,7 +13,7 @@ module.exports = function (app) {
   var modelsAbsPath = path.resolve(modelsPath);
   
   fs.readdirSync(modelsAbsPath).forEach(function (model) {
-    if (model[0] === '.'){
+    if (model[0] === '.' || !fs.lstatSync(path.join(modelsAbsPath, model)).isDirectory() ){
       // hidden directory, continue
       return;
     }
