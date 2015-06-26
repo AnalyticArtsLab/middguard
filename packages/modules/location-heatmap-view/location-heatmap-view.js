@@ -154,7 +154,7 @@ var middguard = middguard || {};
         
         rects
           .attr('x', function(d){return d.x*10;})
-          .attr('y', function(d){return 1000-(d.y*10)+6}) //+6 is a specific choice given the image we're working with
+          .attr('y', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('width', function(d){
             if (d.count > 0){
               return 10;
@@ -177,7 +177,7 @@ var middguard = middguard || {};
           .enter()
           .append('rect')
           .attr('x', function(d){return d.x*10;})
-          .attr('y', function(d){return 1000-(d.y*10)+6}) //+6 is a specific choice given the image we're working with
+          .attr('y', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('width', function(d){
             if (d.count > 0){
               return 10;
@@ -231,7 +231,7 @@ var middguard = middguard || {};
         
         circles
           .attr('cx', function(d){return d.x*10;})
-          .attr('cy', function(d){return 1000-(d.y*10)+6}) //+6 is a specific choice given the image we're working with
+          .attr('cy', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('r', function(d){
             if (d.count > 0){
               return Math.pow(areaScale(d.count)/Math.PI, 0.5);
@@ -247,7 +247,7 @@ var middguard = middguard || {};
           .enter()
           .append('circle')
           .attr('cx', function(d){return d.x*10;})
-          .attr('cy', function(d){return 1000-(d.y*10)+6}) //+6 is a specific choice given the image we're working with
+          .attr('cy', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('r', function(d){
             if (d.count > 0){
               return Math.pow(areaScale(d.count)/Math.PI, 0.5);

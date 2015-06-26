@@ -1,5 +1,5 @@
 .path{
-  stroke: blue;
+  stroke: black;
 }
 .axis path,
 .axis line {
@@ -15,4 +15,9 @@
   font-family:"Times New Roman",Times,serif;
   position: relative;
   left: 15px;
+}
+
+.trendGraphParent{
+  border-width: 1px;
+  border-color: #ABABAB;
 }
