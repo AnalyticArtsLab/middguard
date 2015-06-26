@@ -11,8 +11,12 @@ module.exports = function (app) {
 
   var modelsPath = settings.modelsPath;
   var modelsAbsPath = path.resolve(modelsPath);
-
+  
   fs.readdirSync(modelsAbsPath).forEach(function (model) {
+    if (model[0] === '.'){
+      // hidden directory, continue
+      return;
+    }
     var manifestPath = path.join(modelsAbsPath, model, 'manifest.json');
     var manifest = JSON.parse(fs.readFileSync(manifestPath));
 
