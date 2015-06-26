@@ -3,10 +3,8 @@ var middguard = middguard || {};
 (function () {
   'use strict';
 
-  var LocSpark = middguard.View.extend({
+  var TrendView = middguard.View.extend({
     id: 'loc-spark',
-    
-    //template: _.template('<input type="submit" id=\'locSpark-clear\'>Clear</input>'),
     
     initialize: function () {
       var globalThis = this;
@@ -61,7 +59,6 @@ var middguard = middguard || {};
               
               //make sure that every chart currently displayed is scaled properly
               for (var view in globalThis.childViews){
-                console.log(view, globalThis.childViews[view].absMax);
                 if (middguard.state.trendScale.max > globalThis.childViews[view].absMax && document.getElementById('scale-select').value === 'abs'){
                   globalThis.childViews[view].render();
                 }
@@ -70,7 +67,7 @@ var middguard = middguard || {};
             }
           } else {
             //if a new child View
-            globalThis.childViews['x' + opt.x + 'y' + opt.y] = new LocSparkWeekend(opt.x, opt.y);
+            globalThis.childViews['x' + opt.x + 'y' + opt.y] = new TrendViewWeekend(opt.x, opt.y);
             globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
           
           }
@@ -89,7 +86,6 @@ var middguard = middguard || {};
               
               //make sure that every chart currently displayed is scaled properly
               for (var view in globalThis.childViews){
-                console.log(view, globalThis.childViews[view].absMax);
                 if (middguard.state.trendScale.max > globalThis.childViews[view].absMax && document.getElementById('scale-select').value === 'abs'){
                   globalThis.childViews[view].render();
                 }
@@ -98,7 +94,7 @@ var middguard = middguard || {};
             }
           } else {
             //if a new child View
-            globalThis.childViews['x' + opt.x + 'y' + opt.y] = new LocSparkWeekend(opt.x, opt.y);
+            globalThis.childViews['x' + opt.x + 'y' + opt.y] = new TrendViewWeekend(opt.x, opt.y);
             globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
           
           }
@@ -176,7 +172,7 @@ var middguard = middguard || {};
     
   });
   
-  var LocSparkWeekend = middguard.View.extend({
+  var TrendViewWeekend = middguard.View.extend({
     //wrapper view for each of the daily charts
     
     template: _.template('<div />'),
@@ -196,7 +192,7 @@ var middguard = middguard || {};
     },
     
     appendChild: function(col, resp, opt){
-      var newChart = new LocSparkChart(col, resp, opt, this);
+      var newChart = new TrendViewDay(col, resp, opt, this);
       this.children.push(newChart);
     },
     
@@ -218,7 +214,7 @@ var middguard = middguard || {};
     
   });
   
-  var LocSparkChart = middguard.View.extend({
+  var TrendViewDay = middguard.View.extend({
     //individual views for each chart
     
     template: _.template('<div/>'),
@@ -439,5 +435,5 @@ var middguard = middguard || {};
     
   });
 
-  middguard.addModule('LocSpark', LocSpark);
+  middguard.addModule('TrendView', TrendView);
 })();
