@@ -94,19 +94,28 @@ var middguard = middguard || {};
 
       var routePath = d3.svg.line()
       .x(function(d){return (d.get('x') + .5) *(v.mapWidth/v.cells);})
-      .y(function(d){ return v.mapHeight - (d.get('y') + .5) *(v.mapHeight/v.cells);})
-      .interpolate("basis-open");
+      .y(function(d){ return v.mapHeight - (d.get('y') - .5) *(v.mapHeight/v.cells);})
+      .interpolate("basis");
       
     
+      var start = middguard.state.timeRange.current;
+      var end = middguard.state.timeRange.end;
+      if (start.valueOf() != middguard.state.timeRange.start.valueOf()){
+        // we have a point rather than an interval
+        end = start;
+      }
+    
+    
       var routeCollection = {}
+      
+      
       v.tracked.forEach(function(pid) {
         var before = null;
         var after = null;
         var traces = middguard.entities.Movementtraces.where({person_id:pid})
         .filter(function (t){
           var timestamp = new Date(t.get('timestamp'));
-          var start = middguard.state.timeRange.start;
-          var end = middguard.state.timeRange.end;
+          
           if (timestamp <= start){
             before = t;
           }
@@ -121,26 +130,28 @@ var middguard = middguard || {};
         
         if (traces.length > 0){
           routeCollection[pid] = traces;
+          // add the last point on again to make the path draw correctly
+          routeCollection[pid].push(traces[traces.length - 1]);
         }else if ( before != null && after != null){
           // time range falls between two movement samples
           routeCollection[pid] = [before];
         }
-      
+        
       });
       
       
-  
       var routes = canvas.selectAll('path').data(Object.keys(routeCollection));
-     routes.exit().remove();
-     routes.enter()
-     .append("path");
-     
-     
+      routes.exit().remove();
+      
+      routes.enter()
+      .append("path");
+   
+   
      routes.attr("d", function(d){ return routePath(routeCollection[d]);})
      .attr('stroke', function(d){return color(d)})
      .attr('stroke-width', 2)
      .attr('fill', 'none');
-   
+
    
       
    

@@ -82,7 +82,7 @@ var middguard = middguard || {};
       
 			this.dateRange = [middguard.state.timeRange.current, middguard.state.timeRange.end];
       
-      if (! (this.dateRange[0] <= middguard.state.timeRange.start && middguard.state.timeRange.start <= this.dateRange[0])){
+      if (this.dateRange[0].valueOf() != middguard.state.timeRange.start.valueOf()){
         // we have a single point, so the range is full, but we don't want to draw that
         this.dateRange[1] = middguard.state.timeRange.current;
       }
@@ -103,7 +103,7 @@ var middguard = middguard || {};
 
       // this somewhat mental conditional is because == and === doesn't work on dates for some
       // reason, but <= does
-      if (dateRange[0] <= dateRange[1] && dateRange[1] <= dateRange[0]){
+      if (dateRange[0].valueOf() === dateRange[1].valueOf()){
   			middguard.state.set({timeRange : {start : this.dateRangeFull[0],
         end : this.dateRangeFull[1],
         current: dateRange[0]}});
