@@ -46,10 +46,12 @@ var middguard = middguard || {};
     
     initialize: function(){
       var v = this;
+      _.bindAll(this, 'render');
+      
       var setSize = this.model.size;
       var numGroups = this.model.groups.length;
 
-      this.$el.html(this.template({size:setSize}));
+      this.$el.html(this.template({size:(setSize==1)? 'Individuals': setSize}));
       
       d3.select(this.el).select('.groups-svg')
       .attr('width', 1000)
@@ -69,9 +71,7 @@ var middguard = middguard || {};
       this.cells.attr('width',10)
       .attr('height', 10)
       .attr('x', function(d,i){return (i%100) * 10;})
-      .attr('y', function(d,i){return Math.floor(i/100)* 10 })
-      .attr('stroke', '#CCCCCC')
-      .attr('fill','white');
+      .attr('y', function(d,i){return Math.floor(i/100)* 10 });
       
       this.cells.on('click', function(d){
         middguard.state.Groups.selections.reset(d);
@@ -81,10 +81,38 @@ var middguard = middguard || {};
           members.push({id:member});
          
         });
-        console.log(members);
         middguard.state.People.workingSet.reset(members);
       });
+     
+     this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.render)
+    this.listenTo(middguard.state.Groups.selections, 'add remove reset', this.render)
+      this.render();
+    },
+    
+    render: function(){
+      var v = this;
       
+      this.cells
+      .attr('stroke', function(d){
+        if (middguard.state.Groups.selections.findWhere({group_id:d.get('group_id'), day:d.get('day')})){
+          return 'green';
+        }else{
+          return '#CCCCCC';
+        }
+      })
+      .attr('fill',function(d){
+        for (var i=0; i < middguard.state.People.workingSet.models.length; i++){
+          if (_.contains(d.get('members'), middguard.state.People.workingSet.models[i].get('id'))){
+            return '#5555FF';
+          }
+        }
+        return 'white';
+   
+        
+      });
+      
+      
+      return v;
     }
     
     

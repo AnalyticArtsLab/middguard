@@ -2,6 +2,7 @@
     #individual-timeline-rect {
       width:800px;
       height: 100%;
+      margin: 15px;
       overflow-y: visible;
       overflow-x:auto;
       

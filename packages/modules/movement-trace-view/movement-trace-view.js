@@ -5,7 +5,7 @@ var middguard = middguard || {};
 
   var MovementTraceView = middguard.View.extend({
     id: 'middguard-movement-trace',
-		template: _.template('<svg id="movement-trace-svg"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" x="0" y="0"/><g id="movement-trace-paths"></g></svg><p>Person: <input type="text" id="trace-query" /> <input type="submit" id="trace-query-add" value="Add person"/><input type="submit" id="trace-query-replace" value="Replace person"/> <input type="submit" id="trace-query-clear" value="Clear all"/></p>'),
+		template: _.template('<h1>Movement Traces</h1><svg id="movement-trace-svg"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" x="0" y="0"/><g id="movement-trace-paths"></g></svg><p>Person: <input type="text" id="trace-query" /> <input type="submit" id="trace-query-add" value="Add person"/><input type="submit" id="trace-query-replace" value="Replace person"/> <input type="submit" id="trace-query-clear" value="Clear all"/></p>'),
     
     events:{
       "click #trace-query-add":"addPerson",
