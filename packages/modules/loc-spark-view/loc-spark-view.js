@@ -61,6 +61,7 @@ var middguard = middguard || {};
               
               //make sure that every chart currently displayed is scaled properly
               for (var view in globalThis.childViews){
+                console.log(view, globalThis.childViews[view].absMax);
                 if (middguard.state.trendScale.max > globalThis.childViews[view].absMax && document.getElementById('scale-select').value === 'abs'){
                   globalThis.childViews[view].render();
                 }
@@ -85,6 +86,15 @@ var middguard = middguard || {};
             if (globalThis.childViews['x' + opt.x + 'y' + opt.y].children.length === 3){
               globalThis.childViews['x' + opt.x + 'y' + opt.y].render();
               $('#loc-spark').append(globalThis.childViews['x' + opt.x + 'y' + opt.y].el);
+              
+              //make sure that every chart currently displayed is scaled properly
+              for (var view in globalThis.childViews){
+                console.log(view, globalThis.childViews[view].absMax);
+                if (middguard.state.trendScale.max > globalThis.childViews[view].absMax && document.getElementById('scale-select').value === 'abs'){
+                  globalThis.childViews[view].render();
+                }
+              }
+              
             }
           } else {
             //if a new child View
