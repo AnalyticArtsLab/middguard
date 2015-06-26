@@ -194,10 +194,23 @@ var middguard = middguard || {};
     appendChild: function(col, resp, opt){
       var newChart = new TrendViewDay(col, resp, opt, this);
       this.children.push(newChart);
+      this.opt = opt;
     },
     
     render: function(){
       this.d3el.selectAll('.trendGraphChildren').remove();
+      this.d3el.selectAll('p').remove();
+      if (this.opt.poi){
+        var textHeader = 'X: ' + this.x + ' Y: ' + this.y + ' -- ' + ' Location Name: ' + this.opt.poi;
+      } else {
+        var textHeader = 'X: ' + this.x + ' Y: ' + this.y;
+      }
+      
+      this.d3el
+        .append('p')
+        .attr('class', 'textHeader')
+        .text(textHeader);
+        
       var globalThis = this;
       this.children.forEach(function(day){
         if (document.getElementById('scale-select').value === 'abs'){
