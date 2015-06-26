@@ -42,8 +42,8 @@ var middguard = middguard || {};
       // add a new person to the tracked set
       var pid = +document.getElementById('trace-query').value;
       if (! this.tracked.has(pid)){
-        middguard.state.People.workingSet.add({id:pid});
-        middguard.state.People.selections.reset({id:pid});
+        middguard.state.People.workingSet.add({id:pid, loading: this});
+        middguard.state.People.selections.reset({id:pid, loading: this});
       }
       
     },
@@ -51,8 +51,8 @@ var middguard = middguard || {};
     changePerson: function(){
       // replace the current set of tracked people with a new one
       var pid = +document.getElementById('trace-query').value;
-      middguard.state.People.workingSet.reset({id:pid});
-      middguard.state.People.selections.reset({id:pid});
+      middguard.state.People.workingSet.reset({id:pid, loading: this});
+      middguard.state.People.selections.reset({id:pid, loading: this});
     },
     
     clearAll: function(){
@@ -63,18 +63,47 @@ var middguard = middguard || {};
     
     update: function(model, collection, options){
       var v = this;
+      var model;
+      var collection;
+      var options;
+      if (arguments.length === 3){
+        model = arguments[0];
+        collection = arguments[1];
+        options = arguments[2];
+      }else{
+        collection = arguments[0];
+        options = arguments[1];
+      }
       if (options && options.add){
 
         var pid = model.get('id');
         v.tracked.add(pid);
-        middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}, remove:false,  error:function(c,r,o){console.log(r);}});
+       
+        if (middguard.entities.Movementtraces.where({person_id:pid}).length === 0 && (! model.get('loading') || model.get('loading') === v)){
+          // whoever posted this event isn't going to also load the movement traces and
+          // we don't have the data available, so fetch it
+          // claim ownership
+          model.set({loading: v});
+          model.set({loading: v});
+          // do the fetch
+          middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}, remove:false,  error:function(c,r,o){console.log(r);}});
+        }
+        
       }else{
+        model = collection.models[0];
         middguard.entities.Movementtraces.reset();
         v.tracked.clear();
+        
         middguard.state.People.workingSet.forEach(function(m){
           var pid = m.get('id');
           v.tracked.add(pid);
-          middguard.entities.Movementtraces.fetch({data:{where:{person_id:m.get('id')}}, remove:false});
+          if (middguard.entities.Movementtraces.where({person_id:pid}).length === 0 && (! m.get('loading') || m.get('loading') === v)){
+            // claim ownership
+            m.set({loading: v});
+            m.set({loading: v});
+            // do the fetch
+            middguard.entities.Movementtraces.fetch({data:{where:{person_id:m.get('id')}}, remove:false});
+          }
           
         }) 
       }
@@ -124,7 +153,7 @@ var middguard = middguard || {};
           }
           
 
-          return (start === Number.NEGATIVE_INFINITY || timestamp >= start) && (end === Number.POSITIVE_INFINITY || timestamp <= end);
+          return (timestamp >= start && timestamp <= end);
 
         });
         

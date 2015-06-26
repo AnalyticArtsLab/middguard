@@ -5,15 +5,15 @@ var middguard = middguard || {};
 
   var IndividualTimelinesView = middguard.View.extend({
     id: 'individual-timeline-rect',
-		template: _.template(''),
+		template: _.template('<h1>Individual activity</h1>'),
     
     events:{},
     
     initialize: function () {
       var v = this;
-     // _.bindAll(this, 'render' );
+      _.bindAll(this, 'addView' );
       
-      //this.$el.html(this.template);
+      this.$el.html(this.template);
       
       
       this.listenTo(middguard.state.People.workingSet, 'add', this.addView)
@@ -35,7 +35,7 @@ var middguard = middguard || {};
         }
       });
 
-      $("#individual-timeline-rect").append(newTimeline.el);
+      $(this.$el).append(newTimeline.el);
     }
 	});
   
@@ -51,20 +51,33 @@ var middguard = middguard || {};
       var v = this;
       _.bindAll(this, 'render', 'setupView', 'changeInterval' );
       var pid = this.model.get('id');
-      console.log(pid);
-      this.$el.html(this.template({pid:this.model.get('id')}));
+
+      this.$el.html(this.template({pid:pid}));
       
   		this.timeScale= d3.time.scale();
   		this.axis = d3.svg.axis();
      
-      var data = middguard.entities.Movementtraces.where({person_id: this.model.get('id')});
-      console.log(data);
+      
      
-     
+      
+      
       
   		this.timeScale.domain([middguard.state.timeRange.start, middguard.state.timeRange.end]);
       this.listenTo(middguard.state.timeRange, 'change',this.changeInterval);
   		this.setupView();
+      
+      if (middguard.entities.Movementtraces.where({person_id: pid}).length === 0){
+        // data needs to be fetched
+        this.listenTo(middguard.entities.Movementtraces, 'sync reset', this.render);
+        
+        // check if another view has taken responsibility for it
+        if (! this.model.get('loading')){
+          middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}, remove:false,  error:function(c,r,o){console.log(r);}});
+          
+        }
+      }
+      
+      
     },
     
     changeInterval:function(){
@@ -96,13 +109,13 @@ var middguard = middguard || {};
       .attr('height', v.height - 2 * v.margins);
       
       
-      v.timeScale.range([0, v.height - 2*v.margins]); // make this better later
+      v.timeScale.range([0, v.height - 2*v.margins]); 
       
       v.axis.scale(v.timeScale)
       .orient('left')
       .innerTickSize(20)
       .outerTickSize(10);
-      console.log(v.axis.scale().domain());
+     
       
       v.axisObject = v.canvas
       .append('g')
@@ -110,12 +123,96 @@ var middguard = middguard || {};
       .attr('class','axis')
       .call(v.axis);
       
-      return v;
+      
+      v.checkins = v.canvas.append('g')
+      .attr('class', 'individual-check-ins')
+      .attr('transform', 'translate(35,0)');
+      
+      v.labels = v.canvas.append('g')
+      .attr('class', 'individual-check-in-labels')
+      .attr('transform', 'translate(50,0)');
+      
+      return v.render();
+      
+    },
+    
+    fetchLabel: function(x,y){
+      var poi = middguard.entities.Pois.findWhere({x:x, y:y});
+      if (poi){
+        return poi.get('name');
+      }else{
+        return '('+x+', '+y+')';
+      }
       
     },
     
     render: function () {
       var v = this;
+      var pid = this.model.get('id');
+      var traces = middguard.entities.Movementtraces.where({person_id: pid});
+      var events = [];
+      
+      var start = middguard.state.timeRange.start;
+      var end = middguard.state.timeRange.end;
+      var current = {start: null, end: null, x: null, y: null};
+  
+      for (var i = 0; i < traces.length; i++){
+        var t = traces[i];
+        var timestamp = new Date(t.get('timestamp'));
+        var x = t.get('x');
+        var y = t.get('y');
+        var type = t.get('type');
+
+        if (type==='check-in'){
+          // start of a checkin
+          current = {start:timestamp, end: null, x:x, y:y};
+          
+        }else if (current.start != null){
+          // close the check-in
+          current.end = timestamp;
+          
+          if (current.start < end && current.end > start){
+            // check-in overlaps current time at least
+            // trim to fit
+            current.start = new Date(Math.max(start, current.start));
+            current.end = new Date(Math.min(end, current.end));
+            // save it
+            events.push(current);
+          }
+          current = {start: null, end: null, x: null, y: null};
+        }
+      }
+      
+      
+      var rects = v.checkins.selectAll('rect')
+      .data(events);
+      
+      rects.exit().remove();
+      rects.enter().append('rect');
+      
+      rects
+      .attr('width',10)
+      .attr('x', 0)
+      .attr('y', function(d){ return v.timeScale(d.start);})
+      .attr('height', function(d){ return v.timeScale(d.end) - v.timeScale(d.start)});
+      
+      
+      var labels = v.labels.selectAll('text')
+      .data(events);
+      
+      labels.exit().remove();
+      labels.enter().append('text');
+      
+      labels
+      .attr('x', 0)
+      .attr('y', function(d){ 
+        return v.timeScale(d.start) + (7 + v.timeScale(d.end) - v.timeScale(d.start))/2;})
+      .text(function(d){return v.fetchLabel(d.x, d.y)});
+      
+      
+      
+      
+      
       
       return v;
     }

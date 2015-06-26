@@ -1,11 +1,9 @@
-		#middguard-individual-timelines{
-			margin: 15px;
-      overflow: auto;
-		}
 
     #individual-timeline-rect {
       width:800px;
-      height: 1200px;
+      height: 100%;
+      overflow-y: visible;
+      overflow-x:auto;
       
     }
     
@@ -16,8 +14,16 @@
 
     }
 
+    #individual-timeline-rect .middguard-module{
+      height:90%;
+      float:none;
+      display:inline-block;
+      white-space:nowrap;
+    }
+
     .individual-timeline {
-      border:1px solid black;
+       overflow-y: visible;
+      /*border:1px solid black;*/
     }
     
 		.individual-timeline .axis path,
@@ -29,5 +35,15 @@
     
     
     .individual-timeline .tick text{
+      font-size: 7pt;
+    }
+    
+    
+    .individual-timeline .individual-check-ins rect{
+      fill: #BBBBBB;
+      stroke:black;
+    }
+    
+    .individual-timeline .individual-check-in-labels text{
       font-size: 7pt;
     }
