@@ -1,0 +1,11 @@
+{
+  "name": "Groups",
+  "main": "GroupView",
+  "version": "0.0.1",
+  "js": [
+    "group-view.js"
+  ],
+  "css": [
+    "group-view-styles.css"
+  ]
+}
