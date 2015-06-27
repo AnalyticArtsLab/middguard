@@ -5,7 +5,7 @@ var middguard = middguard || {};
 
   var IndividualTimelinesView = middguard.View.extend({
     id: 'individual-timeline-rect',
-		template: _.template('<h1>Individual activity</h1>'),
+		template: _.template('<h1>Individual activity</h1><div id="individual-timeline-container"></div>'),
     
     events:{},
     
@@ -35,13 +35,14 @@ var middguard = middguard || {};
         }
       });
 
-      $(this.$el).append(newTimeline.el);
+      $("#individual-timeline-container",this.$el).append(newTimeline.el);
     }
 	});
   
   
   var IndividualTimelineView = middguard.View.extend({
-    template: _.template('<h1><%- pid %></h1><div class="individual-timeline"></div>'),
+    className:'individual-timeline',
+    template: _.template('<h1><%- pid %></h1>'),
     
     events:{},
     width: 200,
@@ -96,7 +97,7 @@ var middguard = middguard || {};
       var v = this;
       var pid = this.model.get('id');
       
-      var svg = d3.select(v.el).select('.individual-timeline')
+      var svg = d3.select(v.el)
       .append('svg')
       .attr('class','individual-timeline-svg')
       .attr('id', 'timeline_' + pid)
