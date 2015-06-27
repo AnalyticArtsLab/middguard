@@ -10,12 +10,29 @@
   font-size: 14pt;
 }
 
+
+#all-groups-container, #group-details{
+  float:left;
+  margin: 10px;
+}
+
+#all-groups-container{
+  width: 50%;
+}
+
+ #group-details{
+  width: 45%;
+  float:left;
+  margin: 10px;
+}
+
+
 .group-set-view{
   margin: 10px 25px;
   
 }
 
-.group-set-view h2{
+#group-view-rect h2{
   font-size: 12pt;
   
 }

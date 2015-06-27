@@ -42,10 +42,10 @@
     }
     
     
-    .individual-timeline .individual-check-ins rect{
+   /* .individual-timeline .individual-check-ins rect{
       fill: #BBBBBB;
       stroke:black;
-    }
+    }*/
     
     .individual-timeline .individual-check-in-labels text{
       font-size: 7pt;

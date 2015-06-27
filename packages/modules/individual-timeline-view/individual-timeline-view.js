@@ -155,7 +155,9 @@ var middguard = middguard || {};
       
       var start = middguard.state.timeRange.start;
       var end = middguard.state.timeRange.end;
-      var current = {start: null, end: null, x: null, y: null};
+
+      
+      var current = {start: null, end: null, x: null, y: null, type:null};
   
       for (var i = 0; i < traces.length; i++){
         var t = traces[i];
@@ -164,15 +166,14 @@ var middguard = middguard || {};
         var y = t.get('y');
         var type = t.get('type');
 
-        if (type==='check-in'){
-          // start of a checkin
-          current = {start:timestamp, end: null, x:x, y:y};
-          
-        }else if (current.start != null){
-          // close the check-in
+        if (current.start != null && current.start.getDay() === timestamp.getDay()){
           current.end = timestamp;
           
-          if (current.start < end && current.end > start){
+          if (current.start < end 
+            && current.end > start 
+            && (current.type==='check-in' || current.end - current.start > 2*(6000))){
+            // keep this if the type is a check-in or they have been standing there for
+            // more than two minutes
             // check-in overlaps current time at least
             // trim to fit
             current.start = new Date(Math.max(start, current.start));
@@ -180,10 +181,9 @@ var middguard = middguard || {};
             // save it
             events.push(current);
           }
-          current = {start: null, end: null, x: null, y: null};
         }
+        current = {start: timestamp, end: null, x: x, y: y, type:type};
       }
-      
       
       var rects = v.checkins.selectAll('rect')
       .data(events);
@@ -195,7 +195,9 @@ var middguard = middguard || {};
       .attr('width',10)
       .attr('x', 0)
       .attr('y', function(d){ return v.timeScale(d.start);})
-      .attr('height', function(d){ return v.timeScale(d.end) - v.timeScale(d.start)});
+      .attr('height', function(d){ return v.timeScale(d.end) - v.timeScale(d.start)})
+      .style('fill', function(d){return (d.type==='check-in')? '#BBBBBB' : 'white';})
+      .style('stroke', 'black');
       
       
       var labels = v.labels.selectAll('text')
