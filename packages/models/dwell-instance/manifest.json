@@ -1,0 +1,6 @@
+{
+  "name": "dwell-instance",
+  "customLoad": true,
+  "model": "dwell-instance.js",
+  "version": "0.0.1"
+}
