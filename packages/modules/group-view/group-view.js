@@ -154,7 +154,7 @@ var middguard = middguard || {};
               return '#AAAACC';
             }
           }
-          return 'white';
+          return (d.get('checked')) ? 'white': '#FFDDDD';
         }
         
       });
@@ -164,7 +164,6 @@ var middguard = middguard || {};
     },
     
     listEquals: function(l1, l2){
-      debugger;
       if (l1.length !== l2.length){
         return false;
       }
@@ -184,12 +183,14 @@ var middguard = middguard || {};
   
   var GroupDetailView = middguard.View.extend({
     className: 'group-detail-view',
-    template: _.template('<h2><%= gid %></h2><p>Days: <span class="days-list"></span></p><p >Members: <span class="members-list"></span></p>'),
-    
+    template: _.template('<h2><%= gid %></h2><p>Days: <span class="days-list"></span></p><p >Members: <span class="members-list"></span></p><p>Checked: <input class="group-checkbox" type="checkbox" /></p>'),
+    events: {
+      "click .group-checkbox": "toggleChecked"
+    },
     initialize: function(){
       var v = this;
-      _.bindAll(this, 'render');
-      var gid = this.model.get('group_id');
+      _.bindAll(this, 'render', 'toggleChecked');
+      var gid = this.model.get('id');
       this.$el.html(this.template({gid:gid}));
       
       var days = d3.select(this.el)
@@ -209,10 +210,30 @@ var middguard = middguard || {};
       .append('span')
       .html(function(d,i){return (i < v.model.get('members').length - 1)? d+', ': d ;});
       
+      this.checkbox = $(".group-checkbox", this.$el);
+      this.checkbox.prop('checked', this.model.get('checked'));
+
+      
+    },
+    
+    toggleChecked: function(){
+      console.log(this.model.attributes);
+      this.listenTo(this.model, 'request', function(d){console.log('request')});
+      this.listenTo(this.model, 'update', function(d){console.log('update')});
+      this.listenTo(this.model, 'sync', function(d){console.log('sync')});
+      this.listenTo(this.model, 'change', function(d){console.log('change')});
+      
+      var prom = this.model.save({checked:this.checkbox.prop('checked')},
+      {success:function(m,r,c){console.log('success')}, error:function(m,r,c){console.log(r);}});
+      
+      prom.then(function(result){console.log('it did something', result);}, function(error){console.log("didn't work", error)});
       
       
-      
+      if (this.model.validationError){
+        console.log('error');
+      }
     }
+    
   });
  
 	
