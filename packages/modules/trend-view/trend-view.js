@@ -36,10 +36,13 @@ var middguard = middguard || {};
       
       _.bindAll(this, 'coordChange', 'goFetch');
         
-      this.listenTo(middguard.state.Pois.selections, 'add', function(){
-        globalThis.coordChange();
+      this.listenTo(middguard.state.Pois.selections, 'add', function(currentModel){
+        globalThis.coordChange(currentModel);
       });
       
+      middguard.state.Pois.selections.forEach(function(currentModel){
+        globalThis.coordChange(currentModel);
+      });
       
       this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
         if (opt.source.slice(0,5) === 'spark'){
@@ -126,13 +129,12 @@ var middguard = middguard || {};
     },
     
     
-    coordChange: function(){
+    coordChange: function(currentModel){
       //function called whenever new coordinates/locations have been clicked
 
       var poiName;
       var choice = middguard.state.heatmapChoice;
       
-      var currentModel = middguard.state.Pois.selections.at(middguard.state.Pois.selections.length-1);
       if (!currentModel){
         return false;
       }

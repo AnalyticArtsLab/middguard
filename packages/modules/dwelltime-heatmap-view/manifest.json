@@ -1,0 +1,11 @@
+{
+  "name": "Dwelltime Heatmap",
+  "main": "DwelltimeHeatmap",
+  "version": "0.0.1",
+  "js": [
+    "dwelltime-heatmap-view.js"
+  ],
+  "css": [
+    "dwelltime-heatmap-styles.css"
+  ]
+}

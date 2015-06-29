@@ -28,7 +28,7 @@ var middguard = middguard || {};
       this.areaScale = d3.scale.linear().range([0, Math.PI*9]); //9 is a specific, deliberate choice
       
       _.extend(this, Backbone.Events);
-      _.bindAll(this, 'render', 'processDataCheckin', 'processDataAll', 'getData', 'userChange');
+      _.bindAll(this, 'render', 'getData', 'userChange');
       
       this.listenTo(middguard.state.timeRange, 'all', this.getData); //this.getData
       this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
@@ -212,7 +212,19 @@ var middguard = middguard || {};
           }).on('mouseout', function(d){
             svg.selectAll('.tooltip').remove();
           }).on('click', function(d){
-            middguard.state.Pois.selections.add({x: d.x, y: d.y});
+            if (d.clicked){
+              d3.select(this)
+                .attr('fill', function(d){return colorScale(d.count)})
+                .attr('stroke', function(d){return colorScale(d.count)});
+                d.clicked = false;
+                middguard.state.Pois.selections.remove(d.model);
+            } else {
+              d3.select(this).attr('fill', '#99ff66')
+                .attr('stroke', '#99ff66');
+              d.clicked = true;
+              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
+              d.model = newModel;
+            }
           });
           
       } else {
@@ -274,7 +286,19 @@ var middguard = middguard || {};
           }).on('mouseout', function(d){
             svg.selectAll('.tooltip').remove();
           }).on('click', function(d){
-            middguard.state.Pois.selections.add({x: d.x, y: d.y});
+            if (d.clicked){
+              d3.select(this)
+                .attr('fill', function(d){return colorScale(d.count)})
+                .attr('stroke', function(d){return colorScale(d.count)});
+                d.clicked = false;
+                middguard.state.Pois.selections.remove(d.model);
+            } else {
+              d3.select(this).attr('fill', '#99ff66')
+                .attr('stroke', '#99ff66');
+              d.clicked = true;
+              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
+              d.model = newModel;
+            }
           });
       }
       return this;
@@ -306,101 +330,6 @@ var middguard = middguard || {};
         seconds = '0' + seconds;
       }
       return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
-    },
-    
-    processDataCheckin: function(dataArray, timestamp, start, end){
-      //process data for checkin heatmap
-      
-      var tsDate = new Date(timestamp);
-      if (tsDate > end || tsDate < start){
-        console.log("Error: Timestamp out of range");
-        return null;
-      }
-      
-      var heatmapData = [];
-      for (var i = 0; i < 100; i++){
-        heatmapData[i] = [];
-        for (var j = 0; j < 100; j++){
-          heatmapData[i][j] = 0;
-        }
-      }
-      
-      if (Object.keys(this.attractionTypes).length){
-        //if filters have been applied
-        
-        var desiredSet = new Set();
-        for (prop in this.attractionTypes) {
-          this.attractionTypes[prop].forEach(function(item){
-            desiredSet.add(item);
-          })
-        }
-
-        var daLength = dataArray.length-1;
-        var x;
-        var y;
-        for (var i = 0; i < daLength; i++){
-          x = dataArray[i].attributes.x;
-          y = dataArray[i].attributes.y;
-          if (this.distinctCheckins.has(x + '$' + y) && desiredSet.has(x + ',' + y)){
-            heatmapData[y][x] = dataArray[i]; //[x, y, dataArray[i].attributes.count];
-          }
-          i++;
-        }
-      } else {
-        var daLength = dataArray.length-1;
-        var x;
-        var y;
-        for (var i = 0; i < daLength; i++){
-          x = dataArray[i].attributes.x;
-          y = dataArray[i].attributes.y;
-          if (this.distinctCheckins.has(x + '$' + y)){
-            heatmapData[y][x] = dataArray[i];//[x, y, dataArray[i].attributes.count];
-          }
-          i++;
-        }
-      }
-      
-      return heatmapData;
-      
-      
-    },
-    
-    processDataAll: function(dataArray, timestamp, start, end, distincts){
-      //process data for location heatmap
-      //distincts represents the number of distinct x,y pairs we need before we can exit
-      
-      var heatmapData = [];
-      for (var i = 0; i < 100; i++){
-        heatmapData[i] = [];
-        for (var j = 0; j < 100; j++){
-          heatmapData[i][j] = 0;
-        }
-      }
-      
-      var used = new Object();
-      used.items = 0;
-      var curIndex = dataArray.length-1;
-      var x, y;
-      
-      
-      while (curIndex >= 0 && used.items < distincts){
-        //while not every x,y pair has had a value found for it and the array has not been fully traversed
-        x = dataArray[curIndex].attributes.x;
-        y = dataArray[curIndex].attributes.y;
-        if (! used[x + ',' + y]){
-          //if x,y pair is unencountered
-          used[x + ',' + y] = true;
-          heatmapData[y][x] = dataArray[curIndex]; //[x, y, dataArray[curIndex].attributes.count];
-          /*if (dataArray[curIndex].attributes.count > countMax){
-            countMax = dataArray[curIndex].attributes.count;
-          }*/
-          used.items++;
-        }
-        curIndex--;
-      }
-      
-      //this.colorScale.domain([0, countMax]);
-      return heatmapData;
     },
     
     binarySearch: function(array, first, last, val){
