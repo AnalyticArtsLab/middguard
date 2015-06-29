@@ -6,7 +6,7 @@ var middguard = middguard || {};
   var DwelltimeHeatmap = middguard.View.extend({
     id: 'heatmap',
     
-    template: _.template('<div id="dwellTitle"><h1>Dwell Time Heatmap</h1></div><svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><div><input type="range" id="stepSlider" min="0" max="3706" step="50" value="3706" /> <input type="text" id="stepDisplay" value="3706" /></div>'),
+    template: _.template('<div id="dwellTitle"><h1>Dwell Time Heatmap</h1></div><svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><div><p>Scale Max: <input type="range" id="stepSlider" min="0" max="3706" step="50" value="3706" /> <input type="text" id="stepDisplay" value="3706" /></p></div>'),
     
     events:{
       "change #heatmap-choice":"userChange",
