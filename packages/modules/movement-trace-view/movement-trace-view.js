@@ -5,7 +5,7 @@ var middguard = middguard || {};
 
   var MovementTraceView = middguard.View.extend({
     id: 'middguard-movement-trace',
-		template: _.template('<h1>Movement Traces</h1><svg id="movement-trace-svg"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" x="0" y="0"/><g id="movement-trace-paths"></g></svg><p>Person: <input type="text" id="trace-query" /> <input type="submit" id="trace-query-add" value="Add person"/><input type="submit" id="trace-query-replace" value="Replace person"/> <input type="submit" id="trace-query-clear" value="Clear all"/></p>'),
+		template: _.template('<h1>Movement Traces</h1><svg id="movement-trace-svg"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" x="0" y="0"/><g id="movement-trace-paths"></g><g id="movement-trace-locations"></g></svg><p>Person: <input type="text" id="trace-query" /> <input type="submit" id="trace-query-add" value="Add person"/><input type="submit" id="trace-query-replace" value="Replace person"/> <input type="submit" id="trace-query-clear" value="Clear all"/></p>'),
     
     events:{
       "click #trace-query-add":"addPerson",
@@ -26,7 +26,8 @@ var middguard = middguard || {};
       
       this.listenTo(middguard.entities.Movementtraces, 'sync', this.render);
       this.listenTo(middguard.entities.Movementtraces, 'reset', this.render);
-      this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.update)
+      this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.update);
+      this.listenTo(middguard.state.Pois.selections, 'add remove reset', this.render)
       this.listenTo(middguard.state.timeRange, 'change',this.render);
 
       var v = this;
@@ -197,6 +198,23 @@ var middguard = middguard || {};
      .attr('y',function(d){return v.mapHeight -routeCollection[d][routeCollection[d].length - 1].get('y') *(v.mapHeight/v.cells);})
      .attr('width',10)
      .attr('height',10);
+      
+      
+      var traceLayer = d3.select('#movement-trace-locations');
+      
+      var selections = traceLayer.selectAll('rect')
+      .data(middguard.state.Pois.selections.models);
+      
+      selections.exit().remove();
+      selections.enter().append('rect')
+      .attr('width', 10)
+      .attr('height',10)
+      .attr('fill', '#00FF00');
+      
+      selections
+      .attr('x',function(d){return  d.get('x') *(v.mapWidth/v.cells);})
+      .attr('y',function(d){return v.mapHeight -d.get('y') *(v.mapHeight/v.cells);})
+      
       
       return v;
     }

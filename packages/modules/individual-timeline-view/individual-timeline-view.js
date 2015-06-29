@@ -65,6 +65,9 @@ var middguard = middguard || {};
       
   		this.timeScale.domain([middguard.state.timeRange.start, middguard.state.timeRange.end]);
       this.listenTo(middguard.state.timeRange, 'change',this.changeInterval);
+      this.listenTo(middguard.state.Pois.selections, 'add reset remove', this.render)
+      
+      
   		this.setupView();
       
       if (middguard.entities.Movementtraces.where({person_id: pid}).length === 0){
@@ -148,6 +151,7 @@ var middguard = middguard || {};
     },
     
     render: function () {
+      console.log('render');
       var v = this;
       var pid = this.model.get('id');
       var traces = middguard.entities.Movementtraces.where({person_id: pid});
@@ -155,7 +159,7 @@ var middguard = middguard || {};
       
       var start = middguard.state.timeRange.start;
       var end = middguard.state.timeRange.end;
-
+    
       
       var current = {start: null, end: null, x: null, y: null, type:null};
   
@@ -196,7 +200,13 @@ var middguard = middguard || {};
       .attr('x', 0)
       .attr('y', function(d){ return v.timeScale(d.start);})
       .attr('height', function(d){ return v.timeScale(d.end) - v.timeScale(d.start)})
-      .style('fill', function(d){return (d.type==='check-in')? '#BBBBBB' : 'white';})
+      .style('fill', function(d){
+          if (middguard.state.Pois.selections.findWhere({x:d.x, y:d.y})){
+            return '#00FF00';
+          }else{
+            return (d.type==='check-in')? '#BBBBBB' : 'white';
+          }
+        })
       .style('stroke', 'black');
       
       
@@ -213,8 +223,24 @@ var middguard = middguard || {};
       .text(function(d){return v.fetchLabel(d.x, d.y)});
       
       
-      
-      
+      rects.on('click', function(d){
+         if (d3.event.altKey){
+           var match = middguard.state.Pois.selections.findWhere({x:d.x, y:d.y})
+           console.log(d);
+           console.log(match);
+           
+           if (match){
+             console.log('remove')
+             middguard.state.Pois.selections.remove(match);
+           }else{
+             middguard.state.Pois.selections.add({x:d.x, y:d.y});
+           }
+           
+         }else{
+           middguard.state.Pois.selections.reset({x:d.x, y:d.y});
+         }
+         console.log(middguard.state.Pois.selections);
+      });
       
       
       return v;
