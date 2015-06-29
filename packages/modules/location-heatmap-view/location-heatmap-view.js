@@ -286,10 +286,19 @@ var middguard = middguard || {};
           }).on('mouseout', function(d){
             svg.selectAll('.tooltip').remove();
           }).on('click', function(d){
-            console.log(this);
-            d3.select(this).attr('fill', '#99ff66')
-              .attr('stroke', '#99ff66');
-            middguard.state.Pois.selections.add({x: d.x, y: d.y});
+            if (d.clicked){
+              d3.select(this)
+                .attr('fill', function(d){return colorScale(d.count)})
+                .attr('stroke', function(d){return colorScale(d.count)});
+                d.clicked = false;
+                middguard.state.Pois.selections.remove(d.model);
+            } else {
+              d3.select(this).attr('fill', '#99ff66')
+                .attr('stroke', '#99ff66');
+              d.clicked = true;
+              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
+              d.model = newModel;
+            }
           });
       }
       return this;
