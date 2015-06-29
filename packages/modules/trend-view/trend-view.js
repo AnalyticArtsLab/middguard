@@ -38,13 +38,9 @@ var middguard = middguard || {};
       this.listenTo(middguard.state.Pois.selections, 'add', function(){
         globalThis.coordChange();
       });
-      this.listenTo(middguard.state.Pois.selections, 'add', function(){
-        globalThis.coordChange();
-      });
       
       
       this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
-        console.log(opt);
         if (opt.source.slice(0,5) === 'spark'){
           if (globalThis.childViews['x' + opt.x + 'y' + opt.y]){
             globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
@@ -110,7 +106,7 @@ var middguard = middguard || {};
     
     goFetch: function(){
       //function does the fetching of the data
-      console.log(this.current);
+      
       if (this.current === 3){
         this.current = 0;
       } else {
@@ -131,7 +127,7 @@ var middguard = middguard || {};
     
     coordChange: function(){
       //function called whenever new coordinates/locations have been clicked
-      
+
       var poiName;
       var choice = middguard.state.heatmapChoice;
       
