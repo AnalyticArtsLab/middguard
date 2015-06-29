@@ -23,6 +23,7 @@ var middguard = middguard || {};
           //remove items from selection as well when their spark lines are removed
           middguard.state.Pois.selections.reset([]);
           middguard.state.trendScale.max = 0;
+          globalThis.childViews = {};
           $('.trendGraphParent').remove();
         });
         
