@@ -23,3 +23,9 @@
   border-width: 3px;
   border-color: #ABABAB;
 }
+
+.textHeaderBold {
+  font-weight: bold;
+  position: relative;
+  left: 15px;
+}

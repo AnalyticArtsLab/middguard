@@ -123,7 +123,7 @@ var middguard = middguard || {};
 				//make a triangle to go in the middle of the brush
 			//get triangle coordinates--triTop is mdpt of brush
 
-			var triTop = [this.timeScale(extent[0])+((this.timeScale(extent[1]) - this.timeScale(extent[0]))/2), 8];
+			var triTop = [this.timeScale(extent[0]), 8];
 			var triLeft = [triTop[0]-(12/(Math.pow(3, 0.5))), 20];
 			var triRight = [triTop[0]+(12/(Math.pow(3, 0.5))), 20];
 			var triangleData = [triTop, triLeft, triRight];

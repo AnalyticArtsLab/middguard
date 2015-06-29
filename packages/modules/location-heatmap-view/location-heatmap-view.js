@@ -23,7 +23,7 @@ var middguard = middguard || {};
       this.yinc = 6; //margin at top--not a generalized value
       this.svg = d3.select(this.el).select('#heatmap-svg');
       this.colorScale = d3.scale.linear();
-      this.colorScale.domain([0, 325]); //1000 is a deliberate, specific choice
+      this.colorScale.domain([0, 200]); //domain is a deliberate, specific choice
       this.colorScale.range(['#fee8c8', '#e34a33']);
       this.areaScale = d3.scale.linear().range([0, Math.PI*9]); //9 is a specific, deliberate choice
       
@@ -212,14 +212,14 @@ var middguard = middguard || {};
           }).on('mouseout', function(d){
             svg.selectAll('.tooltip').remove();
           }).on('click', function(d){
-            middguard.state.Locationcounts.selections.add(d);
+            middguard.state.Pois.selections.add({x: d.x, y: d.y});
           });
           
       } else {
         //if checkin heatmap
         
         var areaScale = this.areaScale;
-        var colorScale = d3.scale.linear().domain([0, 1000]).range(['#fee8c8', '#e34a33']); //domain is a specific choice
+        var colorScale = d3.scale.linear().domain([0, 200]).range(['#fee8c8', '#e34a33']); //domain is a specific choice
         
         svg.selectAll('.heatRect')
         .attr('height', 0)
@@ -274,7 +274,7 @@ var middguard = middguard || {};
           }).on('mouseout', function(d){
             svg.selectAll('.tooltip').remove();
           }).on('click', function(d){
-            middguard.state['Check-ins'].selections.add(d);
+            middguard.state.Pois.selections.add({x: d.x, y: d.y});
           });
       }
       return this;

@@ -21,12 +21,7 @@ var middguard = middguard || {};
         .on('click', function(){
           var choice = middguard.state.heatmapChoice;
           //remove items from selection as well when their spark lines are removed
-          if (choice === 'all'){
-            middguard.state.Locationcounts.selections.reset([]);
-          } else {
-            //if choice == 'checkins'
-            middguard.state['Check-ins'].selections.reset([]);
-          }
+          middguard.state.Pois.selections.reset([]);
           middguard.state.trendScale.max = 0;
           $('.trendGraphParent').remove();
         });
@@ -40,15 +35,16 @@ var middguard = middguard || {};
       
       _.bindAll(this, 'coordChange', 'goFetch');
         
-      this.listenTo(middguard.state['Check-ins'].selections, 'add', function(){
+      this.listenTo(middguard.state.Pois.selections, 'add', function(){
         globalThis.coordChange();
       });
-      this.listenTo(middguard.state.Locationcounts.selections, 'add', function(){
+      this.listenTo(middguard.state.Pois.selections, 'add', function(){
         globalThis.coordChange();
       });
       
       
       this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
+        console.log(opt);
         if (opt.source.slice(0,5) === 'spark'){
           if (globalThis.childViews['x' + opt.x + 'y' + opt.y]){
             globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
@@ -69,7 +65,6 @@ var middguard = middguard || {};
             //if a new child View
             globalThis.childViews['x' + opt.x + 'y' + opt.y] = new TrendViewWeekend(opt.x, opt.y);
             globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
-          
           }
           globalThis.current++;
           globalThis.goFetch();
@@ -115,7 +110,7 @@ var middguard = middguard || {};
     
     goFetch: function(){
       //function does the fetching of the data
-      
+      console.log(this.current);
       if (this.current === 3){
         this.current = 0;
       } else {
@@ -139,22 +134,16 @@ var middguard = middguard || {};
       
       var poiName;
       var choice = middguard.state.heatmapChoice;
-      if (choice === 'all'){
-        var currentModel = middguard.state.Locationcounts.selections.at(middguard.state.Locationcounts.selections.length-1);
-        if (!currentModel){
-          return false;
-        }
-        var x = currentModel.get('x');
-        var y = currentModel.get('y');
-      } else {
-        var currentModel = middguard.state['Check-ins'].selections.at(middguard.state['Check-ins'].selections.length-1);
-        if (!currentModel){
-          return false;
-        }
-        var x = currentModel.get('x');
-        var y = currentModel.get('y');
+      
+      var currentModel = middguard.state.Pois.selections.at(middguard.state.Pois.selections.length-1);
+      if (!currentModel){
+        return false;
+      }
+      var x = currentModel.get('x');
+      var y = currentModel.get('y');
+      
+      if (choice === 'checkins'){
         poiName = middguard.entities.Pois.findWhere({x: x, y: y}).get('name');
-          
       }
       this.x = x;
       this.y = y;
@@ -208,10 +197,14 @@ var middguard = middguard || {};
       
       this.d3el
         .append('p')
-        .attr('class', 'textHeader')
+        .attr('class', 'textHeaderBold')
         .text(textHeader);
         
       var globalThis = this;
+      if (this.children.length > 3){
+        //change this.children to the 3 most recently selected items
+        this.children = this.children.slice(this.children.length-3);
+      }
       this.children.forEach(function(day){
         if (document.getElementById('scale-select').value === 'abs'){
           var newChart = day.render(day.borderHeight, day.heightSqueeze, day.borderWidth, day.data, day.startTime, day.endTime, 0, middguard.state.trendScale.max, day.opt.x, day.opt.y, day.day, day.opt.poi, true);
@@ -295,15 +288,7 @@ var middguard = middguard || {};
       this.borderHeight = 60;
       this.heightSqueeze = 20;
       this.borderWidth = 1030;
-      /*
-      if (!init){
-        //yMaxes of 3687 and 325 reflect the max values for all xy coords and non-checkin xy coords, respectively
-        if (document.getElementById('scale-select').value === 'abs'){
-          this.render(this.borderHeight, this.heightSqueeze, this.borderWidth, this.data, this.startTime, this.endTime, 0, this.max, this.opt.x, this.opt.y, this.day, this.opt.poi, true);
-        } else {
-          this.render(this.borderHeight, this.heightSqueeze, this.borderWidth, this.data, this.startTime, this.endTime, 0, this.max, this.opt.x, this.opt.y, this.day, this.opt.poi, false);
-        }
-      }*/
+      
     },
     
     arrangeDailyData: function (start, end, fetchData, dateFunction){
@@ -318,7 +303,7 @@ var middguard = middguard || {};
       var masterIndex = 0;
       
       while (current <= end){
-        tStamp = dateFunction(current);
+        tStamp = current;//dateFunction(current);
         var newDate = new Date(current);
         if (index >= fetchData.length){
           //if fetchData's bound has been passed
@@ -328,8 +313,8 @@ var middguard = middguard || {};
           if (minuteFloor.getSeconds() != 0){
             minuteFloor.setSeconds(0);
           }
-          minuteFloor = dateFunction(minuteFloor);
-          if (minuteFloor === tStamp){
+          //minuteFloor = dateFunction(minuteFloor);
+          if (minuteFloor.valueOf() === tStamp.valueOf()){
             finalArray.push([newDate, fetchData[index].count]);
             if (fetchData[index].count > this.parentView.max){
               this.parentView.max = fetchData[index].count;
@@ -378,7 +363,7 @@ var middguard = middguard || {};
     },
     
     render: function(borderHeight, axisY, borderWidth, allData, xMin, xMax, yMin, yMax, xCoord, yCoord, day, poi, abs){
-      //function actually draws a sparkline
+      //function actually draws a trend line
       //function is specific, not particularly extensible
       
       //this.d3el.selectAll('.trendGraphChild').remove();
@@ -386,12 +371,7 @@ var middguard = middguard || {};
         .append('div')
         .attr('class', 'trendGraphChildren');
         
-      //if a place of interest is passed, include it in the header
-      if (poi){
-        var textHeader = 'X: ' + xCoord + ' Y: ' + yCoord + ' -- ' + day + ' Location Name: ' + poi;
-      } else {
-        var textHeader = 'X: ' + xCoord + ' Y: ' + yCoord + ' -- ' + day;
-      }
+      var textHeader = '' + day;
       
       parentElmnt
         .append('p')
@@ -422,7 +402,7 @@ var middguard = middguard || {};
       var line = d3.svg.line()
         .x(function(d){return xScale(d[0]);})
         .y(function(d){return borderHeight - yScale(d[1]);})
-        .interpolate('basis');
+        .interpolate('linear');
         
       var axis = d3.svg.axis()
         .scale(xScale)
