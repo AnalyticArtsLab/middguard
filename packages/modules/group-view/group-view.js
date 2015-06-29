@@ -43,6 +43,7 @@ var middguard = middguard || {};
     },
     
     addDetails: function(model){
+      var v = this;
       var groupDetails = new GroupDetailView({model:model});
       groupDetails.listenTo(middguard.state.Groups.selections, 'reset', groupDetails.remove);
       groupDetails.listenTo(middguard.state.Groups.selections, 'remove', function(model){
@@ -90,7 +91,8 @@ var middguard = middguard || {};
       this.cells.attr('width',v.cellSize)
       .attr('height', v.cellSize)
       .attr('x', function(d,i){return (i%v.widthCount) * v.cellSize;})
-      .attr('y', function(d,i){return Math.floor(i/v.widthCount)* v.cellSize });
+      .attr('y', function(d,i){return Math.floor(i/v.widthCount)* v.cellSize })
+      .attr('stroke', '#CCCCCC');
       
       this.cells.on('click', function(d){
         var members = [];
@@ -99,21 +101,41 @@ var middguard = middguard || {};
          
         });
         
-        if (d3.event.shiftKey){
+        if (d3.event.altKey){
+          if (middguard.state.Groups.selections.find(function(g){
+            return d.get('group_id') === g.get('group_id') && v.listEquals(d.get('days'),g.get('days'));
+          })){
+            // group is already a selection, remove it
+             middguard.state.Groups.selections.remove(d);
+             
+             // remove members from people working set by reseting and adding all from other groups back in
+             middguard.state.People.workingSet.reset();
+             middguard.state.Groups.selections.models.forEach(function(group){
+               var members = [];
+               group.get('members').forEach(function(member){
+                 members.push({id:member});
+         
+               });
+               
+               
+               middguard.state.People.workingSet.add(members);
+             });
+          }else{
+            // just add to the selections
+            middguard.state.People.workingSet.add(members);
+            middguard.state.Groups.selections.add(d);
+          }
+        }else{
           // reset the selections
           middguard.state.People.workingSet.reset(members);
           middguard.state.Groups.selections.reset(d);
-        }else{
-          // just add to the selections
-          middguard.state.People.workingSet.add(members);
-          middguard.state.Groups.selections.add(d);
         }
         
         
       });
      
      this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.render)
-    this.listenTo(middguard.state.Groups.selections, 'add remove reset', this.render)
+      this.listenTo(middguard.state.Groups.selections, 'add remove reset', this.render)
       this.render();
     },
     
@@ -121,26 +143,39 @@ var middguard = middguard || {};
       var v = this;
       
       this.cells
-      .attr('stroke', function(d){
-        if (middguard.state.Groups.selections.findWhere({group_id:d.get('group_id'), day:d.get('day')})){
-          return 'green';
-        }else{
-          return '#CCCCCC';
-        }
-      })
       .attr('fill',function(d){
-        for (var i=0; i < middguard.state.People.workingSet.models.length; i++){
-          if (_.contains(d.get('members'), middguard.state.People.workingSet.models[i].get('id'))){
-            return '#5555FF';
+         if (middguard.state.Groups.selections.find(function(g){
+           return d.get('group_id') === g.get('group_id') && v.listEquals(d.get('days'),g.get('days'));
+         })){
+          return '#00FF00';
+        }else{
+          for (var i=0; i < middguard.state.People.workingSet.models.length; i++){
+            if (_.contains(d.get('members'), middguard.state.People.workingSet.models[i].get('id'))){
+              return '#AAAACC';
+            }
           }
+          return 'white';
         }
-        return 'white';
-   
         
       });
       
       
       return v;
+    },
+    
+    listEquals: function(l1, l2){
+      debugger;
+      if (l1.length !== l2.length){
+        return false;
+      }
+      
+      for (var i = 0; i < l1.length; i++){
+        if (l1[i] !== l2[i]){
+          return false;
+        }
+      }
+      return true;
+      
     }
     
     
