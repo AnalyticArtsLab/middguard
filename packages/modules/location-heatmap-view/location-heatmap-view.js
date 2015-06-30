@@ -55,29 +55,8 @@ var middguard = middguard || {};
       this.dataStoreList = [];
       this.getData();
       
-      this.listenTo(middguard.state.Pois.selections, 'add', function(model){
-        if (middguard.state.heatmapChoice == 'all'){
-          //if all locations
-         
-          globalThis.d3el.select('#rx' + model.get('x') + 'y' + model.get('y'))
-            .attr('fill', function(d){
-              d.clicked = true;
-              d.model = model;
-              return '#99ff66';
-            })
-            .attr('stroke', function(d){
-              return '#99ff66';
-            });
-        } else {
-          //if checkins
-          
-          globalThis.d3el.select('#cx' + model.get('x') + 'y' + model.get('y'))
-            .attr('fill', function(d){
-              d.clicked = true;
-              d.model = model;
-              return '#99ff66';
-            });
-        }
+      this.listenTo(middguard.state.Pois.selections, 'add', function(){
+        this.render(globalThis.col, globalThis.resp, globalThis.opt);
       });
       this.listenTo(middguard.state.Pois.selections, 'remove', function(model){
         if (middguard.state.heatmapChoice == 'all'){
@@ -317,8 +296,8 @@ var middguard = middguard || {};
                 .attr('fill', function(d){return colorScale(d.count)})
                 .attr('stroke', function(d){return colorScale(d.count)});
                 d.clicked = false;
-                d.model = null;
                 middguard.state.Pois.selections.remove(d.model);
+                d.model = null;
             } else {
               d3.select(this).attr('fill', '#99ff66')
                 .attr('stroke', '#99ff66');
@@ -417,8 +396,8 @@ var middguard = middguard || {};
                 .attr('fill', function(d){return colorScale(d.count)})
                 .attr('stroke', function(d){return colorScale(d.count)});
                 d.clicked = false;
-                d.model = null;
                 middguard.state.Pois.selections.remove(d.model);
+                d.model = null;
             } else {
               d3.select(this).attr('fill', '#99ff66')
                 .attr('stroke', '#99ff66');

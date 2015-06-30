@@ -29,7 +29,7 @@ var middguard = middguard || {};
         
       this.d3el.append('select')
         .attr('id', 'scale-select')
-        .html('<option value="abs">Absolute Scale</option><option value="rel">Relative Scales per XY</option>')
+        .html('<option value="rel">Relative Scales per XY</option><option value="abs">Absolute Scale</option>')
         .on('change', function(){
           globalThis.switchScale();
         });
@@ -111,10 +111,7 @@ var middguard = middguard || {};
     
     goFetch: function(x, y, iteration){
       //function does the fetching of the data
-      //console.log(iteration);
-      //if (this.current === 3){
-        //this.current = 0;
-        //} else {
+      
         switch(iteration){
           case 0:
             var curFetch = {source: 'spark0', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp <= \'2014-06-07 00:00:00\' ', orderBy: ['timestamp', 'asc']}};
@@ -137,7 +134,6 @@ var middguard = middguard || {};
           middguard.entities['Check-ins'].fetch(curFetch);
         }
         
-        //}
       
     },
     
