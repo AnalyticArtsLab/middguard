@@ -79,7 +79,7 @@ function patchModelToEmit(socket, modelName, model) {
 
 function setupSocketEvents(socket, modelName, model) {
   // Set up create, read, update, delete sockets for each model
-  socket.on(pluralize(modelName) + ':create', function (data, callback) {
+  socket.on(modelName + ':create', function (data, callback) {
     // Pass clientCreate to save so the model won't emit anything on the
     // created event and confuse the client.
     // Create is a special case since the model on the creating client doesn't

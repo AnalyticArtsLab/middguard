@@ -2,10 +2,12 @@
   "name": "middguard",
   "version": "0.0.1",
   "authors": [
-    "Dana Silver <dsilver@middlebury.edu>"
+    "Dana Silver <dsilver@middlebury.edu>",
+    "Christopher Andrews <candrews@middlebury.edu>",
+    "Julian Billings <jabillings@middlebury.edu>"
   ],
   "description": "Modular, multiperson analytics.",
-  "homepage": "https://github.com/danasilver/middguard",
+  "homepage": "https://github.com/ProfBlack/middguard",
   "ignore": [
     "**/.*",
     "node_modules",
@@ -18,6 +20,7 @@
     "socket.io-client": "~1.0.6",
     "d3": "~3.4.11",
     "moment": "~2.8.1",
-    "pluralize": "~0.0.11"
+    "pluralize": "~0.0.11",
+    "jQuery-contextMenu":"1.6.7"
   }
 }

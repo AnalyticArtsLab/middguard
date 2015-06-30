@@ -40,18 +40,104 @@ var middguard = middguard || {};
         collection.models.forEach(function(model){v.addDetails(model);});
       });
 
+
+      // Create the context menu we will use for the details
+
+      $.contextMenu({
+        selector: '.group-member',
+        build: function($trigger, e){
+          var menu = {
+            callback: function(key, options){
+              var pid = this.html();
+              var comma = pid.lastIndexOf(',');
+              pid = (comma === -1 )? +pid: +pid.slice(0, comma);
+              var gid = this.closest('.group-detail-view').data('gid');
+              var destID = +key.slice(5);
+              
+              
+              // remove the person from this group
+              if (key === 'remove' || (key.slice(0, 4) === 'move' && destID !== gid)){
+                
+                console.log('remove', pid, gid);
+                // remove the person from the current group
+                var currentGroup = middguard.entities.Groups.get(gid);
+                var members = currentGroup.get('members');
+                members.splice(members.indexOf(pid), 1 );
+                if (members.length === 0){
+                  currentGroup.destroy();
+                }else{
+                  currentGroup.set('group_id', members[0]);
+                  currentGroup.set('members', members);
+                  currentGroup.save();
+                }
+              }
+              
+              
+              if (key === 'remove'){
+                // create a new group with one person
+                var newGroup = middguard.entities.Groups.create(
+                  {
+                    group_id: pid,
+                    days: currentGroup.get('days'),
+                    members: [pid],
+                    checked: true // change this
+                  }, {success:function(model, response, options)
+                    {
+                      console.log('created', model);
+                      middguard.state.Groups.selections.add(model);
+                    },
+                    error: function(model,response, options){
+                      console.log(response);
+                    }});
+                // add the new group to the current selection
+                // (something also need to update the display -- worry about that shortly)
+                
+              }else if (key.slice(0, 4) === 'move' && destID !== gid){
+                // add person to new group
+                var newGroup = middguard.entities.Groups.get(destID);
+                var members = newGroup.get('members');
+                members.push(pid);
+                newGroup.set('members', members);
+          
+                newGroup.save();
+              }
+              
+            },
+            items: { "remove": {name:'Remove from group'}}
+          };
+          
+          if (middguard.state.Groups.selections.length > 1){
+            var destinations = {};
+            
+            middguard.state.Groups.selections.forEach(function(model){
+              destinations['move:'+model.id] = {name: 'Group ' + model.id};
+            });
+            
+            menu.items["move"] = {name:'Move to group', items: destinations};
+            
+          }
+          
+          
+          return menu;
+        }
+      });
+
+
     },
     
     addDetails: function(model){
       var v = this;
       var groupDetails = new GroupDetailView({model:model});
       groupDetails.listenTo(middguard.state.Groups.selections, 'reset', groupDetails.remove);
-      groupDetails.listenTo(middguard.state.Groups.selections, 'remove', function(model){
-        if (model === v.model){
+      groupDetails.listenTo(middguard.state.Groups.selections, 'remove', function(removedModel){
+        if (model === removedModel){
           groupDetails.remove();
         }
       });
-
+      groupDetails.listenTo(model, 'destroy', groupDetails.remove);
+      
+      
+      
       $("#group-details",this.$el).append(groupDetails.el);
     }
     
@@ -189,9 +275,10 @@ var middguard = middguard || {};
     },
     initialize: function(){
       var v = this;
-      _.bindAll(this, 'render', 'toggleChecked');
+      _.bindAll(this, 'update', 'toggleChecked');
       var gid = this.model.get('id');
       this.$el.html(this.template({gid:gid}));
+      this.$el.data('gid', gid);
       
       var days = d3.select(this.el)
       .select('.days-list')
@@ -208,31 +295,53 @@ var middguard = middguard || {};
       .data(this.model.get('members'))
       .enter()
       .append('span')
+      .attr('class', 'group-member')
       .html(function(d,i){return (i < v.model.get('members').length - 1)? d+', ': d ;});
       
       this.checkbox = $(".group-checkbox", this.$el);
       this.checkbox.prop('checked', this.model.get('checked'));
 
+      this.listenTo(this.model, 'change sync', this.update);
+      
       
     },
     
     toggleChecked: function(){
-      console.log(this.model.attributes);
-      this.listenTo(this.model, 'request', function(d){console.log('request')});
-      this.listenTo(this.model, 'update', function(d){console.log('update')});
-      this.listenTo(this.model, 'sync', function(d){console.log('sync')});
-      this.listenTo(this.model, 'change', function(d){console.log('change')});
+      this.model.save({checked:this.checkbox.prop('checked')},
+        {error:function(m,r,c){console.log(r);}});
+
+    },
+    
+    update: function(){
+      var v = this;
+      console.log('update');
+      var days = d3.select(this.el)
+      .select('.days-list')
+      .selectAll('span')
+      .data(this.model.get('days'));
       
-      var prom = this.model.save({checked:this.checkbox.prop('checked')},
-      {success:function(m,r,c){console.log('success')}, error:function(m,r,c){console.log(r);}});
+      days.exit().remove();
       
-      prom.then(function(result){console.log('it did something', result);}, function(error){console.log("didn't work", error)});
+      days.enter().append('span');
+      days.html(function(d, i){return (i < v.model.get('days').length - 1)? d+', ': d ;});
       
       
-      if (this.model.validationError){
-        console.log('error');
-      }
+      var members = d3.select(this.el)
+      .select('.members-list')
+      .selectAll('span')
+      .data(this.model.get('members'));
+      
+      members.exit().remove();
+      
+      members.enter()
+      .append('span')
+      .attr('class', 'group-member');
+      
+      members.html(function(d,i){return (i < v.model.get('members').length - 1)? d+', ': d ;});
+      
+      return this;
     }
+    
     
   });
  

@@ -1,5 +1,5 @@
 {
-  "name": "Group",
+  "name": "group",
   "model": "group.js",
   "customLoad": false,
   "version": "0.0.1"

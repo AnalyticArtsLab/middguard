@@ -6,7 +6,7 @@ var middguard = middguard || {};
   middguard.ChatView = Backbone.View.extend({
     id: 'middguard-chat',
     template: _.template(
-      '<div id="middguard-chat-header">Chat' +
+      '<div id="middguard-chat-header">Observations' +
       '<button id="middguard-chat-collapse">&mdash;</button></div>' +
       '<div id="middguard-chat-log"></div>' +
       '<textarea id="middguard-chat-input"></textarea>'

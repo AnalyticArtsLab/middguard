@@ -9,6 +9,8 @@ module.exports = {
     'socket.io-client/socket.io.js',
     'backbone/backbone.js',
     'backbone.iobind/dist/backbone.iosync.js',
-    'backbone.iobind/dist/backbone.iobind.js'
+    'backbone.iobind/dist/backbone.iobind.js',
+    'jQuery-contextMenu/src/jquery.contextMenu.js',
+    'jQuery-contextMenu/src/jquery.ui.position.js'
   ]
 };

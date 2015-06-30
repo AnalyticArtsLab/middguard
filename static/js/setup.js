@@ -4,10 +4,7 @@ var middguard = middguard || {};
   middguard.socket = Backbone.socket = io();
 
   middguard.state = {
-    // timeRange: _.extend({
-//       start: Number.NEGATIVE_INFINITY,
-//       end: Number.POSITIVE_INFINITY
-//     }, Backbone.Events),
+   
 //     //other properties of middguard.state are initialized in the packages-view.js file
 //
 		
@@ -16,19 +13,28 @@ var middguard = middguard || {};
 		
     // Encode the state as JSON to save in a message
     toJSON: function () {
-			var returnObj = {timeRange: {start: this.timeRange.start, end: this.timeRange.end}};
+			var returnObj = {};//{timeRange: {start: this.timeRange.start, end: this.timeRange.end}};
 			
 			for (dataSet in this){
-				if (typeof this[dataSet] == 'object' && dataSet != 'timeRange'){
+				if (typeof this[dataSet] == 'object'){
+          returnObj[dataSet] ={};
 					//only data is encoded, not functions
-					
-		      var selectionsEncoding = getModelIdentifiers(this[dataSet].selections.models);
-		      var workingSetEncoding = getModelIdentifiers(this[dataSet].workingSet.models);
-					returnObj[dataSet] = {selections: this[dataSet].selections.reset(selectionsEncoding),
-        															workingSet: this[dataSet].workingSet.reset(workingSetEncoding)
-																		};
-				}
-			}
+					for (attribute in this[dataSet]){
+            if (attribute === 'workingSet' || attribute === 'selections'){
+              var encoding = getModelIdentifiers(this[dataSet][attribute].models);
+              returnObj[dataSet][attribute] = this[dataSet][attribute].reset(encoding);
+					  } else{
+					    returnObj[dataSet][attribute] = this[dataSet][attribute];
+              
+					  }
+		      // var selectionsEncoding = getModelIdentifiers(this[dataSet].selections.models);
+//           var workingSetEncoding = getModelIdentifiers(this[dataSet].workingSet.models);
+//           returnObj[dataSet] = {selections: this[dataSet].selections.reset(selectionsEncoding),
+//                                       workingSet: this[dataSet].workingSet.reset(workingSetEncoding)
+//                                     };
+  				}
+  			}
+      }
       return returnObj;
     },
 
