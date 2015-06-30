@@ -39,7 +39,10 @@ var middguard = middguard || {};
       this.listenTo(middguard.entities['Check-ins'], 'sync', function(col, resp, opt){
         this.render(col, resp, opt);
       });
-      //this.listenTo(middguard.entities['Locationcounts'], 'reset', this.render);
+      this.listenTo(middguard.state.Pois.selections, 'reset', function(){
+        this.render(globalThis.col, globalThis.resp, globalThis.opt);
+      });
+      
       this.$('#heatmap-choice')[0].onchange=this.selectChange;
       this.distinctCheckins = new Set([
         '42$37', '34$68', '67$37', '73$79', '81$77', '92$81', '73$84', '85$86', '87$63', '28$66',
@@ -55,9 +58,7 @@ var middguard = middguard || {};
       this.listenTo(middguard.state.Pois.selections, 'add', function(model){
         if (middguard.state.heatmapChoice == 'all'){
           //if all locations
-          //console.log(model);
-          //console.log(model.get('x'));
-          //console.log(globalThis.d3el.select('#rx' + model.get('x') + 'y' + model.get('y')));
+         
           globalThis.d3el.select('#rx' + model.get('x') + 'y' + model.get('y'))
             .attr('fill', function(d){
               d.clicked = true;
@@ -69,6 +70,7 @@ var middguard = middguard || {};
             });
         } else {
           //if checkins
+          
           globalThis.d3el.select('#cx' + model.get('x') + 'y' + model.get('y'))
             .attr('fill', function(d){
               d.clicked = true;
@@ -80,9 +82,7 @@ var middguard = middguard || {};
       this.listenTo(middguard.state.Pois.selections, 'remove', function(model){
         if (middguard.state.heatmapChoice == 'all'){
           //if all locations
-          //console.log(model);
-          //console.log(model.get('x'));
-          //console.log(globalThis.d3el.select('#rx' + model.get('x') + 'y' + model.get('y')));
+          
           globalThis.d3el.select('#rx' + model.get('x') + 'y' + model.get('y'))
             .attr('fill', function(d){
               d.clicked = false;
@@ -190,7 +190,9 @@ var middguard = middguard || {};
       if (!opt || opt.source !== 'heatmap'){
         return this;
       }
-      
+      this.col = col;
+      this.resp = resp;
+      this.opt = opt;
       var svg = this.svg;
       
       if (middguard.state.heatmapChoice == 'all'){
@@ -229,13 +231,14 @@ var middguard = middguard || {};
             }
           })
           .attr('fill', function(d){
-            if (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})){
+            var newModel = middguard.state.Pois.selections.findWhere({x: d.x, y: d.y});
+            if (newModel){
               d.clicked = true;
-              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
               d.model = newModel;
               return '#99ff66';
             } else {
               d.clicked = false;
+              d.model = null;
               return colorScale(d.count); 
             }
           })
@@ -269,13 +272,14 @@ var middguard = middguard || {};
             }
           })
           .attr('fill', function(d){
-            if (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})){
+            var newModel = middguard.state.Pois.selections.findWhere({x: d.x, y: d.y});
+            if (newModel){
               d.clicked = true;
-              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
               d.model = newModel;
               return '#99ff66';
             } else {
               d.clicked = false;
+              d.model = null;
               return colorScale(d.count); 
             }
           })
@@ -313,6 +317,7 @@ var middguard = middguard || {};
                 .attr('fill', function(d){return colorScale(d.count)})
                 .attr('stroke', function(d){return colorScale(d.count)});
                 d.clicked = false;
+                d.model = null;
                 middguard.state.Pois.selections.remove(d.model);
             } else {
               d3.select(this).attr('fill', '#99ff66')
@@ -348,13 +353,14 @@ var middguard = middguard || {};
             }
           })
           .attr('fill', function(d){
-            if (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})){
+            var newModel = middguard.state.Pois.selections.findWhere({x: d.x, y: d.y});
+            if (newModel){
               d.clicked = true;
-              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
               d.model = newModel;
               return '#99ff66';
             } else {
               d.clicked = false;
+              d.model = null;
               return colorScale(d.count); 
             }
           })
@@ -374,13 +380,14 @@ var middguard = middguard || {};
             }
           })
           .attr('fill', function(d){
-            if (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})){
+            var newModel = middguard.state.Pois.selections.findWhere({x: d.x, y: d.y});
+            if (newModel){
               d.clicked = true;
-              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
               d.model = newModel;
               return '#99ff66';
             } else {
               d.clicked = false;
+              d.model = null;
               return colorScale(d.count); 
             }
           })
@@ -410,6 +417,7 @@ var middguard = middguard || {};
                 .attr('fill', function(d){return colorScale(d.count)})
                 .attr('stroke', function(d){return colorScale(d.count)});
                 d.clicked = false;
+                d.model = null;
                 middguard.state.Pois.selections.remove(d.model);
             } else {
               d3.select(this).attr('fill', '#99ff66')

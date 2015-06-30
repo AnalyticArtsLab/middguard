@@ -40,66 +40,59 @@ var middguard = middguard || {};
         globalThis.coordChange(currentModel);
       });
       
+      this.listenTo(middguard.state.Pois.selections, 'remove', function(currentModel){
+        globalThis.childViews['x' + currentModel.get('x') + 'y' + currentModel.get('y')].removeSelf();
+        delete globalThis.childViews['x' + currentModel.get('x') + 'y' + currentModel.get('y')];
+      });
+      
+      this.listenTo(middguard.state.Pois.selections, 'reset', function(newModels, options){
+        options.previousModels.forEach(function(currentModel){
+          globalThis.childViews['x' + currentModel.get('x') + 'y' + currentModel.get('y')].removeSelf();
+          delete globalThis.childViews['x' + currentModel.get('x') + 'y' + currentModel.get('y')];
+        });
+      });
+      
       middguard.state.Pois.selections.forEach(function(currentModel){
         globalThis.coordChange(currentModel);
       });
       
       this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
-        console.log(opt);
-        if (opt.source.slice(0,5) === 'spark'){
-          var curIter = parseInt(opt.source.charAt(5));
-          if (globalThis.childViews['x' + opt.x + 'y' + opt.y]){
-            globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
-            //append a just-completed view to the parent view
-            if (globalThis.childViews['x' + opt.x + 'y' + opt.y].children.length === 3){
-              globalThis.childViews['x' + opt.x + 'y' + opt.y].render();
-              $('#loc-spark').append(globalThis.childViews['x' + opt.x + 'y' + opt.y].el);
-              
-              //make sure that every chart currently displayed is scaled properly
-              for (var view in globalThis.childViews){
-                if (middguard.state.trendScale.max > globalThis.childViews[view].absMax && document.getElementById('scale-select').value === 'abs'){
-                  globalThis.childViews[view].render();
-                }
-              }
-              
-            }
-          } else {
-            //if a new child View
-            globalThis.childViews['x' + opt.x + 'y' + opt.y] = new TrendViewWeekend(opt.x, opt.y);
-            globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
-          }
-          globalThis.current++;
-          globalThis.goFetch(opt.x, opt.y, curIter + 1);
-        }
+        globalThis.syncResponse(col, resp, opt, globalThis);
       });
       this.listenTo(middguard.entities['Check-ins'], 'sync', function(col, resp, opt){
-        if (opt.source.slice(0,5) === 'spark'){
-          if (globalThis.childViews['x' + opt.x + 'y' + opt.y]){
-            globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
-            //append a just-completed view to the parent view
-            if (globalThis.childViews['x' + opt.x + 'y' + opt.y].children.length === 3){
-              globalThis.childViews['x' + opt.x + 'y' + opt.y].render();
-              $('#loc-spark').append(globalThis.childViews['x' + opt.x + 'y' + opt.y].el);
-              
-              //make sure that every chart currently displayed is scaled properly
-              for (var view in globalThis.childViews){
-                if (middguard.state.trendScale.max > globalThis.childViews[view].absMax && document.getElementById('scale-select').value === 'abs'){
-                  globalThis.childViews[view].render();
-                }
-              }
-              
-            }
-          } else {
-            //if a new child View
-            globalThis.childViews['x' + opt.x + 'y' + opt.y] = new TrendViewWeekend(opt.x, opt.y);
-            globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
-          
-          }
-          globalThis.current++;
-          globalThis.goFetch();
-        }
+        globalThis.syncResponse(col, resp, opt, globalThis);
       });
     
+    },
+    
+    syncResponse: function (col, resp, opt, globalThis){
+      //function responds to sync by fetching again or creating a chart view
+      
+      if (opt.source.slice(0,5) === 'spark'){
+        var curIter = parseInt(opt.source.charAt(5));
+        if (globalThis.childViews['x' + opt.x + 'y' + opt.y]){
+          globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
+          //append a just-completed view to the parent view
+          if (globalThis.childViews['x' + opt.x + 'y' + opt.y].children.length === 3){
+            globalThis.childViews['x' + opt.x + 'y' + opt.y].render();
+            $('#loc-spark').append(globalThis.childViews['x' + opt.x + 'y' + opt.y].el);
+            return true;
+            //make sure that every chart currently displayed is scaled properly
+            for (var view in globalThis.childViews){
+              if (middguard.state.trendScale.max > globalThis.childViews[view].absMax && document.getElementById('scale-select').value === 'abs'){
+                globalThis.childViews[view].render();
+              }
+            }
+            
+          }
+        } else {
+          //if a new child View
+          globalThis.childViews['x' + opt.x + 'y' + opt.y] = new TrendViewWeekend(opt.x, opt.y);
+          globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
+        }
+        //globalThis.current++;
+        globalThis.goFetch(opt.x, opt.y, curIter + 1);
+      }
     },
     
     switchScale: function(){
@@ -112,11 +105,21 @@ var middguard = middguard || {};
     
     goFetch: function(x, y, iteration){
       //function does the fetching of the data
-      
-      if (this.current === 3){
-        this.current = 0;
-      } else {
-        var curFetch = new Object(this.fetches[iteration]);
+      //console.log(iteration);
+      //if (this.current === 3){
+        //this.current = 0;
+        //} else {
+        switch(iteration){
+          case 0:
+            var curFetch = {source: 'spark0', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp <= \'2014-06-07 00:00:00\' ', orderBy: ['timestamp', 'asc']}};
+            break;
+          case 1:
+            var curFetch = {source: 'spark1', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp >= \'2014-06-07 01:00:00\' AND timestamp <= \'2014-06-08 01:00:00\' ', orderBy: ['timestamp', 'asc']}};
+            break;
+          case 2:
+            var curFetch = {source: 'spark2', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp >= \'2014-06-08 01:00:00\' AND timestamp <= \'2014-06-09 01:00:00\' ', orderBy: ['timestamp', 'asc']}};
+            break;
+        }
         curFetch.x = x;
         curFetch.y = y;
         var choice = middguard.state.heatmapChoice;
@@ -128,7 +131,7 @@ var middguard = middguard || {};
           middguard.entities['Check-ins'].fetch(curFetch);
         }
         
-      }
+        //}
       
     },
     
@@ -152,14 +155,8 @@ var middguard = middguard || {};
       this.y = y;
       this.poiName = poiName;
       
-      this.fetches = [
-        {source: 'spark0', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp <= \'2014-06-07 00:00:00\' '}},
-        {source: 'spark1', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp >= \'2014-06-07 01:00:00\' AND timestamp <= \'2014-06-08 01:00:00\'  '}},
-        {source: 'spark2', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp >= \'2014-06-08 01:00:00\' AND timestamp <= \'2014-06-09 01:00:00\'  '}}         
-      ];
-      
-      this.goFetch();
-      return true;
+      this.goFetch(x, y, 0);
+      //return true;
     }
     
   });
@@ -183,7 +180,15 @@ var middguard = middguard || {};
       
     },
     
+    removeSelf: function(){
+      //remove this view and its child views
+      this.d3el.selectAll('.trendGraphChildren').remove();
+      this.d3el.remove();
+    },
+    
     appendChild: function(col, resp, opt){
+      //append a child view
+      
       var newChart = new TrendViewDay(col, resp, opt, this);
       this.children.push(newChart);
       this.opt = opt;
@@ -295,18 +300,20 @@ var middguard = middguard || {};
     },
     
     arrangeDailyData: function (start, end, fetchData, dateFunction){
-      //Function makes an small-space-consuming array containing indices/pointers to data to be used in the makeSparkline function (leanData)
-      //Function also makes an array containing the actual data to be used in makeSparkline (data)
+      //Function also makes an array containing the actual data to be used in rendering a chart
       //'dateFunction' is used to pass in the this.outputDate function
+      //NOTE: -- Function assumed fetchData is sorted from least timestamp to greatest timestamp!
       
       var tStamp;
+      var x = fetchData[0].x;
+      var y = fetchData[0].y;
       var finalArray = [];
+      var lastEntry = {};
       var index = 0;
       var current = new Date(start);
       var masterIndex = 0;
-      
       while (current <= end){
-        tStamp = current;//dateFunction(current);
+        tStamp = current;
         var newDate = new Date(current);
         if (index >= fetchData.length){
           //if fetchData's bound has been passed
@@ -316,9 +323,13 @@ var middguard = middguard || {};
           if (minuteFloor.getSeconds() != 0){
             minuteFloor.setSeconds(0);
           }
-          //minuteFloor = dateFunction(minuteFloor);
           if (minuteFloor.valueOf() === tStamp.valueOf()){
+            //if there's a value at the current time
+            
             finalArray.push([newDate, fetchData[index].count]);
+            lastEntry[x + ',' + y] = fetchData[index].count;
+            
+            //SET MAXES IF NEEDED
             if (fetchData[index].count > this.parentView.max){
               this.parentView.max = fetchData[index].count;
             }
@@ -326,9 +337,17 @@ var middguard = middguard || {};
               middguard.state.trendScale.max = fetchData[index].count;
               this.parentView.absMax = fetchData[index].count;
             }
+            //-----
+            
             index++;
           } else {
-            finalArray.push([newDate, 0]);
+            //if there's not a value at the current time
+            
+            if (lastEntry[x + ',' + y]){
+              finalArray.push([newDate, lastEntry[x + ',' + y]])
+            } else {
+              finalArray.push([newDate, 0]);
+            }
           }
         }
         masterIndex++;
