@@ -15,11 +15,13 @@ var middguard = middguard || {};
     },
     
     initialize: function () {
+      var globalThis = this;
       
       //this.choice will switch between "all" and "checkins"
       middguard.state.heatmapChoice = 'all';
       
       this.$el.html(this.template);
+      this.d3el = d3.select(this.el);
       this.yinc = 6; //margin at top--not a generalized value
       this.svg = d3.select(this.el).select('#heatmap-svg');
       this.colorScale = d3.scale.linear();
@@ -49,6 +51,56 @@ var middguard = middguard || {};
       this.dataStore = {};
       this.dataStoreList = [];
       this.getData();
+      
+      this.listenTo(middguard.state.Pois.selections, 'add', function(model){
+        if (middguard.state.heatmapChoice == 'all'){
+          //if all locations
+          //console.log(model);
+          //console.log(model.get('x'));
+          //console.log(globalThis.d3el.select('#rx' + model.get('x') + 'y' + model.get('y')));
+          globalThis.d3el.select('#rx' + model.get('x') + 'y' + model.get('y'))
+            .attr('fill', function(d){
+              d.clicked = true;
+              d.model = model;
+              return '#99ff66';
+            })
+            .attr('stroke', function(d){
+              return '#99ff66';
+            });
+        } else {
+          //if checkins
+          globalThis.d3el.select('#cx' + model.get('x') + 'y' + model.get('y'))
+            .attr('fill', function(d){
+              d.clicked = true;
+              d.model = model;
+              return '#99ff66';
+            });
+        }
+      });
+      this.listenTo(middguard.state.Pois.selections, 'remove', function(model){
+        if (middguard.state.heatmapChoice == 'all'){
+          //if all locations
+          //console.log(model);
+          //console.log(model.get('x'));
+          //console.log(globalThis.d3el.select('#rx' + model.get('x') + 'y' + model.get('y')));
+          globalThis.d3el.select('#rx' + model.get('x') + 'y' + model.get('y'))
+            .attr('fill', function(d){
+              d.clicked = false;
+              return globalThis.colorScale(d.count);
+            })
+            .attr('stroke', function(d){
+              return globalThis.colorScale(d.count);
+            });
+        } else {
+          //if checkins
+          globalThis.d3el.select('#cx' + model.get('x') + 'y' + model.get('y'))
+            .attr('fill', function(d){
+              d.clicked = false;
+              return globalThis.colorScale(d.count);
+            });
+        }
+      });
+      
 			
     },
     
@@ -169,8 +221,32 @@ var middguard = middguard || {};
               return 0;
             }
           })
-          .attr('fill', function(d){return colorScale(d.count)})
-          .attr('stroke', function(d){return colorScale(d.count)})
+          .attr('height', function(d){
+            if (d.count > 0){
+              return 10;
+            } else {
+              return 0;
+            }
+          })
+          .attr('fill', function(d){
+            if (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})){
+              d.clicked = true;
+              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
+              d.model = newModel;
+              return '#99ff66';
+            } else {
+              d.clicked = false;
+              return colorScale(d.count); 
+            }
+          })
+          .attr('stroke', function(d){
+            if (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})){
+              return '#99ff66';
+            }
+            else{
+              return colorScale(d.count);
+            }
+          })
           .attr('class', 'heatRect');
         
         rects
@@ -192,9 +268,29 @@ var middguard = middguard || {};
               return 0;
             }
           })
-          .attr('fill', function(d){return colorScale(d.count)})
-          .attr('stroke', function(d){return colorScale(d.count)})
-          .attr('class', 'heatRect');
+          .attr('fill', function(d){
+            if (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})){
+              d.clicked = true;
+              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
+              d.model = newModel;
+              return '#99ff66';
+            } else {
+              d.clicked = false;
+              return colorScale(d.count); 
+            }
+          })
+          .attr('stroke', function(d){
+            if (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})){
+              return '#99ff66';
+            }
+            else{
+              return colorScale(d.count);
+            }
+          })
+          .attr('class', 'heatRect')
+          .attr('id', function(d){
+            return 'rx' + d.x + 'y' + d.y;
+          });
           
         rects
           .exit()
@@ -251,7 +347,17 @@ var middguard = middguard || {};
               return 0;
             }
           })
-          .attr('fill', function(d){return colorScale(d.count)})
+          .attr('fill', function(d){
+            if (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})){
+              d.clicked = true;
+              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
+              d.model = newModel;
+              return '#99ff66';
+            } else {
+              d.clicked = false;
+              return colorScale(d.count); 
+            }
+          })
           .attr('stroke', 'black')
           .attr('class', 'heatCircle');
       
@@ -267,9 +373,22 @@ var middguard = middguard || {};
               return 0;
             }
           })
-          .attr('fill', function(d){return colorScale(d.count)})
+          .attr('fill', function(d){
+            if (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})){
+              d.clicked = true;
+              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
+              d.model = newModel;
+              return '#99ff66';
+            } else {
+              d.clicked = false;
+              return colorScale(d.count); 
+            }
+          })
           .attr('stroke', 'black')
-          .attr('class', 'heatCircle');
+          .attr('class', 'heatCircle')
+          .attr('id', function(d){
+            return 'cx' + d.x + 'y' + d.y;
+          });
           
         circles
           .exit()
