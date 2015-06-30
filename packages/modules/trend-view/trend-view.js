@@ -45,7 +45,9 @@ var middguard = middguard || {};
       });
       
       this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
+        console.log(opt);
         if (opt.source.slice(0,5) === 'spark'){
+          var curIter = parseInt(opt.source.charAt(5));
           if (globalThis.childViews['x' + opt.x + 'y' + opt.y]){
             globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
             //append a just-completed view to the parent view
@@ -67,7 +69,7 @@ var middguard = middguard || {};
             globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
           }
           globalThis.current++;
-          globalThis.goFetch();
+          globalThis.goFetch(opt.x, opt.y, curIter + 1);
         }
       });
       this.listenTo(middguard.entities['Check-ins'], 'sync', function(col, resp, opt){
@@ -108,18 +110,20 @@ var middguard = middguard || {};
       }
     },
     
-    goFetch: function(){
+    goFetch: function(x, y, iteration){
       //function does the fetching of the data
       
       if (this.current === 3){
         this.current = 0;
       } else {
+        var curFetch = new Object(this.fetches[iteration]);
+        curFetch.x = x;
+        curFetch.y = y;
         var choice = middguard.state.heatmapChoice;
         if (choice === 'all'){
-          middguard.entities.Locationcounts.fetch(this.fetches[this.current]);
+          middguard.entities.Locationcounts.fetch(curFetch);
         } else {
           //if choice == 'checkins'
-          var curFetch = new Object(this.fetches[this.current]);
           curFetch.poi = this.poiName;
           middguard.entities['Check-ins'].fetch(curFetch);
         }
@@ -149,9 +153,9 @@ var middguard = middguard || {};
       this.poiName = poiName;
       
       this.fetches = [
-        {source: 'spark0', x: x, y: y, data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp <= \'2014-06-07 00:00:00\' '}},
-        {source: 'spark1', x: x, y: y, data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp >= \'2014-06-07 01:00:00\' AND timestamp <= \'2014-06-08 01:00:00\'  '}},
-        {source: 'spark2', x: x, y: y, data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp >= \'2014-06-08 01:00:00\' AND timestamp <= \'2014-06-09 01:00:00\'  '}}         
+        {source: 'spark0', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp <= \'2014-06-07 00:00:00\' '}},
+        {source: 'spark1', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp >= \'2014-06-07 01:00:00\' AND timestamp <= \'2014-06-08 01:00:00\'  '}},
+        {source: 'spark2', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp >= \'2014-06-08 01:00:00\' AND timestamp <= \'2014-06-09 01:00:00\'  '}}         
       ];
       
       this.goFetch();
