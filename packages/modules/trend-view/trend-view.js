@@ -6,8 +6,12 @@ var middguard = middguard || {};
   var TrendView = middguard.View.extend({
     id: 'loc-spark',
     
+    template: _.template('<div id="XYTrendTitle"><h1>XY Timeline</h1></div>'),
+    
     initialize: function () {
       var globalThis = this;
+      
+      this.$el.html(this.template);
       this.current = 0;
       this.d3el = d3.select(this.el);
       //.style('display', 'table');
@@ -17,7 +21,7 @@ var middguard = middguard || {};
       this.childViews = {};
       this.d3el.append('input')
         .attr('type', 'submit')
-        .attr('value', 'Clear')
+        .attr('value', 'Clear Selection')
         .on('click', function(){
           var choice = middguard.state.heatmapChoice;
           //remove items from selection as well when their spark lines are removed
@@ -29,7 +33,7 @@ var middguard = middguard || {};
         
       this.d3el.append('select')
         .attr('id', 'scale-select')
-        .html('<option value="rel">Relative Scales per XY</option><option value="abs">Absolute Scale</option>')
+        .html('<option value="rel">Relative Scales per Day</option><option value="relWeekend">Relative Scales per XY/Weekend</option><option value="abs">Absolute Scale</option>')
         .on('change', function(){
           globalThis.switchScale();
         });
@@ -217,9 +221,12 @@ var middguard = middguard || {};
       }
       this.children.forEach(function(day){
         if (document.getElementById('scale-select').value === 'abs'){
-          var newChart = day.render(day.borderHeight, day.heightSqueeze, day.borderWidth, day.data, day.startTime, day.endTime, 0, middguard.state.trendScale.max, day.opt.x, day.opt.y, day.day, day.opt.poi, true);
+          var newChart = day.render(day.borderHeight, day.heightSqueeze, day.borderWidth, day.data, day.startTime, day.endTime, 0, middguard.state.trendScale.max, day.opt.x, day.opt.y, day.day, day.opt.poi);
+        } else if (document.getElementById('scale-select').value === 'relWeekend'){
+          var newChart = day.render(day.borderHeight, day.heightSqueeze, day.borderWidth, day.data, day.startTime, day.endTime, 0, globalThis.max, day.opt.x, day.opt.y, day.day, day.opt.poi);
         } else {
-          var newChart = day.render(day.borderHeight, day.heightSqueeze, day.borderWidth, day.data, day.startTime, day.endTime, 0, globalThis.max, day.opt.x, day.opt.y, day.day, day.opt.poi, false);
+          //else if value = 'rel'
+          var newChart = day.render(day.borderHeight, day.heightSqueeze, day.borderWidth, day.data, day.startTime, day.endTime, 0, day.max, day.opt.x, day.opt.y, day.day, day.opt.poi);
         }
         globalThis.$el.append(newChart.el);
         
@@ -332,6 +339,9 @@ var middguard = middguard || {};
             lastEntry[x + ',' + y] = fetchData[index].count;
             
             //SET MAXES IF NEEDED
+            if (fetchData[index].count > this.max){
+              this.max = fetchData[index].count;
+            }
             if (fetchData[index].count > this.parentView.max){
               this.parentView.max = fetchData[index].count;
             }
@@ -386,7 +396,7 @@ var middguard = middguard || {};
       return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
     },
     
-    render: function(borderHeight, axisY, borderWidth, allData, xMin, xMax, yMin, yMax, xCoord, yCoord, day, poi, abs){
+    render: function(borderHeight, axisY, borderWidth, allData, xMin, xMax, yMin, yMax, xCoord, yCoord, day, poi, whichMax){
       //function actually draws a trend line
       //function is specific, not particularly extensible
       
@@ -412,11 +422,6 @@ var middguard = middguard || {};
       var xScale = d3.time.scale()
         .domain([xMin, xMax])
         .range([15, borderWidth-15]);
-        
-      //use global max if scale is absolute
-      if (abs){
-        yMax = middguard.state.trendScale.max;
-      }
       
       var yScale = d3.scale.linear()
         .domain([yMin, yMax])

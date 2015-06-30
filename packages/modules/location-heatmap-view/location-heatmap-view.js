@@ -84,6 +84,7 @@ var middguard = middguard || {};
     },
     
     userChange: function(){
+      console.log(this);
       middguard.state.heatmapChoice = document.getElementById('heatmap-choice').value;
       var attractionTypes = {};
       var filterSet = new Set();
@@ -117,7 +118,7 @@ var middguard = middguard || {};
         document.getElementById('NoFilter').checked = true;
         this.attractionTypes = {};
       }
-      
+      console.log(this.attractionTypes);
       this.getData();
     },
     
@@ -165,6 +166,8 @@ var middguard = middguard || {};
     render: function (col, resp, opt) {
       //render the heatmap
       
+      var globalThis = this;
+      
       //make sure the function call is coming from the right place
       if (!opt || opt.source !== 'heatmap'){
         return this;
@@ -189,25 +192,13 @@ var middguard = middguard || {};
           .attr('x', function(d){return d.x*10;})
           .attr('y', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('width', function(d){
-            if (d.count > 0){
-              return 10;
-            } else {
-              return 0;
-            }
+            return (d.count > 0) ? 10: 0;
           })
           .attr('height', function(d){
-            if (d.count > 0){
-              return 10;
-            } else {
-              return 0;
-            }
+            return (d.count > 0) ? 10: 0;
           })
           .attr('height', function(d){
-            if (d.count > 0){
-              return 10;
-            } else {
-              return 0;
-            }
+            return (d.count > 0) ? 10: 0;
           })
           .attr('fill', function(d){
             var newModel = middguard.state.Pois.selections.findWhere({x: d.x, y: d.y});
@@ -222,12 +213,7 @@ var middguard = middguard || {};
             }
           })
           .attr('stroke', function(d){
-            if (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})){
-              return '#99ff66';
-            }
-            else{
-              return colorScale(d.count);
-            }
+            return (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})) ? '#99ff66': colorScale(d.count);
           })
           .attr('class', 'heatRect');
         
@@ -237,18 +223,10 @@ var middguard = middguard || {};
           .attr('x', function(d){return d.x*10;})
           .attr('y', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('width', function(d){
-            if (d.count > 0){
-              return 10;
-            } else {
-              return 0;
-            }
+            return (d.count > 0) ? 10: 0;
           })
           .attr('height', function(d){
-            if (d.count > 0){
-              return 10;
-            } else {
-              return 0;
-            }
+            return (d.count > 0) ? 10: 0;
           })
           .attr('fill', function(d){
             var newModel = middguard.state.Pois.selections.findWhere({x: d.x, y: d.y});
@@ -263,12 +241,7 @@ var middguard = middguard || {};
             }
           })
           .attr('stroke', function(d){
-            if (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})){
-              return '#99ff66';
-            }
-            else{
-              return colorScale(d.count);
-            }
+            return (middguard.state.Pois.selections.findWhere({x: d.x, y: d.y})) ? '#99ff66': colorScale(d.count);
           })
           .attr('class', 'heatRect')
           .attr('id', function(d){
@@ -325,10 +298,15 @@ var middguard = middguard || {};
           .attr('cx', function(d){return d.x*10;})
           .attr('cy', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('r', function(d){
-            if (d.count > 0){
-              return Math.pow(areaScale(d.count)/Math.PI, 0.5);
-            } else {
+            if (! _.isEmpty(globalThis.attractionTypes)){
+              for (var current in globalThis.attractionTypes){
+                if (globalThis.attractionTypes[current].has(d.x + ',' + d.y) && d.count > 0){
+                  return Math.pow(areaScale(d.count)/Math.PI, 0.5);
+                } 
+              }
               return 0;
+            } else {
+              return (d.count > 0) ? Math.pow(areaScale(d.count)/Math.PI, 0.5): 0;
             }
           })
           .attr('fill', function(d){
@@ -352,10 +330,15 @@ var middguard = middguard || {};
           .attr('cx', function(d){return d.x*10;})
           .attr('cy', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('r', function(d){
-            if (d.count > 0){
-              return Math.pow(areaScale(d.count)/Math.PI, 0.5);
-            } else {
+            if (! _.isEmpty(globalThis.attractionTypes)){
+              for (var current in globalThis.attractionTypes){
+                if (globalThis.attractionTypes[current].has(d.x + ',' + d.y) && d.count > 0){
+                  return Math.pow(areaScale(d.count)/Math.PI, 0.5);
+                } 
+              }
               return 0;
+            } else {
+              return (d.count > 0) ? Math.pow(areaScale(d.count)/Math.PI, 0.5): 0;
             }
           })
           .attr('fill', function(d){
