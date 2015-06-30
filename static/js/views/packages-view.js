@@ -65,7 +65,7 @@ var middguard = middguard || {};
         var plural = pluralize(name);
         var capitalPlural = capitalize(plural);
 
-        middguard.entities[capital] = Backbone.Model;
+        middguard.entities[capital] = Backbone.Model.extend({url:name});
         middguard.entities[capitalPlural] = new middguard.EntityCollection([], {
           url: plural,
           model: middguard.entities[capital]
