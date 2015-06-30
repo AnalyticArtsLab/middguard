@@ -46,9 +46,15 @@ var middguard = middguard || {};
       });
       
       this.listenTo(middguard.state.Pois.selections, 'reset', function(newModels, options){
+        
+        //get rid of the old models
         options.previousModels.forEach(function(currentModel){
           globalThis.childViews['x' + currentModel.get('x') + 'y' + currentModel.get('y')].removeSelf();
           delete globalThis.childViews['x' + currentModel.get('x') + 'y' + currentModel.get('y')];
+        });
+        //add the new ones
+        middguard.state.Pois.selections.forEach(function(currentModel){
+          globalThis.coordChange(currentModel);
         });
       });
       
