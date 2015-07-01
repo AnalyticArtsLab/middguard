@@ -2,11 +2,14 @@ var middguard = middguard || {};
 
 (function () {
   'use strict';
+  
+ 
+  
 
   var GroupView = middguard.View.extend({
     id: 'group-view-rect',
 		template: _.template('<h1>Groups</h1><div><div id="all-groups-container"></div><div id="group-details"></div></div>'),
-    
+    tagFormTemplate: _.template('<div id="tag-form" title="Add New Tag"><form><fieldset><ul id="tag-list"></ul><label for="group-tag">Tag</label> <input type="text" name="tag" id="group-tag" class="text ui-widget-content ui-corner-all"></fieldset></form></div>'),
     events:{},
     
     initialize: function () {
@@ -14,6 +17,91 @@ var middguard = middguard || {};
       _.bindAll(this, 'addDetails' );
       
       this.$el.html(this.template);
+      this.$el.append(this.tagFormTemplate);
+      
+      
+      $('#tag-form', this.$el).dialog({
+    		autoOpen: false,
+    		height: 400,
+    		width: 400,
+    		modal: true,
+        position: {my:'center', at:'center', of: '#group-view-rect'},
+    		buttons: [
+    		  {text:"Add Tag", 
+        click:function() {
+          var group = $(this).data().group;
+          var gid = group.id;
+    			var tag = $('#group-tag').val();
+ 
+            
+          
+          var tagModel = middguard.entities.Tags.findWhere({tag:tag});
+          
+          if (tagModel){
+            // existing tag, just add it
+            group.get('tags').push(tagModel.id);
+            group.save();
+            group.trigger('change:tag', group); 
+            
+          }else{
+            // new tag, need to create it
+            middguard.entities.Tags.create({tag:tag},{success:function(model, response, options)
+                    {
+                      group.get('tags').push(model.id);
+                      group.save();
+                      group.trigger('change:tag', group); 
+                    }} );
+          }
+            
+            
+
+    			    $(this).dialog("close");
+    			}},
+          {text:'Cancel',
+      			click: function() {
+      				$(this).dialog("close");
+      			}
+          }
+    		],
+        open:function(event, ui){
+          
+          var tags = middguard.entities.Tags.models.map(function(m){return m.get('tag');});
+          
+          var items = d3.select('#tag-list').selectAll('li').data(tags);
+          items.exit().remove();
+          items.enter().append('li');
+          
+          items.text(function(d){return d});
+          
+          
+          
+          $('#tag-list').menu(
+            {role:'listbox',
+            select:function(event, ui){
+              var tag = ui.item.prop('__data__');
+              $('#group-tag').val(tag);
+            }
+          }
+          );
+          
+          $('#group-tag').autocomplete({
+            source:function( request, response ) {
+              var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( request.term ), "i" );
+              response( $.grep( tags, function( item ){
+                return matcher.test( item );
+              }) );
+            }
+          });
+          
+          
+        },
+        close:function(event,ui){
+          $('#tag-list').menu('destroy');
+        }
+        
+      });
+  
+      
       
       
       var groups = {};
@@ -123,6 +211,36 @@ var middguard = middguard || {};
           return menu;
         }
       });
+      
+      // create a context menu for removing tags
+      $.contextMenu({
+        selector: '.group-tag-item',
+        build: function($trigger, e){
+          var menu = {
+            callback: function(key, options){
+              var tagid = this.prop('__data__');
+              var gid = this.closest('.group-detail-view').data('gid');
+
+              if (key === 'remove'){
+                var group = middguard.entities.Groups.get(gid);
+                var tags = group.get('tags');
+                tags.splice(tags.indexOf(tagid), 1 );
+                group.save();
+                group.trigger('change:tag', group);
+              }
+              
+            },
+            items: { "remove": {name:'Remove tag'}}
+          };
+          
+          
+          return menu;
+        }
+      }); 
+
+
+
+
 
 
     },
@@ -321,13 +439,14 @@ var middguard = middguard || {};
   
   var GroupDetailView = middguard.View.extend({
     className: 'group-detail-view',
-    template: _.template('<h2><%= gid %></h2><p>Days: <span class="days-list"></span></p><p >Members: <span class="members-list"></span></p><p>Checked: <input class="group-checkbox" type="checkbox" /></p>'),
+    template: _.template('<h2><%= gid %></h2><p>Days: <span class="days-list"></span></p><p >Members: <span class="members-list"></span></p><p >Tags: <span class="tag-list"></span> <input type="button" value="+"  id="add-tag" /><p>Checked: <input class="group-checkbox" type="checkbox" /></p>'),
     events: {
-      "click .group-checkbox": "toggleChecked"
+      "click .group-checkbox": "toggleChecked",
+      "click #add-tag":"showDialog"
     },
     initialize: function(){
       var v = this;
-      _.bindAll(this, 'update', 'toggleChecked');
+      _.bindAll(this, 'update', 'toggleChecked', 'showDialog');
       var gid = this.model.get('id');
       this.$el.html(this.template({gid:gid}));
       this.$el.data('gid', gid);
@@ -350,12 +469,33 @@ var middguard = middguard || {};
       .attr('class', 'group-member')
       .html(function(d,i){return (i < v.model.get('members').length - 1)? d+', ': d ;});
       
+      var tags = d3.select(this.el)
+      .select('.tag-list')
+      .selectAll('span')
+      .data(this.model.get('tags'))
+      .enter()
+      .append('span')
+      .attr('class', 'group-tag-item')
+      .html(function(d,i){
+        var tag = middguard.entities.Tags.get(d).get('tag');
+        return (i < v.model.get('tags').length - 1)? tag+', ': tag ;});
+      
+      
+      
       this.checkbox = $(".group-checkbox", this.$el);
       this.checkbox.prop('checked', this.model.get('checked'));
 
-      this.listenTo(this.model, 'change change:addGroup change:removeGroup sync', this.update);
+      this.listenTo(this.model, 'change change:addGroup change:removeGroup change:tag sync', this.update);
       
       
+
+      
+      
+      
+    },
+    
+    showDialog:function(){
+      $('#tag-form').data("group", this.model).dialog('open');
     },
     
     toggleChecked: function(){
@@ -389,6 +529,23 @@ var middguard = middguard || {};
       .attr('class', 'group-member');
       
       members.html(function(d,i){return (i < v.model.get('members').length - 1)? d+', ': d ;});
+      
+      
+      
+      var tags = d3.select(this.el)
+      .select('.tag-list')
+      .selectAll('span')
+      .data(this.model.get('tags'));
+      
+      tags.exit().remove();
+      
+      tags.enter()
+      .append('span')
+      .attr('class', 'group-tag-item');
+      
+      tags.html(function(d,i){
+        var tag = middguard.entities.Tags.get(d).get('tag');
+        return (i < v.model.get('tags').length - 1)? tag+', ': tag ;});
       
       return this;
     }

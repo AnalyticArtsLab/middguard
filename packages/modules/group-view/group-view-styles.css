@@ -36,3 +36,16 @@
   font-size: 12pt;
   
 }
+
+.ui-dialog{
+ font-size: 12pt; 
+  
+}
+
+#tag-list{
+  overflow-y: scroll;
+  overflow-x: hidden;
+  
+  height: 200px;
+  
+}
