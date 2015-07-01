@@ -111,19 +111,14 @@ var middguard = middguard || {};
           }
         });
         
-        /*
-        //resize timeline appropriately when window is changed
+        
+        //resize timeline div appropriately when window is changed
         window.onresize = function(){
           globalThis.width = window.innerWidth - globalThis.widthOffset;
-          globalThis.d3el.select('#timelineSVG')
-            .attr('width', globalThis.width);
-          globalThis.timeScale.range([0,globalThis.width-globalThis.margin.left*10]);
-          globalThis.axisEl.scale(globalThis.timeScale);
-          globalThis.mainBrush = d3.svg.brush().x(globalThis.timeScale);
-          globalThis.brushG.call(globalThis.mainBrush);
-          globalThis.render();
+          globalThis.d3el.attr('width', globalThis.width)
+            .style('width', globalThis.width + 'px');
         }
-        */
+        
 				
 			_.extend(this, Backbone.Events);
       
