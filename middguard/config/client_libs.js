@@ -11,6 +11,7 @@ module.exports = {
     'backbone.iobind/dist/backbone.iosync.js',
     'backbone.iobind/dist/backbone.iobind.js',
     'jQuery-contextMenu/src/jquery.contextMenu.js',
-    'jQuery-contextMenu/src/jquery.ui.position.js'
+    'jQuery-contextMenu/src/jquery.ui.position.js',
+    'jquery-ui/jquery-ui.js'
   ]
 };

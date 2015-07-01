@@ -36,7 +36,10 @@ var middguard = middguard || {};
       });
 
       $("#individual-timeline-container",this.$el).append(newTimeline.el);
+      //make each div draggable
+      $("#individual-timeline-container",this.$el).sortable();
     }
+    
 	});
   
   
@@ -204,7 +207,7 @@ var middguard = middguard || {};
           if (middguard.state.Pois.selections.findWhere({x:d.x, y:d.y})){
             return '#00FF00';
           }else{
-            return (d.type==='check-in')? '#BBBBBB' : 'white';
+            return (d.type === 'check-in')? '#BBBBBB' : 'white';
           }
         })
       .style('stroke', 'black');

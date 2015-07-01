@@ -10,11 +10,14 @@ var middguard = middguard || {};
 		dateRange : [new Date("2014-06-06 08:00:19"), new Date("2014-06-08 23:20:16")], // currently displayed range
     initialize: function () {
 			
+      var globalThis = this;
+      
       // Properties for our chart
-      this.margin = {top: 20, right: 20, bottom: 30, left: 40};
-      this.height = 75;
-      this.width = 2000 - this.margin.left - this.margin.right;
-			
+      this.margin = {top: 20, right: 20, bottom: 30, left: 10};
+      this.height = 125;
+      this.widthOffset = 350;
+      this.width = window.innerWidth - this.widthOffset;// - this.margin.left - this.margin.right;
+      
       // Setup elements for the view
       this.d3el = d3.select(this.el);
       this.svg = this.d3el.append('svg')
@@ -42,7 +45,7 @@ var middguard = middguard || {};
 			this.axisEl = d3.svg.axis().tickValues(this.dateList);
       
 			this.timeScale = d3.time.scale().domain(this.dateRangeFull);
-			this.timeScale.range([0,this.width-this.margin.left*3]);
+			this.timeScale.range([0,this.width-this.margin.left*10]);
 			this.axisEl.scale(this.timeScale)
 				.orient('bottom')
 				.innerTickSize(20)
@@ -60,6 +63,61 @@ var middguard = middguard || {};
 			this.brushG.selectAll('rect')
 				.attr('y', -8)
 				.attr('height', 16);
+        
+      this.buttons = this.d3el.append('div')
+        .attr('id', 'buttons')
+        .html('<div />');
+        
+      //append left button
+      this.buttons.append('button')
+        .attr('id', 'leftButton')
+        .html('<button type="button" id="backwards">&#x2190 Go Back</button>')
+        .on('click', function(){
+          var dateRange = globalThis.mainBrush.extent();
+          dateRange[0].setMinutes(dateRange[0].getMinutes()-1);
+          dateRange[1].setMinutes(dateRange[1].getMinutes()-1);
+          if (dateRange[0].valueOf() === dateRange[1].valueOf()){
+      			middguard.state.set({timeRange : {start : globalThis.dateRangeFull[0],
+            end : globalThis.dateRangeFull[1],
+            current: dateRange[0]}});
+          }else{
+      			middguard.state.set({timeRange : {start : dateRange[0],
+            end : dateRange[1],
+            current: dateRange[0]}});
+          }
+        });
+      //append right button
+      this.buttons.append('button')
+        .attr('id', 'rightButton')
+        .html('<button type="button" id="backwards">Go Forward &#x2192</button>')
+        .on('click', function(){
+          var dateRange = globalThis.mainBrush.extent();
+          dateRange[0].setMinutes(dateRange[0].getMinutes() + 1);
+          dateRange[1].setMinutes(dateRange[1].getMinutes() + 1);
+          if (dateRange[0].valueOf() === dateRange[1].valueOf()){
+      			middguard.state.set({timeRange : {start : globalThis.dateRangeFull[0],
+            end : globalThis.dateRangeFull[1],
+            current: dateRange[0]}});
+          }else{
+      			middguard.state.set({timeRange : {start : dateRange[0],
+            end : dateRange[1],
+            current: dateRange[0]}});
+          }
+        });
+        
+        /*
+        //resize timeline appropriately when window is changed
+        window.onresize = function(){
+          globalThis.width = window.innerWidth - globalThis.widthOffset;
+          globalThis.d3el.select('#timelineSVG')
+            .attr('width', globalThis.width);
+          globalThis.timeScale.range([0,globalThis.width-globalThis.margin.left*10]);
+          globalThis.axisEl.scale(globalThis.timeScale);
+          globalThis.mainBrush = d3.svg.brush().x(globalThis.timeScale);
+          globalThis.brushG.call(globalThis.mainBrush);
+          globalThis.render();
+        }
+        */
 				
 			_.extend(this, Backbone.Events);
       
@@ -79,7 +137,7 @@ var middguard = middguard || {};
     },
 		updateDateRange: function(){
       // system state has changed, change the drawing
-      
+      console.log('here');
 			this.dateRange = [middguard.state.timeRange.current, middguard.state.timeRange.end];
       
       if (this.dateRange[0].valueOf() != middguard.state.timeRange.start.valueOf()){
@@ -179,7 +237,7 @@ var middguard = middguard || {};
 			}
     },
 		
-    render: function () {			
+    render: function () {
       return this;
     }
   });

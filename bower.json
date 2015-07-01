@@ -21,6 +21,7 @@
     "d3": "~3.4.11",
     "moment": "~2.8.1",
     "pluralize": "~0.0.11",
-    "jQuery-contextMenu":"1.6.7"
+    "jQuery-contextMenu":"1.6.7",
+    "jquery-ui": "1.11.4"
   }
 }

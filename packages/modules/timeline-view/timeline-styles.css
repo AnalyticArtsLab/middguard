@@ -1,7 +1,21 @@
 		#middguard-timeline{
 			margin: 0 60px 0 15px;
-			height: 100px;
+			height: 125px;
+      float: right;
+      margin: 5px;
 		}
+    
+    #rightButton{
+      float: right;
+      padding: 0px;
+      border: 0px;
+      background-color: #FFFFFF;
+    }
+    #leftButton{
+      padding: 0px;
+      border: 0px;
+      background-color: #FFFFFF;
+    }
 		.slider axis{
 			stroke: black;
 		}
