@@ -61,9 +61,21 @@ var middguard = middguard || {};
   		this.timeScale= d3.time.scale();
   		this.axis = d3.svg.axis();
      
+      //replace old selected person with new one on click
+      d3.select(this.el).select('h1').on('click', function(){
+        middguard.state.People.selections.pop();
+        middguard.state.People.selections.add(v.model);
+        d3.select(v.el).style('color', 'rgb(0, 255, 0)');
+      })
       
+      d3.select(this.el).style('cursor', 'pointer');
      
-      
+      //change color if unselected
+      this.listenTo(middguard.state.People.selections, 'remove', function(model){
+        if (model.get('id') === v.model.get('id')){
+          d3.select(v.el).style('color', 'rgb(0, 0, 0)');
+        }
+      })
       
       
   		this.timeScale.domain([middguard.state.timeRange.start, middguard.state.timeRange.end]);

@@ -15,13 +15,13 @@ var middguard = middguard || {};
       // Properties for our chart
       this.margin = {top: 20, right: 20, bottom: 30, left: 10};
       this.height = 125;
-      this.svgWidth = 2200;
+      this.svgWidth = 2150;
       this.widthOffset = 350;
       this.width = window.innerWidth - this.widthOffset;// - this.margin.left - this.margin.right;
       
       // Setup elements for the view
       this.d3el = d3.select(this.el);
-      console.log(this.width);
+      
       this.d3el.attr('width', this.width)
         .style('width', this.width + 'px');
       
