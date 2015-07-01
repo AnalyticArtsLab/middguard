@@ -15,14 +15,19 @@ var middguard = middguard || {};
       // Properties for our chart
       this.margin = {top: 20, right: 20, bottom: 30, left: 10};
       this.height = 125;
+      this.svgWidth = 2200;
       this.widthOffset = 350;
       this.width = window.innerWidth - this.widthOffset;// - this.margin.left - this.margin.right;
       
       // Setup elements for the view
       this.d3el = d3.select(this.el);
+      console.log(this.width);
+      this.d3el.attr('width', this.width)
+        .style('width', this.width + 'px');
+      
       this.svg = this.d3el.append('svg')
           .attr('height', 75)
-          .attr('width', this.width)
+          .attr('width', this.svgWidth)
 					.attr('id', 'timelineSVG')
           .attr('focusable', 'true')
 			.append("g")
@@ -45,7 +50,7 @@ var middguard = middguard || {};
 			this.axisEl = d3.svg.axis().tickValues(this.dateList);
       
 			this.timeScale = d3.time.scale().domain(this.dateRangeFull);
-			this.timeScale.range([0,this.width-this.margin.left*10]);
+			this.timeScale.range([0,this.svgWidth-this.margin.left*10]);
 			this.axisEl.scale(this.timeScale)
 				.orient('bottom')
 				.innerTickSize(20)
@@ -66,8 +71,9 @@ var middguard = middguard || {};
         
       this.buttons = this.d3el.append('div')
         .attr('id', 'buttons')
-        .html('<div />');
-        
+        .html('<div />')
+        .style('width', this.svgWidth +'px');
+      
       //append left button
       this.buttons.append('button')
         .attr('id', 'leftButton')

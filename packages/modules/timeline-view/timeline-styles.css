@@ -1,8 +1,9 @@
 		#middguard-timeline{
 			margin: 0 60px 0 15px;
 			height: 125px;
-      float: right;
+      float: left;
       margin: 5px;
+      display: block;
 		}
     
     #rightButton{
@@ -31,6 +32,7 @@
 		
 		#middguard-timeline svg {
 		  font: 10px sans-serif;
+      margin-left: 25px;
 		}
 		#timeTriangle {
 			fill: red;
