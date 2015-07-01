@@ -57,8 +57,7 @@ var middguard = middguard || {};
               
               // remove the person from this group
               if (key === 'remove' || (key.slice(0, 4) === 'move' && destID !== gid)){
-                
-                console.log('remove', pid, gid);
+          
                 // remove the person from the current group
                 var currentGroup = middguard.entities.Groups.get(gid);
                 var members = currentGroup.get('members');
@@ -68,6 +67,8 @@ var middguard = middguard || {};
                 }else{
                   currentGroup.set('group_id', members[0]);
                   currentGroup.set('members', members);
+                  // added because the array ref doesn't change, so no change event is triggered
+                  currentGroup.trigger('change:removeGroup', currentGroup); 
                   currentGroup.save();
                 }
               }
@@ -83,7 +84,7 @@ var middguard = middguard || {};
                     checked: true // change this
                   }, {success:function(model, response, options)
                     {
-                      console.log('created', model);
+     
                       middguard.state.Groups.selections.add(model);
                     },
                     error: function(model,response, options){
@@ -98,7 +99,8 @@ var middguard = middguard || {};
                 var members = newGroup.get('members');
                 members.push(pid);
                 newGroup.set('members', members);
-          
+                // added because the array ref doesn't change, so no change event is triggered
+                newGroup.trigger('change:addGroup', newGroup);
                 newGroup.save();
               }
               
@@ -152,12 +154,58 @@ var middguard = middguard || {};
     cellSize: 10,
     initialize: function(){
       var v = this;
-      _.bindAll(this, 'render');
+      _.bindAll(this, 'render', 'setup');
       
-      var setSize = this.model.size;
+      var setSize = +this.model.size;
       var numGroups = this.model.groups.length;
 
       this.$el.html(this.template({size:(setSize==1)? 'Individuals': setSize}));
+      
+     
+     
+      this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.render);
+      this.listenTo(middguard.state.Groups.selections, 'add remove reset', this.render);
+      this.listenTo(middguard.state.Groups.selections, 'change:addGroup', function(model) {
+        
+        var members = model.get('members');
+        if (members.length === setSize){
+          // new member of this set
+          v.model.groups.push(model);
+          v.setup();
+        }else if (members.length - 1 === setSize){
+          // old member of this group -- remove it
+          v.model.groups.splice(v.model.groups.indexOf(model), 1);
+
+          v.setup();
+        }
+      });
+      
+      this.listenTo(middguard.state.Groups.selections, 'change:removeGroup', function(model) {
+        var members = model.get('members');
+        if (members.length === setSize){
+          // new member of this set
+          v.model.groups.push(model);
+          v.setup();
+        }else if (members.length + 1 === setSize){
+          // old member of this group -- remove it
+          v.model.groups.splice(v.model.groups.indexOf(model), 1);
+
+          v.setup();
+        }
+        
+      });
+      
+      this.setup();
+  
+    },
+    
+    
+    
+    setup: function(){
+      var v = this;
+ 
+      var setSize = +this.model.size;
+      var numGroups = this.model.groups.length;
       
       d3.select(this.el).select('.groups-svg')
       .attr('width', v.widthCount*v.cellSize)
@@ -168,10 +216,14 @@ var middguard = middguard || {};
       
       
       var canvas = d3.select(this.el).select('.group-grid');
+      
       this.cells = canvas.selectAll('rect')
-      .data(this.model.groups)
-      .enter()
+      .data(this.model.groups);
+      
+      this.cells.enter()
       .append('rect');
+      
+      this.cells.exit().remove();
       
       
       this.cells.attr('width',v.cellSize)
@@ -219,15 +271,15 @@ var middguard = middguard || {};
         
         
       });
-     
-     this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.render)
-      this.listenTo(middguard.state.Groups.selections, 'add remove reset', this.render)
-      this.render();
+      
+      
+      return this.render();
+      
     },
     
     render: function(){
       var v = this;
-      
+ 
       this.cells
       .attr('fill',function(d){
          if (middguard.state.Groups.selections.find(function(g){
@@ -301,7 +353,7 @@ var middguard = middguard || {};
       this.checkbox = $(".group-checkbox", this.$el);
       this.checkbox.prop('checked', this.model.get('checked'));
 
-      this.listenTo(this.model, 'change sync', this.update);
+      this.listenTo(this.model, 'change change:addGroup change:removeGroup sync', this.update);
       
       
     },
@@ -314,7 +366,6 @@ var middguard = middguard || {};
     
     update: function(){
       var v = this;
-      console.log('update');
       var days = d3.select(this.el)
       .select('.days-list')
       .selectAll('span')
