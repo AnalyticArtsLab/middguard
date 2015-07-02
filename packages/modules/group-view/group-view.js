@@ -501,7 +501,7 @@ var middguard = middguard || {};
   
   var GroupDetailView = middguard.View.extend({
     className: 'group-detail-view',
-    template: _.template('<h2><%= gid %></h2><p>Days: <span class="days-list"></span></p><p >Members: <span class="members-list"></span></p><p >Tags: <span class="tag-list"></span> <input type="button" value="+"  id="add-tag" /><p>Checked: <input class="group-checkbox" type="checkbox" /></p>'),
+    template: _.template('<h2><%= gid %></h2><p>Days: <span class="days-list"></span></p><p >Members: <span class="members-list"></span></p><p >Tags: <span class="tag-list"></span> <input type="button" value="+"  id="add-tag" /><p>Checked: <input class="group-checkbox" type="checkbox" /></p><p>Notes</p><textarea cols = "40" rows="8" class="group-notes"/>'),
     events: {
       "click .group-checkbox": "toggleChecked",
       "click #add-tag":"showDialog"
@@ -597,6 +597,15 @@ var middguard = middguard || {};
           }
         });
       
+      
+      d3.select(this.el)
+      .select('.group-notes')
+        .datum(this.model.get('notes'))
+        .text(function(d){ return d;})
+        .on('blur', function(d){
+          v.model.set('notes', $(this).val());
+          v.model.save();
+        });
    
       
       return this.render();
