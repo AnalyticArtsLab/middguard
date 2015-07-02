@@ -85,7 +85,7 @@ var middguard = middguard || {};
           });
           middguard.entities.People.get(pid).set({metric:max});
           
-          //middguard.entities.People.sort();
+          middguard.entities.People.sort();
           
           v.render();
         }});

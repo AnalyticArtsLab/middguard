@@ -446,52 +446,21 @@ var middguard = middguard || {};
     },
     initialize: function(){
       var v = this;
-      _.bindAll(this, 'update', 'toggleChecked', 'showDialog');
+      _.bindAll(this, 'update', 'toggleChecked', 'showDialog', 'render');
       var gid = this.model.get('id');
       this.$el.html(this.template({gid:gid}));
       this.$el.data('gid', gid);
       
-      var days = d3.select(this.el)
-      .select('.days-list')
-      .selectAll('span')
-      .data(this.model.get('days'))
-      .enter()
-      .append('span')
-      .html(function(d, i){return (i < v.model.get('days').length - 1)? d+', ': d ;});
-      
-      
-      var members = d3.select(this.el)
-      .select('.members-list')
-      .selectAll('span')
-      .data(this.model.get('members'))
-      .enter()
-      .append('span')
-      .attr('class', 'group-member')
-      .html(function(d,i){return (i < v.model.get('members').length - 1)? d+', ': d ;});
-      
-      var tags = d3.select(this.el)
-      .select('.tag-list')
-      .selectAll('span')
-      .data(this.model.get('tags'))
-      .enter()
-      .append('span')
-      .attr('class', 'group-tag-item')
-      .html(function(d,i){
-        var tag = middguard.entities.Tags.get(d).get('tag');
-        return (i < v.model.get('tags').length - 1)? tag+', ': tag ;});
-      
-      
+      this.update();
       
       this.checkbox = $(".group-checkbox", this.$el);
       this.checkbox.prop('checked', this.model.get('checked'));
 
       this.listenTo(this.model, 'change change:addGroup change:removeGroup change:tag sync', this.update);
-      
-      
 
-      
-      
-      
+      this.listenTo(middguard.state.People.selections, 'add reset', this.render);
+      this.listenTo(middguard.state.Tags.selections, 'add reset', this.render);
+
     },
     
     showDialog:function(){
@@ -528,7 +497,17 @@ var middguard = middguard || {};
       .append('span')
       .attr('class', 'group-member');
       
-      members.html(function(d,i){return (i < v.model.get('members').length - 1)? d+', ': d ;});
+      members.html(function(d,i){return (i < v.model.get('members').length - 1)? d+', ': d ;})
+      .on('click', function(d){
+        var person = middguard.entities.People.get(d);
+        if (middguard.state.People.selections.get(d)){
+          // this is the selection, remove it
+          middguard.state.People.selections.reset();
+        }else{
+          middguard.state.People.selections.reset(person);
+        }
+        
+      });
       
       
       
@@ -545,13 +524,40 @@ var middguard = middguard || {};
       
       tags.html(function(d,i){
         var tag = middguard.entities.Tags.get(d).get('tag');
-        return (i < v.model.get('tags').length - 1)? tag+', ': tag ;});
+        return (i < v.model.get('tags').length - 1)? tag+', ': tag ;})
+      .on('click', function(d){
+          var tag = middguard.entities.Tags.get(d);
+          if (middguard.state.Tags.selections.get(d)){
+            // this is the selection, remove it
+            middguard.state.Tags.selections.reset();
+          }else{
+            middguard.state.Tags.selections.reset(tag);
+          }
+        });
+      
+   
+      
+      return this.render();
+    },
+    
+    render: function(){
+      var v = this;
+      
+      d3.select(this.el).selectAll('.group-member')
+      .style('background',function(d){return (middguard.state.People.selections.get(d)) ? '#00FF00' : 'white';});
+      
+      d3.select(this.el).selectAll('.group-tag-item')
+      .style('background',function(d){return (middguard.state.Tags.selections.get(d)) ? '#00FF00' : 'white';});
+       
       
       return this;
     }
     
     
   });
+  
+  
+  
  
 	
 	middguard.addModule('GroupView', GroupView);

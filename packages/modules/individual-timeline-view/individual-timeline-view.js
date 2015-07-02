@@ -63,19 +63,26 @@ var middguard = middguard || {};
      
       //replace old selected person with new one on click
       d3.select(this.el).select('h1').on('click', function(){
-        middguard.state.People.selections.pop();
-        middguard.state.People.selections.add(v.model);
-        d3.select(v.el).style('color', 'rgb(0, 255, 0)');
-      })
+        if (middguard.state.People.selections.get(pid)){
+          // this person is already in the selection, remove it
+          middguard.state.People.selections.reset();
+        }else{
+          middguard.state.People.selections.reset(v.model);
+        }
+      });
       
       d3.select(this.el).style('cursor', 'pointer');
      
-      //change color if unselected
-      this.listenTo(middguard.state.People.selections, 'remove', function(model){
-        if (model.get('id') === v.model.get('id')){
-          d3.select(v.el).style('color', 'rgb(0, 0, 0)');
+      //change color based on selection
+      this.listenTo(middguard.state.People.selections, 'add remove reset', function(model){
+        console.log('selection change', pid);
+        if (middguard.state.People.selections.get(pid)){
+          // this person is already in the selection, remove it
+         d3.select(v.el).select('h1').style('background', 'rgb(0, 255, 0)');
+        }else{
+          d3.select(v.el).select('h1').style('background', 'white');
         }
-      })
+      });
       
       
   		this.timeScale.domain([middguard.state.timeRange.start, middguard.state.timeRange.end]);
@@ -258,6 +265,13 @@ var middguard = middguard || {};
       });
       
       
+      // set color based on current selections
+      if (middguard.state.People.selections.get(v.id)){
+        // this person is already in the selection, remove it
+       d3.select(v.el).select('h1').style('background', 'rgb(0, 255, 0)');
+      }else{
+        d3.select(v.el).select('h1').style('background', 'white');
+      }
       return v;
     }
     
