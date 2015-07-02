@@ -468,7 +468,7 @@ var middguard = middguard || {};
         }else{
           for (var i=0; i < middguard.state.People.workingSet.models.length; i++){
             if (_.contains(d.get('members'), middguard.state.People.workingSet.models[i].get('id'))){
-              return '#AAAACC';
+              return 'rgb(0,100,255)';
             }
           }
 
