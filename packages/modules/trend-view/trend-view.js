@@ -400,7 +400,8 @@ var middguard = middguard || {};
       //function actually draws a trend line
       //function is specific, not particularly extensible
       
-      //this.d3el.selectAll('.trendGraphChild').remove();
+      var globalThis = this;
+     
       var parentElmnt = this.d3el
         .append('div')
         .attr('class', 'trendGraphChildren');
@@ -423,6 +424,10 @@ var middguard = middguard || {};
         .domain([xMin, xMax])
         .range([15, borderWidth-15]);
       
+      var revXScale = d3.time.scale()
+        .domain([15, borderWidth-15])
+        .range([xMin, xMax]);
+      
       var yScale = d3.scale.linear()
         .domain([yMin, yMax])
         .range([axisY+2, borderHeight-2])
@@ -444,7 +449,37 @@ var middguard = middguard || {};
         .attr('d', line)
         .attr('stroke', '#626f91')
         .attr('stroke-width', 2)
-        .attr('fill', 'none');
+        .attr('fill', 'none')
+        .on('mouseover', function(d){
+          
+          //get rid of any previous mouseover stuff
+          d3.selectAll('.xTrack').remove();
+          d3.selectAll('.trendTooltip').remove();
+          
+          console.log(d3.mouse(this));
+          var dateTime = new Date(revXScale(d3.mouse(this)[0]));
+          canvas.append('circle')
+          .attr('cx', function(){
+            console.log(d3.mouse(this)[0]); return d3.mouse(this)[0];
+          })
+            .attr('cy', d3.mouse(this)[1])
+            .attr('r', 4)
+            .attr('fill', 'none')
+            .attr('stroke', 'black')
+            .attr('class', 'xTrack');
+            
+          globalThis.parentView.d3el.select('p').html(function(d){
+            console.log(this.innerHTML);
+            this.innerHTML = String(this.innerHTML) + String('\t\t\tDate and Time: ' + globalThis.outputDate(dateTime));
+            return this;
+          })
+            /*.append('text')
+            .property('x', '900px')
+            .attr('y', '20px')
+            .attr('class', 'trendTooltip')
+            .text('Date and Time: ' + globalThis.outputDate(dateTime));
+            */
+        });
 
       canvas
         .append('g')
