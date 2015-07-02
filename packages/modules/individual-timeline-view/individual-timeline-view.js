@@ -75,7 +75,6 @@ var middguard = middguard || {};
      
       //change color based on selection
       this.listenTo(middguard.state.People.selections, 'add remove reset', function(model){
-        console.log('selection change', pid);
         if (middguard.state.People.selections.get(pid)){
           // this person is already in the selection, remove it
          d3.select(v.el).select('h1').style('background', 'rgb(0, 255, 0)');

@@ -8,7 +8,7 @@ var middguard = middguard || {};
 
   var GroupView = middguard.View.extend({
     id: 'group-view-rect',
-		template: _.template('<h1>Groups</h1><div><div id="all-groups-container"></div><div id="group-details"></div></div>'),
+		template: _.template('<h1>Groups</h1><div><p>Color by: <select id="group-color-select"><option value="checked">Checked</option></select></p><div id="all-groups-container"></div><div id="group-details"></div></div>'),
     tagFormTemplate: _.template('<div id="tag-form" title="Add New Tag"><form><fieldset><ul id="tag-list"></ul><label for="group-tag">Tag</label> <input type="text" name="tag" id="group-tag" class="text ui-widget-content ui-corner-all"></fieldset></form></div>'),
     events:{},
     
@@ -19,7 +19,48 @@ var middguard = middguard || {};
       this.$el.html(this.template);
       this.$el.append(this.tagFormTemplate);
       
+      // create an event broadcaster
+      var switchboard = _.extend({}, Backbone.Events);
       
+      
+      
+      // populate the color selector
+      this.populateColorSelector();
+      
+      this.listenTo(middguard.entities.Tags, 'add remove reset', this.populateColorSelector);
+      d3.select(this.el).select('#group-color-select')
+      .on('change', function(){
+        switchboard.trigger('select:change', this.value);
+      });
+      
+      // create the group sets
+      var groups = {};
+      
+      middguard.entities.Groups.models.forEach(function(group){
+        var size = group.get('members').length;
+
+        if (groups.hasOwnProperty(size)){
+
+          groups[size].push(group);
+        }else{
+          groups[size] = [group];
+        }
+      });
+      
+      
+      for (var groupSize in groups){
+        var newGroupSet = new GroupSetView({model:{size: groupSize, groups: groups[groupSize]}, switchboard:switchboard});
+        $("#all-groups-container",this.$el).append(newGroupSet.el);
+        
+      };
+
+      this.listenTo(middguard.state.Groups.selections, 'add', this.addDetails);
+      this.listenTo(middguard.state.Groups.selections, 'reset', function(collection, options){
+        collection.models.forEach(function(model){v.addDetails(model);});
+      });
+      
+      
+      // create the tagging dialog box
       $('#tag-form', this.$el).dialog({
     		autoOpen: false,
     		height: 400,
@@ -103,31 +144,7 @@ var middguard = middguard || {};
   
       
       
-      
-      var groups = {};
-      
-      middguard.entities.Groups.models.forEach(function(group){
-        var size = group.get('members').length;
-
-        if (groups.hasOwnProperty(size)){
-
-          groups[size].push(group);
-        }else{
-          groups[size] = [group];
-        }
-      });
-      
-      
-      for (var groupSize in groups){
-        var newGroupSet = new GroupSetView({model:{size: groupSize, groups: groups[groupSize]}});
-        $("#all-groups-container",this.$el).append(newGroupSet.el);
-      };
-
-      this.listenTo(middguard.state.Groups.selections, 'add', this.addDetails);
-      this.listenTo(middguard.state.Groups.selections, 'reset', function(collection, options){
-        collection.models.forEach(function(model){v.addDetails(model);});
-      });
-
+     
 
       // Create the context menu we will use for the details
 
@@ -245,6 +262,21 @@ var middguard = middguard || {};
 
     },
     
+    populateColorSelector: function(){
+      var selector = d3.select(this.el).select('#group-color-select');
+      
+      var tagOptions = selector.selectAll('.tag-option').data(middguard.entities.Tags.models);
+      
+      tagOptions.exit().remove();
+      
+      tagOptions.enter()
+      .append('option')
+      .attr('class','tag-option')
+      .attr('value', function(d){return 'tag:' + d.get('tag');})
+      .html(function(d){return 'Tag: ' + d.get('tag')});
+   
+    },
+    
     addDetails: function(model){
       var v = this;
       var groupDetails = new GroupDetailView({model:model});
@@ -270,16 +302,31 @@ var middguard = middguard || {};
     template: _.template('<h2><%= size %></h2><svg class="groups-svg"><g class="group-grid"></g></svg>'),
     widthCount: 50,
     cellSize: 10,
-    initialize: function(){
+    initialize: function(options){
       var v = this;
+      
       _.bindAll(this, 'render', 'setup');
       
       var setSize = +this.model.size;
       var numGroups = this.model.groups.length;
 
       this.$el.html(this.template({size:(setSize==1)? 'Individuals': setSize}));
-      
      
+      this.coloringFunc = this.coloringTestChecked;
+      this.listenTo(options.switchboard, 'select:change', function(value){
+        if (value === 'checked'){
+          v.coloringFunc = v.coloringTestChecked;
+        }else{
+          var tag = value.slice(value.indexOf(':')+1);
+          v.coloringFunc = function(group){
+            return v.coloringTestTag(group, tag);
+          }
+          
+        }
+     
+        v.render();
+      });
+      
      
       this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.render);
       this.listenTo(middguard.state.Groups.selections, 'add remove reset', this.render);
@@ -315,6 +362,19 @@ var middguard = middguard || {};
       
       this.setup();
   
+    },
+    
+    coloringTestChecked: function(group){
+      return group.get('checked');
+      
+    },
+    
+    coloringTestTag: function(group, tag){
+      var tagModel = middguard.entities.Tags.findWhere({tag:tag});
+      if (tagModel){
+        return group.get('tags').indexOf(tagModel.id) != -1;
+      }
+      return false;
     },
     
     
@@ -397,7 +457,8 @@ var middguard = middguard || {};
     
     render: function(){
       var v = this;
- 
+      
+    
       this.cells
       .attr('fill',function(d){
          if (middguard.state.Groups.selections.find(function(g){
@@ -410,7 +471,8 @@ var middguard = middguard || {};
               return '#AAAACC';
             }
           }
-          return (d.get('checked')) ? 'white': '#FFDDDD';
+
+          return (v.coloringFunc(d)) ? '#FFFF88': 'white';
         }
         
       });
