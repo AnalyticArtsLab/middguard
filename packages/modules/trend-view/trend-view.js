@@ -449,7 +449,8 @@ var middguard = middguard || {};
         .attr('d', line)
         .attr('stroke', '#626f91')
         .attr('stroke-width', 2)
-        .attr('fill', 'none')
+        .attr('fill', 'none');
+        /*
         .on('mouseover', function(d){
           
           //get rid of any previous mouseover stuff
@@ -473,14 +474,14 @@ var middguard = middguard || {};
             this.innerHTML = String(this.innerHTML) + String('\t\t\tDate and Time: ' + globalThis.outputDate(dateTime));
             return this;
           })
-            /*.append('text')
-            .property('x', '900px')
-            .attr('y', '20px')
-            .attr('class', 'trendTooltip')
-            .text('Date and Time: ' + globalThis.outputDate(dateTime));
-            */
+            //.append('text')
+            //.property('x', '900px')
+            //.attr('y', '20px')
+            //.attr('class', 'trendTooltip')
+            //.text('Date and Time: ' + globalThis.outputDate(dateTime));
+            
         });
-
+        */
       canvas
         .append('g')
         .attr('class', 'axis')

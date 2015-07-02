@@ -6,7 +6,7 @@ var middguard = middguard || {};
   var LocationHeatmap = middguard.View.extend({
     id: 'heatmap',
     
-    template: _.template('<div id="heatmapTitle"><h1>Location Heatmap</h1></div><svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><div><select id="heatmap-choice"><option value="all">All Locations</option><option value="checkins">Check-In Locations</option></select><p id="atf">Attraction Type Filter: </><div id="filter1"><input type="checkbox" class="filter" id="NoFilter">No Filter</input><input type="checkbox" class="filter" id="ThrillRides">Thrill Rides</input><input type="checkbox" class="filter" id="KiddieRides">Kiddie Rides</input><input type="checkbox" class="filter" id="RidesforEveryone">Rides for Everyone</input></div><div id="filter2"><input type="checkbox" class="filter" id="Shows&Entertainment">Shows & Entertainment</input><input type="checkbox" class="filter" id="Information&Assistance">Information & Assistance</input><input type="checkbox" class="filter" id="Entrance">Entrance</input><input type="checkbox" class="filter" id="Unknown">Unknown</input></div></div>'),
+    template: _.template('<div id="heatmapTitle"><h1>Location Heatmap</h1></div><svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><div><select id="heatmap-choice"><option value="all">All Locations</option><option value="checkins">Check-In Locations</option></select></div>'),
     
     events:{
       "change #heatmap-choice":"userChange",
@@ -80,6 +80,10 @@ var middguard = middguard || {};
         }
       });
       
+      d3.selectAll('.filter').on('change', function(){
+          globalThis.userChange();
+        });
+      
 			
     },
     
@@ -102,7 +106,7 @@ var middguard = middguard || {};
           //Break up data structure (a dictionary) into different sets whose keys
           //are based on the name of the attraction type in case we need to 
           //easily find out which attraction types have been selected
-        
+          console.log('here');
           x = model.get('x');
           y = model.get('y');
           type = model.get('type').replace(/\s+/g, '');

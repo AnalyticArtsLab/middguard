@@ -69,6 +69,26 @@ var middguard = middguard || {};
 				.attr('y', -8)
 				.attr('height', 16);
         
+      this.d3el.append('p')
+        .text('Attraction Type Filter: ')
+        .style('display', 'inline')
+        .style('font-family', 'Times New Roman, Times, serif');
+        
+        
+      this.filters = ['No Filter', 'Thrill Rides', 'Kiddie Rides', 'Rides for Everyone', 'Shows & Entertainment', 'Information & Assistance', 'Entrance', 'Unknown'];
+      
+      this.filters.forEach(function(filter){
+        var input = globalThis.d3el
+          .append('label')
+          .text(filter)
+          .style('font-family', 'Times New Roman, Times, serif')
+          .append('input')
+          .attr('type', 'checkbox')
+          .attr('class', 'filter')
+          .attr('id', filter.replace(/\s+/g, ''));
+          
+      });
+      
       this.buttons = this.d3el.append('div')
         .attr('id', 'buttons')
         .html('<div />')

@@ -21,10 +21,10 @@ var middguard = middguard || {};
 					//only data is encoded, not functions
 					for (attribute in this[dataSet]){
             if (attribute === 'workingSet' || attribute === 'selections'){
-              var encoding = getModelIdentifiers(this[dataSet][attribute].models);
+              var encoding = getModelBareBones(this[dataSet][attribute].models);
               returnObj[dataSet][attribute] = this[dataSet][attribute].reset(encoding);
 					  } else{
-					    returnObj[dataSet][attribute] = this[dataSet][attribute];
+					    //returnObj[dataSet][attribute] = this[dataSet][attribute];
               
 					  }
 		      // var selectionsEncoding = getModelIdentifiers(this[dataSet].selections.models);
@@ -36,6 +36,7 @@ var middguard = middguard || {};
   			}
       }
       return returnObj;
+      
     },
 
     // Properties can be anything of the form 
@@ -93,17 +94,23 @@ var middguard = middguard || {};
       // //(i.e. it's whatever the value field is for the "selections" key in the "state" object 
   };
 
-  var getModelIdentifiers = function (collection) {
+  var getModelBareBones = function (collection) {
 		if (collection.length == 0){
 			return collection;
 		} else{
 	    return _.map(collection, function (model) {
 				if (model.attributes && model.cid){
 					//if 'model' is an actual Backbone model
-					return {id: model.get('id')};
+					return model.attributes;
 				} else {
 					//if 'model' is just a regular JS object
-					return {id: model.id};
+          var returnObj = {};
+          for (var prop in model){
+            if (typeof(prop) != 'function'){
+              returnObj[prop] = model[prop];
+            }
+          }
+					return returnObj;
 				}
 	    });
 		}
