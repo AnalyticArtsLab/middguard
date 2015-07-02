@@ -9,8 +9,7 @@ var middguard = middguard || {};
     template: _.template('<div id="heatmapTitle"><h1>Location Heatmap</h1></div><svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><div><select id="heatmap-choice"><option value="all">All Locations</option><option value="checkins">Check-In Locations</option></select></div>'),
     
     events:{
-      "change #heatmap-choice":"userChange",
-      "change .filter": "userChange"
+      "change #heatmap-choice":"userChange"
       
     },
     
@@ -32,7 +31,10 @@ var middguard = middguard || {};
       _.extend(this, Backbone.Events);
       _.bindAll(this, 'render', 'getData', 'userChange');
       
-      this.listenTo(middguard.state.timeRange, 'all', this.getData); //this.getData
+      this.listenTo(middguard.state.timeRange, 'all', this.getData);
+      this.listenTo(middguard.state.filters, 'change', function(col, resp, opt){
+        this.render(globalThis.col, globalThis.resp, globalThis.opt);
+      });
       this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
         this.render(col, resp, opt);
       });
@@ -43,14 +45,16 @@ var middguard = middguard || {};
         this.render(globalThis.col, globalThis.resp, globalThis.opt);
       });
       
-      this.$('#heatmap-choice')[0].onchange=this.selectChange;
+      this.availAttractions = new Set();
+      
       this.distinctCheckins = new Set([
         '42$37', '34$68', '67$37', '73$79', '81$77', '92$81', '73$84', '85$86', '87$63', '28$66',
         '38$90', '87$48', '79$89', '16$49', '23$54', '99$77', '86$44', '63$99', '83$88', '78$48', '27$15', '50$57',
         '87$81', '79$87', '78$37', '76$22', '43$56', '69$44', '26$59', '6$43', '82$80', '76$88', '47$11', '16$66', '17$43',
         '43$78', '45$24', '32$33', '60$37', '0$67', '17$67', '48$87'
       ]);
-      this.attractionTypes = {};
+      
+      //this.listenTo(middguard.state.filters.selections, 'change', this.userChange);
       this.dataStore = {};
       this.dataStoreList = [];
       this.getData();
@@ -80,49 +84,12 @@ var middguard = middguard || {};
         }
       });
       
-      d3.selectAll('.filter').on('change', function(){
-          globalThis.userChange();
-        });
       
 			
     },
     
-    userChange: function(){
-      console.log(this);
+    userChange: function(model){
       middguard.state.heatmapChoice = document.getElementById('heatmap-choice').value;
-      var attractionTypes = {};
-      var filterSet = new Set();
-      var x, y, type, elmnts, numElmnts;
-      elmnts = document.getElementsByClassName('filter');
-      numElmnts = elmnts.length;
-      for (var i = 0; i < numElmnts; i++){
-        if (elmnts[i].checked){
-          filterSet.add(elmnts[i].id);
-        }
-      }
-      if (filterSet.size > 0 && ! document.getElementById('NoFilter').checked){
-        middguard.entities['Pois'].forEach(function(model){
-          //Add all types of attractions to a data structure for filtering later.
-          //Break up data structure (a dictionary) into different sets whose keys
-          //are based on the name of the attraction type in case we need to 
-          //easily find out which attraction types have been selected
-          console.log('here');
-          x = model.get('x');
-          y = model.get('y');
-          type = model.get('type').replace(/\s+/g, '');
-          if (x && y && filterSet.has(type)){
-            if (! attractionTypes[type]){
-              attractionTypes[type] = new Set();
-            }
-            attractionTypes[type].add(x + ',' + y);
-          }
-        });
-        this.attractionTypes = attractionTypes;
-      } else {
-        document.getElementById('NoFilter').checked = true;
-        this.attractionTypes = {};
-      }
-      console.log(this.attractionTypes);
       this.getData();
     },
     
@@ -140,16 +107,7 @@ var middguard = middguard || {};
       //start and end are specific, non-extensible dates
       var start = new Date("2014-06-06 08:02:00");
       var end = new Date("2014-06-08 23:20:16");
-      if (middguard.state.timeRange.current < start){
-        this.stopListening(middguard.state.timeRange, "change", this.selectChange);
-        middguard.state.timeRange.current = start;
-        this.listenTo(middguard.state.timeRange, "change", this.selectChange);
-      }
-      if (middguard.state.timeRange.current > end){
-        this.stopListening(middguard.state.timeRange, "change", this.selectChange);
-        middguard.state.timeRange.current = end;
-        this.listenTo(middguard.state.timeRange, "change", this.selectChange);
-      }
+      
       var dateString = this.outputDate(middguard.state.timeRange.current);
       if (middguard.state.heatmapChoice == 'all'){
         //if data is being pulled for all locations
@@ -302,16 +260,11 @@ var middguard = middguard || {};
           .attr('cx', function(d){return d.x*10;})
           .attr('cy', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('r', function(d){
-            if (! _.isEmpty(globalThis.attractionTypes)){
-              for (var current in globalThis.attractionTypes){
-                if (globalThis.attractionTypes[current].has(d.x + ',' + d.y) && d.count > 0){
-                  return Math.pow(areaScale(d.count)/Math.PI, 0.5);
-                } 
-              }
-              return 0;
-            } else {
-              return (d.count > 0) ? Math.pow(areaScale(d.count)/Math.PI, 0.5): 0;
+            if (middguard.state.filters['No Filter']){
+              return Math.pow(areaScale(d.count)/Math.PI, 0.5);
             }
+            var possibility = middguard.entities.Pois.findWhere({x: d.x, y: d.y});
+            return (possibility && middguard.state.filters[possibility.get('type')] && d.count > 0) ? Math.pow(areaScale(d.count)/Math.PI, 0.5): 0;
           })
           .attr('fill', function(d){
             var newModel = middguard.state.Pois.selections.findWhere({x: d.x, y: d.y});
@@ -334,16 +287,11 @@ var middguard = middguard || {};
           .attr('cx', function(d){return d.x*10;})
           .attr('cy', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('r', function(d){
-            if (! _.isEmpty(globalThis.attractionTypes)){
-              for (var current in globalThis.attractionTypes){
-                if (globalThis.attractionTypes[current].has(d.x + ',' + d.y) && d.count > 0){
-                  return Math.pow(areaScale(d.count)/Math.PI, 0.5);
-                } 
-              }
-              return 0;
-            } else {
-              return (d.count > 0) ? Math.pow(areaScale(d.count)/Math.PI, 0.5): 0;
+            if (middguard.state.filters['No Filter']){
+              return Math.pow(areaScale(d.count)/Math.PI, 0.5);
             }
+            var possibility = middguard.entities.Pois.findWhere({x: d.x, y: d.y});
+            return (possibility && middguard.state.filters[possibility.get('type')] && d.count > 0) ? Math.pow(areaScale(d.count)/Math.PI, 0.5): 0;
           })
           .attr('fill', function(d){
             var newModel = middguard.state.Pois.selections.findWhere({x: d.x, y: d.y});

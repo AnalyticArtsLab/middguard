@@ -72,6 +72,10 @@ var middguard = middguard || {};
       });
       
       d3.select(this.el).style('cursor', 'pointer');
+      
+      //filter checkin attraction types appropriately
+      
+      this.listenTo(middguard.state.filters, 'change', this.render);
      
       //change color based on selection
       this.listenTo(middguard.state.People.selections, 'add remove reset', function(model){
@@ -103,6 +107,28 @@ var middguard = middguard || {};
       }
       
       
+    },
+    
+    userChange: function(){
+      var v = this;
+      var availAttractions = new Set();
+      var x, y, type, searchObj;
+      if (middguard.state.filters.selections.models.length > 0 && ! middguard.state.filters.selections.findWhere({'No Filter': true})){
+        middguard.entities['Pois'].forEach(function(model){
+          //Put all xy instances of selected attraction types into a set
+          
+          x = model.get('x');
+          y = model.get('y');
+          searchObj = {};
+          searchObj[model.get('type')] = true;
+          if (x && y && middguard.state.filters.selections.findWhere(searchObj)) availAttractions.add(x + ',' + y);
+        });
+        v.availAttractions = availAttractions;
+      } else {
+        document.getElementById('NoFilter').checked = true;
+        v.availAttractions = new Set();
+      }
+      v.render();
     },
     
     changeInterval:function(){
@@ -172,7 +198,7 @@ var middguard = middguard || {};
     },
     
     render: function () {
-      console.log('render');
+      
       var v = this;
       var pid = this.model.get('id');
       var traces = middguard.entities.Movementtraces.where({person_id: pid});
@@ -241,7 +267,15 @@ var middguard = middguard || {};
       .attr('x', 0)
       .attr('y', function(d){ 
         return v.timeScale(d.start) + (7 + v.timeScale(d.end) - v.timeScale(d.start))/2;})
-      .text(function(d){return v.fetchLabel(d.x, d.y)});
+      .text(function(d){return v.fetchLabel(d.x, d.y)})
+      .attr('opacity', function(d){
+        if (middguard.state.filters['No Filter']){
+          return '1.0';
+        }
+        var possibility = middguard.entities.Pois.findWhere({x: d.x, y: d.y});
+        return (possibility && middguard.state.filters[possibility.get('type')]) ? '1.0': '0.5';
+          
+      });
       
       
       rects.on('click', function(d){

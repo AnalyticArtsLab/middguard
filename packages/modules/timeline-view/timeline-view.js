@@ -77,6 +77,10 @@ var middguard = middguard || {};
         
       this.filters = ['No Filter', 'Thrill Rides', 'Kiddie Rides', 'Rides for Everyone', 'Shows & Entertainment', 'Information & Assistance', 'Entrance', 'Unknown'];
       
+      //the workingSet and selections will be converted into a collection of models with said attributes
+      middguard.state.filters = {'No Filter':true, 'Thrill Rides':false, 'Kiddie Rides':false, 'Rides for Everyone':false, 'Shows & Entertainment':false, 'Information & Assistance':false, 'Entrance':false, 'Unknown':false};
+      _.extend(middguard.state.filters, Backbone.Events);
+      
       this.filters.forEach(function(filter){
         var input = globalThis.d3el
           .append('label')
@@ -85,8 +89,18 @@ var middguard = middguard || {};
           .append('input')
           .attr('type', 'checkbox')
           .attr('class', 'filter')
-          .attr('id', filter.replace(/\s+/g, ''));
-          
+          .property('checked', function(){
+            return (filter === 'No Filter')? true: false;
+          })
+          .attr('id', filter.replace(/\s+/g, ''))
+          .on('click', function(){
+            if (middguard.state.filters[filter]){
+              middguard.state.filters[filter] = false;
+            } else {
+              middguard.state.filters[filter] = true;
+            }
+            middguard.state.filters.trigger('change');
+          });
       });
       
       this.buttons = this.d3el.append('div')
@@ -158,7 +172,7 @@ var middguard = middguard || {};
     },
 		updateDateRange: function(){
       // system state has changed, change the drawing
-      console.log('here');
+      
 			this.dateRange = [middguard.state.timeRange.current, middguard.state.timeRange.end];
       
       if (this.dateRange[0].valueOf() != middguard.state.timeRange.start.valueOf()){
