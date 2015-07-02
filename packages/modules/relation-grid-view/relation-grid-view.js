@@ -23,7 +23,7 @@ var middguard = middguard || {};
       
       // add a metric to the Person records
       middguard.entities.People.models.forEach(function(m){
-        m.set({id:m.get('person_id'),metric:0})
+        m.set({id:m.get('id'),metric:0})
       });
       
       middguard.entities.People.comparator = function(m){return -m.get('metric');};
@@ -57,7 +57,7 @@ var middguard = middguard || {};
       .attr('fill','white');
       
       this.cells.on('click', function(){
-        var pid = d3.select(this).data()[0].get('person_id');
+        var pid = d3.select(this).data()[0].get('id');
         middguard.state.People.selections.reset({id:pid});
         middguard.state.People.workingSet.reset({id:pid});
         
@@ -108,7 +108,7 @@ var middguard = middguard || {};
     
     
     cellValue: function (model){
-      var pid = model.get('person_id');
+      var pid = model.get('id');
       var pair = middguard.entities.Pairs.findWhere({id1:pid});
       
       if (! pair){
