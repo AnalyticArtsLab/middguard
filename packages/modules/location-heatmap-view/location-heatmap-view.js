@@ -220,21 +220,20 @@ var middguard = middguard || {};
               d3.select(this)
                 .attr('fill', function(d){return colorScale(d.count)})
                 .attr('stroke', function(d){return colorScale(d.count)});
-                d.clicked = false;
-                middguard.state.Pois.selections.remove(d.model);
-                middguard.state.Pois.workingSet.remove(d.model);
-                d.model = null;
+              d.clicked = false;
+              middguard.state.Pois.selections.remove(d.model);
+              var removed = middguard.state.Pois.workingSet.remove(d.model);
+              d.model = null;
             } else {
               d3.select(this).attr('fill', '#99ff66')
                 .attr('stroke', '#99ff66');
               d.clicked = true;
-              var newModel = middguard.state.Pois.selections.reset({x: d.x, y: d.y});
+              var newModel = new Backbone.Model({x: d.x, y: d.y})
+              middguard.state.Pois.selections.reset(newModel);
               if (d3.event.altKey){
-                console.log('here1');
-                middguard.state.Pois.workingSet.add({x: d.x, y: d.y});
+                middguard.state.Pois.workingSet.add(newModel);
               } else {
-                console.log('here2');
-                middguard.state.Pois.workingSet.reset({x: d.x, y: d.y});
+                middguard.state.Pois.workingSet.reset(newModel);
               }
               d.model = newModel;
             }
@@ -323,25 +322,25 @@ var middguard = middguard || {};
             .text('x: ' + d.x + ', y: ' + d.y + ', count: ' + d.count);
           }).on('mouseout', function(d){
             svg.selectAll('.tooltip').remove();
-          }).on('click', function(d, event){
-            console.log(d3.event);
+          }).on('click', function(d){
             if (d.clicked){
               d3.select(this)
                 .attr('fill', function(d){return colorScale(d.count)})
                 .attr('stroke', function(d){return colorScale(d.count)});
-                d.clicked = false;
-                middguard.state.Pois.selections.remove(d.model);
-                middguard.state.Pois.workingSet.remove(d.model);
-                d.model = null;
+              d.clicked = false;
+              middguard.state.Pois.selections.remove(d.model);
+              var removed = middguard.state.Pois.workingSet.remove(d.model);
+              d.model = null;
             } else {
               d3.select(this).attr('fill', '#99ff66')
                 .attr('stroke', '#99ff66');
               d.clicked = true;
-              var newModel = middguard.state.Pois.selections.reset({x: d.x, y: d.y});
+              var newModel = new Backbone.Model({x: d.x, y: d.y})
+              middguard.state.Pois.selections.reset(newModel);
               if (d3.event.altKey){
-                middguard.state.Pois.workingSet.add({x: d.x, y: d.y});
+                middguard.state.Pois.workingSet.add(newModel);
               } else {
-                middguard.state.Pois.workingSet.reset({x: d.x, y: d.y});
+                middguard.state.Pois.workingSet.reset(newModel);
               }
               d.model = newModel;
             }
