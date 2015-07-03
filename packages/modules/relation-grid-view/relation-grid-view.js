@@ -68,6 +68,7 @@ var middguard = middguard || {};
       this.cells = canvas.selectAll('rect')
       .data(middguard.entities.People.models)
       .enter().append('rect')
+      .attr('class','person-rect')
       .attr('width',10)
       .attr('height', 10)
       .attr('x', function(d,i){return (i%100) * 10;})
@@ -85,7 +86,8 @@ var middguard = middguard || {};
         }
         
       });
-
+      
+   
       
       this.dots = canvas.selectAll('.dot')
       .data(middguard.entities.People.models)
@@ -108,26 +110,34 @@ var middguard = middguard || {};
 
     changeSelection: function(){
       var v = this;
-      var pid = middguard.state.People.selections.models[0].get('id');
-      var query = 'id1='+pid+' or id2='+pid;
-      middguard.entities.Pairs.fetch({data:{whereRaw:query},
-        error:function(c,r,o){console.log(r)}, 
-        success:function(c,r,o){
-          var max = c.models[c.length - 1].get('delta');
-          v.colors.domain([0,max]);
+      if (middguard.state.People.selections.length > 0){
+        var pid = middguard.state.People.selections.models[0].get('id');
+        var query = 'id1='+pid+' or id2='+pid;
+        middguard.entities.Pairs.fetch({data:{whereRaw:query},
+          error:function(c,r,o){console.log(r)}, 
+          success:function(c,r,o){
+            var max = c.models[c.length - 1].get('delta');
+            v.colors.domain([0,max]);
           
-          middguard.entities.People.models.forEach(function(m){m.set({metric:0});});
-          c.models.forEach(function(m){
-            var id2 = m.get('id1') === pid ? m.get('id2') : m.get('id1');
-            var p = middguard.entities.People.get(id2);
-            p.set({metric:m.get('delta')}); 
-          });
-          middguard.entities.People.get(pid).set({metric:max+1});
+            middguard.entities.People.models.forEach(function(m){m.set({metric:0});});
+            c.models.forEach(function(m){
+              var id2 = m.get('id1') === pid ? m.get('id2') : m.get('id1');
+              var p = middguard.entities.People.get(id2);
+              p.set({metric:m.get('delta')}); 
+            });
+            middguard.entities.People.get(pid).set({metric:max+1});
           
-          middguard.entities.People.sort();
+            middguard.entities.People.sort();
           
-          v.render();
-        }});
+            v.render();
+          }});
+      }else{
+        // selection has been removed
+        middguard.entities.People.models.forEach(function(m){m.set({metric:0});});
+        v.render();
+        
+      }
+      
       
       
       
