@@ -47,7 +47,6 @@ var middguard = middguard || {};
       
       var slider = this.d3el.select('#stepSlider')[0][0];
       var display = this.d3el.select('#stepDisplay')[0][0];
-      console.log(display);
       slider.oninput = function(){
         var val = parseInt(slider.value);
         display.value = val;
@@ -66,25 +65,14 @@ var middguard = middguard || {};
         this.render(globalThis.col, globalThis.resp, globalThis.opt);
       });
       this.listenTo(middguard.state.Pois.selections, 'remove', function(model){
-        if (middguard.state.heatmapChoice == 'all'){
-          //if all locations
-          
-          globalThis.d3el.select('#rx' + model.get('x') + 'y' + model.get('y'))
-            .attr('fill', function(d){
-              d.clicked = false;
-              return globalThis.colorScale(d.count);
-            })
-            .attr('stroke', function(d){
-              return globalThis.colorScale(d.count);
-            });
-        } else {
-          //if checkins
-          globalThis.d3el.select('#cx' + model.get('x') + 'y' + model.get('y'))
-            .attr('fill', function(d){
-              d.clicked = false;
-              return globalThis.colorScale(d.count);
-            });
-        }
+        globalThis.d3el.select('#rx' + model.get('x') + 'y' + model.get('y'))
+          .attr('fill', function(d){
+            d.clicked = false;
+            return globalThis.colorScale(d.dwell);
+          })
+          .attr('stroke', function(d){
+            return globalThis.colorScale(d.dwell);
+          });
       });
       
       this.getData();
@@ -146,6 +134,10 @@ var middguard = middguard || {};
         resp = this.processDataAll(resp);
       }
       
+      this.col = col;
+      this.resp = resp;
+      this.opt = opt;
+      
       var svg = this.svg;
       
       //if (middguard.state.heatmapChoice == 'all'){
@@ -160,72 +152,82 @@ var middguard = middguard || {};
         .data(resp);
         
         rects
-          .attr('x', function(d){return d.x*10})
-          .attr('y', function(d){return 800-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
+          .attr('x', function(d){return d.x*8})
+          .attr('y', function(d){return 800-(d.y*8)-5}) //-6 is a specific choice given the image we're working with
           .attr('width', function(d){
-            if (d.dwell > 0){
-              return 10;
-            } else {
-              return 0;
-            }
+            return (d.dwell > 0) ? 8: 0;
           })
           .attr('height', function(d){
-            if (d.dwell > 0){
-              return 10;
-            } else {
-              return 0;
-            }
+            return (d.dwell > 0) ? 8: 0;
           })
           .attr('fill', function(d){
-            if (d.dwell){
-              return colorScale(d.dwell)
+            var newModel = middguard.state.Pois.selections.findWhere({x: d.x, y: d.y});
+            if (newModel){
+              d.clicked = true;
+              d.model = newModel;
+              return '#99ff66';
             } else {
-              return 0;
+              d.clicked = false;
+              d.model = null;
+              return colorScale(d.dwell); 
             }
           })
           .attr('stroke', function(d){
-            if (d.dwell){
-              return colorScale(d.dwell)
+            var newModel = middguard.state.Pois.selections.findWhere({x: d.x, y: d.y});
+            if (newModel){
+              d.clicked = true;
+              d.model = newModel;
+              return '#99ff66';
             } else {
-              return 0;
+              d.clicked = false;
+              d.model = null;
+              return colorScale(d.dwell); 
             }
           })
-          .attr('class', 'heatRect');
+          .attr('class', 'heatRect')
+          .attr('id', function(d){
+            return 'rx' + d.x + 'y' + d.y;
+          });
         
         rects
           .enter()
           .append('rect')
-          .attr('x', function(d){return d.x*10})
-          .attr('y', function(d){return 800-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
+          .attr('x', function(d){return d.x*8})
+          .attr('y', function(d){return 800-(d.y*8)-5}) //-6 is a specific choice given the image we're working with
           .attr('width', function(d){
-            if (d.dwell > 0){
-              return 10;
-            } else {
-              return 0;
-            }
+            return (d.dwell > 0) ? 8: 0;
           })
           .attr('height', function(d){
-            if (d.dwell > 0){
-              return 10;
-            } else {
-              return 0;
-            }
+            return (d.dwell > 0) ? 8: 0;
           })
           .attr('fill', function(d){
-            if (d.dwell){
-              return colorScale(d.dwell)
+            var newModel = middguard.state.Pois.selections.findWhere({x: d.x, y: d.y});
+            if (newModel){
+              d.clicked = true;
+              d.model = newModel;
+              return '#99ff66';
             } else {
-              return 0;
+              d.clicked = false;
+              d.model = null;
+              return colorScale(d.dwell); 
             }
           })
           .attr('stroke', function(d){
-            if (d.dwell){
-              return colorScale(d.dwell)
+            var newModel = middguard.state.Pois.selections.findWhere({x: d.x, y: d.y});
+            if (newModel){
+              d.clicked = true;
+              d.model = newModel;
+              return '#99ff66';
             } else {
-              return 0;
+              d.clicked = false;
+              d.model = null;
+              return colorScale(d.dwell); 
             }
           })
-          .attr('class', 'heatRect');
+          .attr('class', 'heatRect')
+          .attr('id', function(d){
+            return 'rx' + d.x + 'y' + d.y;
+          });
           
         rects
           .exit()
@@ -245,8 +247,8 @@ var middguard = middguard || {};
           }).on('click', function(d){
             if (d.clicked){
               d3.select(this)
-                .attr('fill', function(d){return colorScale(d.count)})
-                .attr('stroke', function(d){return colorScale(d.count)});
+                .attr('fill', function(d){return colorScale(d.dwell)})
+                .attr('stroke', function(d){return colorScale(d.dwell)});
               d.clicked = false;
               middguard.state.Pois.selections.remove(d.model);
               var removed = middguard.state.Pois.workingSet.remove(d.model);
