@@ -5,7 +5,7 @@ var middguard = middguard || {};
 
   var RelationGridView = middguard.View.extend({
     id: 'middguard-relation-grid',
-		template: _.template('<h1>Individuals</h1><p>Mark by: <select id="individual-filter-select"></select></p><svg id="relation-grid-svg"><g id="relation-grid"></g></svg> '),
+		template: _.template('<h1>Individuals</h1><p>Mark by: <select id="individual-filter-select"></select></p><div id="relation-grid-container"><svg id="relation-grid-svg"><g id="relation-grid"></g></svg></div> '),
     
     events:{
       

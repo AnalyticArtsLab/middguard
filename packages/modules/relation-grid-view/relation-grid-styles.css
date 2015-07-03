@@ -1,5 +1,6 @@
 		#middguard-relation-grid{
 			margin: 15px 35px;
+      height:1175px;
 		}
 
     #relation-grid-svg {
@@ -11,4 +12,11 @@
 
     #middguard-relation-grid h1{
       font-size: 14pt;
+    
+    }
+    
+    #relation-grid-container{
+      height:1075px;
+      overflow-y:scroll;
+      
     }
