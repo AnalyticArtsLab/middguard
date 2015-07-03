@@ -5,7 +5,7 @@ var middguard = middguard || {};
 
   var RelationGridView = middguard.View.extend({
     id: 'middguard-relation-grid',
-		template: _.template('<h1>Individuals</h1><p>Filter by: <select id="individual-filter-select"></select></p><svg id="relation-grid-svg"><g id="relation-grid"></g></svg> '),
+		template: _.template('<h1>Individuals</h1><p>Mark by: <select id="individual-filter-select"></select></p><svg id="relation-grid-svg"><g id="relation-grid"></g></svg> '),
     
     events:{
       
@@ -31,6 +31,16 @@ var middguard = middguard || {};
       v.filter = 'none';
       selector.on('change', function(){
         v.filter = selector.val();
+        v.stopListening(middguard.state.timeRange);
+        v.stopListening(middguard.state.Pois.selections);
+        
+        if (v.filter === 'time'){
+          v.listenTo(middguard.state.timeRange, 'change', v.render);
+        }else if (v.filter === 'location'){
+          v.listenTo(middguard.state.Pois.selections, 'add remove reset', v.render);
+        }else{
+          
+        }
         v.render();
       });
       
@@ -50,15 +60,50 @@ var middguard = middguard || {};
       // set up the color scale
       v.colors = d3.scale.linear()
       .domain([0,0])
-      .range([255,0]);
+      .range(['white', 'blue']);
       
       
+      var canvas = d3.select(this.el).select('#relation-grid');
+      
+      this.cells = canvas.selectAll('rect')
+      .data(middguard.entities.People.models)
+      .enter().append('rect')
+      .attr('width',10)
+      .attr('height', 10)
+      .attr('x', function(d,i){return (i%100) * 10;})
+      .attr('y', function(d,i){return Math.floor(i/100)* 10 })
+      .attr('stroke', '#CCCCCC')
+      .attr('fill', 'white');
+      
+      this.cells.on('click', function(){
+        var pid = d3.select(this).data()[0].get('id');
+        middguard.state.People.selections.reset(middguard.entities.People.get(pid));
+        if (d3.event.altKey){
+          middguard.state.People.workingSet.add(middguard.entities.People.get(pid));
+        }else{
+          middguard.state.People.workingSet.reset(middguard.entities.People.get(pid));
+        }
+        
+      });
+
+      
+      this.dots = canvas.selectAll('.dot')
+      .data(middguard.entities.People.models)
+      .enter().append('rect')
+      .attr('class','dot')
+      .attr('width',3)
+      .attr('height', 3)
+      .attr('x', function(d,i){return (i%100) * 10 + 3.5;})
+      .attr('y', function(d,i){return Math.floor(i/100)* 10 +3.5;})
+      .attr('stroke', '#CCCCCC')
+      .attr('fill', 'none')
+      .attr('visibility','hidden');
       
       
       this.listenTo(middguard.state.People.selections, 'add remove reset', this.changeSelection);
       this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.render);
-      this.listenTo(middguard.state.Pois.selections, 'add remove reset', this.render);
-      this.listenTo(middguard.state.timeRange, 'change', this.render);
+
+      this.render();
     },
 
     changeSelection: function(){
@@ -77,7 +122,7 @@ var middguard = middguard || {};
             var p = middguard.entities.People.get(id2);
             p.set({metric:m.get('delta')}); 
           });
-          middguard.entities.People.get(pid).set({metric:max});
+          middguard.entities.People.get(pid).set({metric:max+1});
           
           middguard.entities.People.sort();
           
@@ -95,47 +140,30 @@ var middguard = middguard || {};
     setColor:function(person){
       var v = this;
       var c = v.colors(person.get('metric')); 
-      if (middguard.state.People.workingSet.get(person.id)){
-        return v.rgb(0, 100, 255);
+      if (middguard.state.People.selections.get(person.id)){
+        return v.rgb(0, 255, 0);
+      } else if (middguard.state.People.workingSet.get(person.id)){
+        //return v.rgb(0, 100, 255);
+        return v.rgb(255,255,100);
       }
       
-      return v.rgb(c,c,c)
+      return c;
       
     },
 		
     render: function () {
       var v = this;
       
-      
-      // the data for People should be pre-fetched on load
-      // so we make some rects and grab the selector
-      var canvas = d3.select(this.el).select('#relation-grid');
-      
-      var cells = canvas.selectAll('rect')
-      .data(middguard.entities.People.models.filter(v.shouldShow));
-      
-      cells.exit().remove();
-      
-      cells.enter().append('rect');
-      
       // do initial layout and color them all white
-      cells.attr('width',10)
-      .attr('height', 10)
-      .attr('x', function(d,i){return (i%100) * 10;})
-      .attr('y', function(d,i){return Math.floor(i/100)* 10 })
-      .attr('stroke', '#CCCCCC')
+      this.cells.data(middguard.entities.People.models)
       .attr('fill', v.setColor);
       
-      cells.on('click', function(){
-        var pid = d3.select(this).data()[0].get('id');
-        middguard.state.People.selections.reset(middguard.entities.People.get(pid));
-        middguard.state.People.workingSet.add(middguard.entities.People.get(pid));
-        
-      });
+      
+
+      this.dots.data(middguard.entities.People.models)
+      .attr('visibility', function(d) {return v.shouldShow(d) ? 'visible': 'hidden'});
       
       
-      
-     
       return v;
     },
     
@@ -177,7 +205,7 @@ var middguard = middguard || {};
        
         return ! locationid ||( locations && locations.indexOf(locationid) !== -1);
       }
-      return true;
+      return false;
     },
     
     cellValue: function (model){

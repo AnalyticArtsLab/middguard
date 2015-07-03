@@ -97,7 +97,7 @@ var middguard = middguard || {};
       
       if (middguard.entities.Movementtraces.where({person_id: pid}).length === 0){
         // data needs to be fetched
-        this.listenTo(middguard.entities.Movementtraces, 'sync reset', this.render);
+        this.listenToOnce(middguard.entities.Movementtraces, 'sync reset', this.render);
         
         // check if another view has taken responsibility for it
         if (! this.model.get('loading')){
