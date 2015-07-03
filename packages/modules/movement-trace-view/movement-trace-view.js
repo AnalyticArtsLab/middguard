@@ -27,6 +27,7 @@ var middguard = middguard || {};
       this.listenTo(middguard.entities.Movementtraces, 'sync', this.render);
       this.listenTo(middguard.entities.Movementtraces, 'reset', this.render);
       this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.update);
+      this.listenTo(middguard.state.People.selections, 'add remove reset', this.render);
       this.listenTo(middguard.state.Pois.selections, 'add remove reset', this.render)
       this.listenTo(middguard.state.timeRange, 'change',this.render);
 
@@ -169,16 +170,23 @@ var middguard = middguard || {};
         
       });
       
+      // if there is a selected person, put them on the back of the list so they will draw on top
+      var pids = Object.keys(routeCollection);
+      if (middguard.state.People.selections.length > 0){
+        pids.push(middguard.state.People.selections.models[0].id);
+      }
+  
       
-      var routes = canvas.selectAll('path').data(Object.keys(routeCollection));
+      
+      var routes = canvas.selectAll('path').data(pids);
       routes.exit().remove();
       
       routes.enter()
       .append("path");
    
    
-     routes.attr("d", function(d){ return routePath(routeCollection[d]);})
-     .attr('stroke', function(d){return color(d)})
+     routes.attr("d", function(d){return routePath(routeCollection[d]);})
+     .attr('stroke', function(d){return (middguard.state.People.selections.get(d))? '#00FF00':color(d);})
      .attr('stroke-width', 2)
      .attr('fill', 'none');
 
