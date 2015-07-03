@@ -106,8 +106,7 @@ var middguard = middguard || {};
           }
         } else {
           //if a new child View
-          console.log(opt.x);
-          //debugger;
+          
           globalThis.childViews['x' + opt.x + 'y' + opt.y] = new TrendViewWeekend({x:opt.x, y:opt.y});
           globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
         }
@@ -128,7 +127,6 @@ var middguard = middguard || {};
       //function does the fetching of the data
         switch(iteration){
           case 0:
-            console.log('x = ' + x + ' AND y = ' + y + ' AND timestamp <= \'2014-06-07 00:00:00\' ');
             var curFetch = {source: 'spark0', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp <= \'2014-06-07 00:00:00\' ', orderBy: ['timestamp', 'asc']}};
             break;
           case 1:
@@ -184,7 +182,7 @@ var middguard = middguard || {};
     template: _.template('<div />'),
     
     initialize: function(options){
-      console.log(options);
+      
       this.x = options.x;
       this.y = options.y;
       this.el.classList.remove('middguard-module');

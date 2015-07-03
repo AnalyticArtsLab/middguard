@@ -62,6 +62,31 @@ var middguard = middguard || {};
         globalThis.getData();
       }
       
+      this.listenTo(middguard.state.Pois.selections, 'add reset', function(){
+        this.render(globalThis.col, globalThis.resp, globalThis.opt);
+      });
+      this.listenTo(middguard.state.Pois.selections, 'remove', function(model){
+        if (middguard.state.heatmapChoice == 'all'){
+          //if all locations
+          
+          globalThis.d3el.select('#rx' + model.get('x') + 'y' + model.get('y'))
+            .attr('fill', function(d){
+              d.clicked = false;
+              return globalThis.colorScale(d.count);
+            })
+            .attr('stroke', function(d){
+              return globalThis.colorScale(d.count);
+            });
+        } else {
+          //if checkins
+          globalThis.d3el.select('#cx' + model.get('x') + 'y' + model.get('y'))
+            .attr('fill', function(d){
+              d.clicked = false;
+              return globalThis.colorScale(d.count);
+            });
+        }
+      });
+      
       this.getData();
 			
     },
@@ -220,15 +245,23 @@ var middguard = middguard || {};
           }).on('click', function(d){
             if (d.clicked){
               d3.select(this)
-                .attr('fill', function(d){return colorScale(d.dwell)})
-                .attr('stroke', function(d){return colorScale(d.dwell)});
-                d.clicked = false;
-                middguard.state.Pois.selections.remove(d.model);
+                .attr('fill', function(d){return colorScale(d.count)})
+                .attr('stroke', function(d){return colorScale(d.count)});
+              d.clicked = false;
+              middguard.state.Pois.selections.remove(d.model);
+              var removed = middguard.state.Pois.workingSet.remove(d.model);
+              d.model = null;
             } else {
               d3.select(this).attr('fill', '#99ff66')
                 .attr('stroke', '#99ff66');
               d.clicked = true;
-              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
+              var newModel = new Backbone.Model({x: d.x, y: d.y})
+              middguard.state.Pois.selections.reset(newModel);
+              if (d3.event.altKey){
+                middguard.state.Pois.workingSet.add(newModel);
+              } else {
+                middguard.state.Pois.workingSet.reset(newModel);
+              }
               d.model = newModel;
             }
           });
