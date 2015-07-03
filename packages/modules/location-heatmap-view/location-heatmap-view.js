@@ -230,9 +230,11 @@ var middguard = middguard || {};
               d.clicked = true;
               var newModel = middguard.state.Pois.selections.reset({x: d.x, y: d.y});
               if (d3.event.altKey){
-                middguard.state.Pois.workingSet.reset({x: d.x, y: d.y});
-              } else {
+                console.log('here1');
                 middguard.state.Pois.workingSet.add({x: d.x, y: d.y});
+              } else {
+                console.log('here2');
+                middguard.state.Pois.workingSet.reset({x: d.x, y: d.y});
               }
               d.model = newModel;
             }
@@ -337,9 +339,9 @@ var middguard = middguard || {};
               d.clicked = true;
               var newModel = middguard.state.Pois.selections.reset({x: d.x, y: d.y});
               if (d3.event.altKey){
-                middguard.state.Pois.workingSet.reset({x: d.x, y: d.y});
-              } else {
                 middguard.state.Pois.workingSet.add({x: d.x, y: d.y});
+              } else {
+                middguard.state.Pois.workingSet.reset({x: d.x, y: d.y});
               }
               d.model = newModel;
             }
