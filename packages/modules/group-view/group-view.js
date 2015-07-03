@@ -459,6 +459,7 @@ var middguard = middguard || {};
           }
         }else{
           // reset the selections
+          middguard.state.People.selections.reset();
           middguard.state.People.workingSet.reset(members);
           middguard.state.Groups.selections.reset(d);
         }

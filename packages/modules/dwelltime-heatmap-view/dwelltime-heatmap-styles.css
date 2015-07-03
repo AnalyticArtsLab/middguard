@@ -3,3 +3,11 @@
   left: 50px;
   margin: 5px;
 }
+
+#dwell-heatmap{
+  margin:15px 35px;
+}
+
+#dwell-heatmap h1{
+  font-size:14pt;
+}

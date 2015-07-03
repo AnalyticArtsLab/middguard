@@ -29,3 +29,12 @@
   position: relative;
   left: 15px;
 }
+
+#loc-spark h1{
+  font-size: 14pt;
+}
+
+#loc-spark{
+  width:1050px;
+  margin:15px;
+}

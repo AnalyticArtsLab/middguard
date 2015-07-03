@@ -4,9 +4,9 @@ var middguard = middguard || {};
   'use strict';
 
   var DwelltimeHeatmap = middguard.View.extend({
-    id: 'heatmap',
+    id: 'dwell-heatmap',
     
-    template: _.template('<div id="dwellTitle"><h1>Dwell Time Heatmap</h1></div><svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><div><p>Scale Max: <input type="range" id="stepSlider" min="0" max="3706" step="50" value="3706" /> <input type="text" id="stepDisplay" value="3706" /></p></div>'),
+    template: _.template('<div id="dwellTitle"><h1>Dwell Time Heatmap</h1></div><svg id="heatmap-svg" width="800" height="800"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:800px; height:800px;" x="0" y="0"/></svg><div><p>Scale Max: <input type="range" id="stepSlider" min="0" max="3706" step="50" value="3706" /> <input type="text" id="stepDisplay" value="3706" /></p></div>'),
     
     events:{
       "change #heatmap-choice":"userChange",
@@ -136,7 +136,7 @@ var middguard = middguard || {};
         
         rects
           .attr('x', function(d){return d.x*10})
-          .attr('y', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
+          .attr('y', function(d){return 800-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('width', function(d){
             if (d.dwell > 0){
               return 10;
@@ -171,7 +171,7 @@ var middguard = middguard || {};
           .enter()
           .append('rect')
           .attr('x', function(d){return d.x*10})
-          .attr('y', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
+          .attr('y', function(d){return 800-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('width', function(d){
             if (d.dwell > 0){
               return 10;
