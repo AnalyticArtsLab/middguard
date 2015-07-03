@@ -5,7 +5,7 @@ var middguard = middguard || {};
 
   var RelationGridView = middguard.View.extend({
     id: 'middguard-relation-grid',
-		template: _.template('<h1>Individuals</h1><p>Mark by: <select id="individual-filter-select"></select></p><svg id="relation-grid-svg"><g id="relation-grid"></g></svg> '),
+		template: _.template('<h1>Individuals</h1><p>Mark by: <select id="individual-filter-select"></select></p><div id="relation-grid-container"><svg id="relation-grid-svg"><g id="relation-grid"></g></svg></div> '),
     
     events:{
       
@@ -78,13 +78,14 @@ var middguard = middguard || {};
       
       this.cells.on('click', function(){
         var pid = d3.select(this).data()[0].get('id');
-        middguard.state.People.selections.reset(middguard.entities.People.get(pid));
+        
+        
         if (d3.event.altKey){
           middguard.state.People.workingSet.add(middguard.entities.People.get(pid));
         }else{
           middguard.state.People.workingSet.reset(middguard.entities.People.get(pid));
         }
-        
+        middguard.state.People.selections.reset(middguard.entities.People.get(pid));
       });
       
    

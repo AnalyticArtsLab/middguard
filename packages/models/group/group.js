@@ -1,5 +1,5 @@
 module.exports = function (Bookshelf) {
   return Bookshelf.Model.extend({
-    tableName: 'groups2'
+    tableName: 'groups'
   });
 };
