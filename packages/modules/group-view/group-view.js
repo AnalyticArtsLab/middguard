@@ -8,7 +8,7 @@ var middguard = middguard || {};
 
   var GroupView = middguard.View.extend({
     id: 'group-view-rect',
-		template: _.template('<h1>Groups</h1><div><p>Color by: <select id="group-color-select"><option value="checked">Checked</option></select></p><div id="all-groups-container"></div><div id="group-details"></div></div>'),
+		template: _.template('<h1>Groups</h1><div><p>Color by: <select id="group-color-select"><option value="checked">Checked</option><option value="fri">Active Friday</option><option value="sat">Active Saturday</option><option value="sun">Active Sunday</option></select></p><div id="all-groups-container"></div><div id="group-details"></div></div>'),
     tagFormTemplate: _.template('<div id="tag-form" title="Add New Tag"><form><fieldset><ul id="tag-list"></ul><label for="group-tag">Tag</label> <input type="text" name="tag" id="group-tag" class="text ui-widget-content ui-corner-all"></fieldset></form></div>'),
     events:{},
     
@@ -316,6 +316,18 @@ var middguard = middguard || {};
       this.listenTo(options.switchboard, 'select:change', function(value){
         if (value === 'checked'){
           v.coloringFunc = v.coloringTestChecked;
+        }else if (value === 'fri'){
+          v.coloringFunc = function(group){
+            return v.coloringTestDay(group, 6);
+          }
+        }else if (value === 'sat'){
+          v.coloringFunc = function(group){
+            return v.coloringTestDay(group, 7);
+          }
+        }else if (value === 'sun'){
+          v.coloringFunc = function(group){
+            return v.coloringTestDay(group, 8);
+          }
         }else{
           var tag = value.slice(value.indexOf(':')+1);
           v.coloringFunc = function(group){
@@ -367,6 +379,10 @@ var middguard = middguard || {};
     coloringTestChecked: function(group){
       return group.get('checked');
       
+    },
+    
+    coloringTestDay: function(group, day){
+      return group.get('days').indexOf(day) !== -1;
     },
     
     coloringTestTag: function(group, tag){
