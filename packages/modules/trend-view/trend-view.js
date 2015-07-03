@@ -25,7 +25,7 @@ var middguard = middguard || {};
         .on('click', function(){
           var choice = middguard.state.heatmapChoice;
           //remove items from selection as well when their spark lines are removed
-          middguard.state.Pois.selections.reset([]);
+          middguard.state.Pois.workingSet.reset([]);
           middguard.state.trendScale.max = 0;
           globalThis.childViews = {};
           $('.trendGraphParent').remove();
@@ -40,33 +40,38 @@ var middguard = middguard || {};
       
       _.bindAll(this, 'coordChange', 'goFetch');
         
-      this.listenTo(middguard.state.Pois.selections, 'add', function(currentModel){
+      this.listenTo(middguard.state.Pois.workingSet, 'add', function(currentModel){
         globalThis.coordChange(currentModel);
       });
       
-      this.listenTo(middguard.state.Pois.selections, 'remove', function(currentModel){
+      this.listenTo(middguard.state.Pois.workingSet, 'remove', function(currentModel){
         if (globalThis.childViews['x' + currentModel.get('x') + 'y' + currentModel.get('y')]){
           globalThis.childViews['x' + currentModel.get('x') + 'y' + currentModel.get('y')].removeSelf();
           delete globalThis.childViews['x' + currentModel.get('x') + 'y' + currentModel.get('y')];
         }
       });
       
-      this.listenTo(middguard.state.Pois.selections, 'reset', function(newModels, options){
+      this.listenTo(middguard.state.Pois.workingSet, 'reset', function(newModels, options){
         
         //get rid of the old models
+        middguard.state.trendScale.max = 0;
+        globalThis.childViews = {};
+        $('.trendGraphParent').remove();
+        /*
         options.previousModels.forEach(function(currentModel){
           if (globalThis.childViews['x' + currentModel.get('x') + 'y' + currentModel.get('y')]){
             globalThis.childViews['x' + currentModel.get('x') + 'y' + currentModel.get('y')].removeSelf();
             delete globalThis.childViews['x' + currentModel.get('x') + 'y' + currentModel.get('y')];
           }
         });
+        */
         //add the new ones
-        middguard.state.Pois.selections.forEach(function(currentModel){
+        middguard.state.Pois.workingSet.forEach(function(currentModel){
           globalThis.coordChange(currentModel);
         });
       });
       
-      middguard.state.Pois.selections.forEach(function(currentModel){
+      middguard.state.Pois.workingSet.forEach(function(currentModel){
         globalThis.coordChange(currentModel);
       });
       
@@ -101,7 +106,9 @@ var middguard = middguard || {};
           }
         } else {
           //if a new child View
-          globalThis.childViews['x' + opt.x + 'y' + opt.y] = new TrendViewWeekend(opt.x, opt.y);
+          console.log(opt.x);
+          //debugger;
+          globalThis.childViews['x' + opt.x + 'y' + opt.y] = new TrendViewWeekend({x:opt.x, y:opt.y});
           globalThis.childViews['x' + opt.x + 'y' + opt.y].appendChild(col, resp, opt);
         }
         //globalThis.current++;
@@ -119,9 +126,9 @@ var middguard = middguard || {};
     
     goFetch: function(x, y, iteration){
       //function does the fetching of the data
-      
         switch(iteration){
           case 0:
+            console.log('x = ' + x + ' AND y = ' + y + ' AND timestamp <= \'2014-06-07 00:00:00\' ');
             var curFetch = {source: 'spark0', data: {whereRaw: 'x = ' + x + ' AND y = ' + y + ' AND timestamp <= \'2014-06-07 00:00:00\' ', orderBy: ['timestamp', 'asc']}};
             break;
           case 1:
@@ -176,10 +183,10 @@ var middguard = middguard || {};
     
     template: _.template('<div />'),
     
-    initialize: function(x, y){
-      
-      this.x = x;
-      this.y = y;
+    initialize: function(options){
+      console.log(options);
+      this.x = options.x;
+      this.y = options.y;
       this.el.classList.remove('middguard-module');
       this.d3el = d3.select(this.el);
       this.d3el.attr('id', 'x' + this.x + 'y' + this.y);
@@ -326,7 +333,6 @@ var middguard = middguard || {};
       var current = new Date(start);
       var masterIndex = 0;
       while (current <= end){
-        tStamp = current;
         var newDate = new Date(current);
         if (index >= fetchData.length){
           //if fetchData's bound has been passed
@@ -336,7 +342,7 @@ var middguard = middguard || {};
           if (minuteFloor.getSeconds() != 0){
             minuteFloor.setSeconds(0);
           }
-          if (minuteFloor.valueOf() === tStamp.valueOf()){
+          if (minuteFloor.valueOf() === current.valueOf()){
             //if there's a value at the current time
             
             finalArray.push([newDate, fetchData[index].count]);

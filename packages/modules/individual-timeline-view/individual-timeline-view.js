@@ -290,6 +290,7 @@ var middguard = middguard || {};
              middguard.state.Pois.workingSet.remove(match);
            }else{
              middguard.state.Pois.workingSet.add({x:d.x, y:d.y});
+             middguard.state.Pois.selections.reset({x:d.x, y:d.y});
            }
            
          }else{
@@ -317,7 +318,3 @@ var middguard = middguard || {};
 	
 	middguard.addModule('IndividualTimelinesView', IndividualTimelinesView);
 })();
-
-
-
-
