@@ -189,7 +189,7 @@ var middguard = middguard || {};
                     checked: true // change this
                   }, {success:function(model, response, options)
                     {
-     
+                      console.log('created new group');
                       middguard.state.Groups.selections.add(model);
                     },
                     error: function(model,response, options){
@@ -202,11 +202,29 @@ var middguard = middguard || {};
                 // add person to new group
                 var newGroup = middguard.entities.Groups.get(destID);
                 var members = newGroup.get('members');
-                members.push(pid);
-                newGroup.set('members', members);
-                // added because the array ref doesn't change, so no change event is triggered
-                newGroup.trigger('change:addGroup', newGroup);
-                newGroup.save();
+                if (members.indexOf(pid) === -1){
+                  // only add if the person isn't in the group
+                  members.push(pid);
+                  newGroup.set('members', members);
+                  // added because the array ref doesn't change, so no change event is triggered
+                  newGroup.trigger('change:addGroup', newGroup);
+                  newGroup.save();
+                }else{
+                  days = [];
+                  currentGroup.get('days').forEach(function(day){
+                    if (newGroup.get('days').indexOf(day) === -1){
+                      days.push(day);
+                    }
+                  });
+                  
+                  if (days.length > 0){
+                    Array.prototype.push.apply(newGroup.get('days'), days);
+                    newGroup.trigger('change:addGroup', newGroup);
+                    newGroup.save();
+                  }
+                  
+                }
+                
               }
               
             },
