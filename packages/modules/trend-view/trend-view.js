@@ -6,7 +6,7 @@ var middguard = middguard || {};
   var TrendView = middguard.View.extend({
     id: 'loc-spark',
     
-    template: _.template('<div id="XYTrendTitle"><h1>XY Timeline</h1></div>'),
+    template: _.template('<div id="XYTrendTitle"><h1>Location Trends</h1></div>'),
     
     initialize: function () {
       var globalThis = this;

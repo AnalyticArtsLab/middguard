@@ -6,7 +6,7 @@ var middguard = middguard || {};
   var LocationHeatmap = middguard.View.extend({
     id: 'heatmap',
     
-    template: _.template('<div id="heatmapTitle"><h1>Location Heatmap</h1></div><svg id="heatmap-svg" width="1000" height="1000"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:1000px; height:1000px;" x="0" y="0"/></svg><div><select id="heatmap-choice"><option value="all">All Locations</option><option value="checkins">Check-In Locations</option></select></div>'),
+    template: _.template('<div id="heatmapTitle"><h1>Location Heatmap</h1></div><svg id="heatmap-svg" width="800" height="800"><image xlink:href="/modules/movement-trace-view/images/movement-trace-map.jpg" id="movement-trace-map" style="width:800px; height:800px;" x="0" y="0"/></svg><div><select id="heatmap-choice"><option value="all">All Locations</option><option value="checkins">Check-In Locations</option></select></div>'),
     
     events:{
       "change #heatmap-choice":"userChange"
@@ -142,7 +142,7 @@ var middguard = middguard || {};
         
         rects
           .attr('x', function(d){return d.x*10;})
-          .attr('y', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
+          .attr('y', function(d){return 800-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('width', function(d){
             return (d.count > 0) ? 10: 0;
           })
@@ -173,7 +173,7 @@ var middguard = middguard || {};
           .enter()
           .append('rect')
           .attr('x', function(d){return d.x*10;})
-          .attr('y', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
+          .attr('y', function(d){return 800-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('width', function(d){
             return (d.count > 0) ? 10: 0;
           })
@@ -255,7 +255,7 @@ var middguard = middguard || {};
         
         circles
           .attr('cx', function(d){return d.x*10;})
-          .attr('cy', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
+          .attr('cy', function(d){return 800-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('r', function(d){
             if (middguard.state.filters['No Filter']){
               return Math.pow(areaScale(d.count)/Math.PI, 0.5);
@@ -282,7 +282,7 @@ var middguard = middguard || {};
           .enter()
           .append('circle')
           .attr('cx', function(d){return d.x*10;})
-          .attr('cy', function(d){return 1000-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
+          .attr('cy', function(d){return 800-(d.y*10)-6}) //-6 is a specific choice given the image we're working with
           .attr('r', function(d){
             if (middguard.state.filters['No Filter']){
               return Math.pow(areaScale(d.count)/Math.PI, 0.5);

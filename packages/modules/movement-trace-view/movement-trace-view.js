@@ -32,6 +32,11 @@ var middguard = middguard || {};
       this.listenTo(middguard.state.timeRange, 'change',this.render);
 
       var v = this;
+      
+      // make sure that movement traces remain sorted
+      middguard.entities.Movementtraces.comparator = function(m){return m.get('timestamp');};
+      
+      
 			middguard.state.People.workingSet.forEach(function(m){
         var pid = m.get('id');
         v.tracked.add(pid);
@@ -86,7 +91,7 @@ var middguard = middguard || {};
           // we don't have the data available, so fetch it
           // claim ownership
           model.set({loading: v});
-          model.set({loading: v});
+         
           // do the fetch
           middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}, remove:false,  error:function(c,r,o){console.log(r);}});
         }
@@ -102,7 +107,7 @@ var middguard = middguard || {};
           if (middguard.entities.Movementtraces.where({person_id:pid}).length === 0 && (! m.get('loading') || m.get('loading') === v)){
             // claim ownership
             m.set({loading: v});
-            m.set({loading: v});
+           
             // do the fetch
             middguard.entities.Movementtraces.fetch({data:{where:{person_id:m.get('id')}}, remove:false});
           }
@@ -118,11 +123,7 @@ var middguard = middguard || {};
   
       var canvas = d3.select('#movement-trace-paths');
       
-      // use color brewer set1[9] for coloring
-      var color = d3.scale.ordinal()
-      .domain(v.tracked)
-        .range(["#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf","#999999"])
-
+     
       var routePath = d3.svg.line()
       .x(function(d){return (d.get('x') + .5) *(v.mapWidth/v.cells);})
       .y(function(d){ return v.mapHeight - (d.get('y') - .5) *(v.mapHeight/v.cells);})
@@ -170,14 +171,19 @@ var middguard = middguard || {};
         
       });
       
-      // if there is a selected person, put them on the back of the list so they will draw on top
+      
       var pids = Object.keys(routeCollection);
+      
+      // use color brewer set1[9] for coloring
+      var color = d3.scale.ordinal()
+      .domain(pids)
+        .range(["#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf","#999999"])
+      
+      // if there is a selected person, put them on the back of the list so they will draw on top
       if (middguard.state.People.selections.length > 0){
         pids.push(middguard.state.People.selections.models[0].id);
       }
   
-      
-      
       var routes = canvas.selectAll('path').data(pids);
       routes.exit().remove();
       
