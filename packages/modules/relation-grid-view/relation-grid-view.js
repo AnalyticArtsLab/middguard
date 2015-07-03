@@ -78,13 +78,14 @@ var middguard = middguard || {};
       
       this.cells.on('click', function(){
         var pid = d3.select(this).data()[0].get('id');
-        middguard.state.People.selections.reset(middguard.entities.People.get(pid));
+        
+        
         if (d3.event.altKey){
           middguard.state.People.workingSet.add(middguard.entities.People.get(pid));
         }else{
           middguard.state.People.workingSet.reset(middguard.entities.People.get(pid));
         }
-        
+        middguard.state.People.selections.reset(middguard.entities.People.get(pid));
       });
       
    

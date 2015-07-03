@@ -180,7 +180,7 @@ var middguard = middguard || {};
         .range(["#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf","#999999"])
       
       // if there is a selected person, put them on the back of the list so they will draw on top
-      if (middguard.state.People.selections.length > 0){
+      if (pids.length > 0 && middguard.state.People.selections.length > 0){
         pids.push(middguard.state.People.selections.models[0].id);
       }
   
