@@ -172,7 +172,6 @@ var middguard = middguard || {};
     },
 		updateDateRange: function(){
       // system state has changed, change the drawing
-      
 			this.dateRange = [middguard.state.timeRange.current, middguard.state.timeRange.end];
       
       if (this.dateRange[0].valueOf() != middguard.state.timeRange.start.valueOf()){

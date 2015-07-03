@@ -16,7 +16,12 @@ var middguard = middguard || {};
 			var returnObj = {};//{timeRange: {start: this.timeRange.start, end: this.timeRange.end}};
 			
 			for (dataSet in this){
-				if (typeof this[dataSet] == 'object'){
+        if (dataSet === 'timeRange'){
+          returnObj[dataSet] = {};
+          returnObj[dataSet].current = this[dataSet].current;
+          returnObj[dataSet].start = this[dataSet].start;
+          returnObj[dataSet].end = this[dataSet].end;
+        } else if (typeof this[dataSet] == 'object'){
           returnObj[dataSet] ={};
 					//only data is encoded, not functions
 					for (attribute in this[dataSet]){
@@ -27,11 +32,6 @@ var middguard = middguard || {};
 					    //returnObj[dataSet][attribute] = this[dataSet][attribute];
               
 					  }
-		      // var selectionsEncoding = getModelIdentifiers(this[dataSet].selections.models);
-//           var workingSetEncoding = getModelIdentifiers(this[dataSet].workingSet.models);
-//           returnObj[dataSet] = {selections: this[dataSet].selections.reset(selectionsEncoding),
-//                                       workingSet: this[dataSet].workingSet.reset(workingSetEncoding)
-//                                     };
   				}
   			}
       }
@@ -78,13 +78,21 @@ var middguard = middguard || {};
   						//this[prop].workingSet.reset(getModelIdentifiers(state[prop].workingSet));
               this[prop][attribute].reset(state[prop][attribute]);
   					}
-          }else{
-            this[prop][attribute] = state[prop][attribute];
+          } else {
+            if (prop === 'timeRange' &&  (attribute === 'current' || attribute === 'start' || attribute === 'end')){
+              //convert to Date type if necessary (i.e. state is being restored from a JSON string object)
+              if (Object.prototype.toString.call(state[prop][attribute]) !== '[object Date]'){
+                this[prop][attribute] = new Date(state[prop][attribute]);
+              } else {
+                this[prop][attribute] = state[prop][attribute];
+              }
+            } else {
+              this[prop][attribute] = state[prop][attribute];
+            }
             
           }
           
         }
-        
 				this[prop].trigger('change', this[prop]);
       }
     },

@@ -40,26 +40,18 @@ var middguard = middguard || {};
       });
       this.listenTo(middguard.entities['Check-ins'], 'sync', function(col, resp, opt){
         this.render(col, resp, opt);
-      });
+      });/*
       this.listenTo(middguard.state.Pois.selections, 'reset', function(){
+        console.log('here');
         this.render(globalThis.col, globalThis.resp, globalThis.opt);
-      });
-      
-      this.availAttractions = new Set();
-      
-      this.distinctCheckins = new Set([
-        '42$37', '34$68', '67$37', '73$79', '81$77', '92$81', '73$84', '85$86', '87$63', '28$66',
-        '38$90', '87$48', '79$89', '16$49', '23$54', '99$77', '86$44', '63$99', '83$88', '78$48', '27$15', '50$57',
-        '87$81', '79$87', '78$37', '76$22', '43$56', '69$44', '26$59', '6$43', '82$80', '76$88', '47$11', '16$66', '17$43',
-        '43$78', '45$24', '32$33', '60$37', '0$67', '17$67', '48$87'
-      ]);
+      });*/
       
       //this.listenTo(middguard.state.filters.selections, 'change', this.userChange);
       this.dataStore = {};
       this.dataStoreList = [];
       this.getData();
       
-      this.listenTo(middguard.state.Pois.selections, 'add', function(){
+      this.listenTo(middguard.state.Pois.selections, 'add reset', function(){
         this.render(globalThis.col, globalThis.resp, globalThis.opt);
       });
       this.listenTo(middguard.state.Pois.selections, 'remove', function(model){
@@ -105,8 +97,6 @@ var middguard = middguard || {};
         console.log(Error(err));
       }
       //start and end are specific, non-extensible dates
-      var start = new Date("2014-06-06 08:02:00");
-      var end = new Date("2014-06-08 23:20:16");
       
       var dateString = this.outputDate(middguard.state.timeRange.current);
       if (middguard.state.heatmapChoice == 'all'){
@@ -232,12 +222,18 @@ var middguard = middguard || {};
                 .attr('stroke', function(d){return colorScale(d.count)});
                 d.clicked = false;
                 middguard.state.Pois.selections.remove(d.model);
+                middguard.state.Pois.workingSet.remove(d.model);
                 d.model = null;
             } else {
               d3.select(this).attr('fill', '#99ff66')
                 .attr('stroke', '#99ff66');
               d.clicked = true;
-              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
+              var newModel = middguard.state.Pois.selections.reset({x: d.x, y: d.y});
+              if (d3.event.altKey){
+                middguard.state.Pois.workingSet.reset({x: d.x, y: d.y});
+              } else {
+                middguard.state.Pois.workingSet.add({x: d.x, y: d.y});
+              }
               d.model = newModel;
             }
           });
@@ -325,19 +321,26 @@ var middguard = middguard || {};
             .text('x: ' + d.x + ', y: ' + d.y + ', count: ' + d.count);
           }).on('mouseout', function(d){
             svg.selectAll('.tooltip').remove();
-          }).on('click', function(d){
+          }).on('click', function(d, event){
+            console.log(d3.event);
             if (d.clicked){
               d3.select(this)
                 .attr('fill', function(d){return colorScale(d.count)})
                 .attr('stroke', function(d){return colorScale(d.count)});
                 d.clicked = false;
                 middguard.state.Pois.selections.remove(d.model);
+                middguard.state.Pois.workingSet.remove(d.model);
                 d.model = null;
             } else {
               d3.select(this).attr('fill', '#99ff66')
                 .attr('stroke', '#99ff66');
               d.clicked = true;
-              var newModel = middguard.state.Pois.selections.add({x: d.x, y: d.y});
+              var newModel = middguard.state.Pois.selections.reset({x: d.x, y: d.y});
+              if (d3.event.altKey){
+                middguard.state.Pois.workingSet.reset({x: d.x, y: d.y});
+              } else {
+                middguard.state.Pois.workingSet.add({x: d.x, y: d.y});
+              }
               d.model = newModel;
             }
           });
