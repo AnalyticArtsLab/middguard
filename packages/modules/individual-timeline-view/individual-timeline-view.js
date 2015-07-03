@@ -97,7 +97,7 @@ var middguard = middguard || {};
       
       if (middguard.entities.Movementtraces.where({person_id: pid}).length === 0){
         // data needs to be fetched
-        this.listenToOnce(middguard.entities.Movementtraces, 'sync reset', this.render);
+        this.listenTo(middguard.entities.Movementtraces, 'sync reset', this.render);
         
         // check if another view has taken responsibility for it
         if (! this.model.get('loading')){
@@ -287,12 +287,14 @@ var middguard = middguard || {};
            if (match){
              console.log('remove')
              middguard.state.Pois.selections.remove(match);
+             middguard.state.Pois.workingSet.remove(match);
            }else{
-             middguard.state.Pois.selections.add({x:d.x, y:d.y});
+             middguard.state.Pois.workingSet.add({x:d.x, y:d.y});
            }
            
          }else{
            middguard.state.Pois.selections.reset({x:d.x, y:d.y});
+           middguard.state.Pois.workingSet.reset({x:d.x, y:d.y});
          }
          console.log(middguard.state.Pois.selections);
       });
