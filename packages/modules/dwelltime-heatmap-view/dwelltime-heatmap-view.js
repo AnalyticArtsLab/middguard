@@ -237,8 +237,8 @@ var middguard = middguard || {};
         rects
           .on('mouseover', function(d){
             svg.append('text')
-              .attr('x', 750) //750 and 950 are specific, deliberate choices
-              .attr('y', 970)
+              .attr('x', 550) //750 and 950 are specific, deliberate choices
+              .attr('y', 772)
               .attr('fill', '#CC0000')
               .attr('class', 'tooltip')
             .text('x: ' + d.x + ', y: ' + d.y + ', Avg. Dwell Time: ' + d.dwell);
