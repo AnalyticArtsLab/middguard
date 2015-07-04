@@ -117,7 +117,25 @@ var middguard = middguard || {};
         middguard.entities.Pairs.fetch({data:{whereRaw:query},
           error:function(c,r,o){console.log(r)}, 
           success:function(c,r,o){
-            var max = c.models[c.length - 1].get('delta');
+            var model = middguard.entities.People.get(middguard.state.People.selections.models[0].get('id')).attributes;
+            var totalSeconds = 0;
+            if (model.fri_enter && model.fri_exit){
+              var friEnter = new Date(model.fri_enter);
+              var friExit = new Date(model.fri_exit);
+              totalSeconds += friExit.valueOf() - friEnter.valueOf();
+            }
+            if (model.sat_enter && model.sat_exit){
+              var satEnter = new Date(model.sat_enter);
+              var satExit = new Date(model.sat_exit);
+              totalSeconds += satExit.valueOf() - satEnter.valueOf();
+            }
+            if (model.sun_enter && model.sun_exit){
+              var sunEnter = new Date(model.sun_enter);
+              var sunExit = new Date(model.sun_exit);
+              totalSeconds += sunExit.valueOf() - sunEnter.valueOf();
+            }
+            console.log(totalSeconds);
+            var max = totalSeconds/1000.0; //c.models[c.length - 1].get('delta');
             v.colors.domain([0,max]);
           
             middguard.entities.People.models.forEach(function(m){m.set({metric:0});});
