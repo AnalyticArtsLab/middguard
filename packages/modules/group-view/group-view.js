@@ -20,9 +20,12 @@ var middguard = middguard || {};
       this.$el.append(this.tagFormTemplate);
       
       // create an event broadcaster
-      var switchboard = _.extend({}, Backbone.Events);
+      this.switchboard = _.extend({}, Backbone.Events);
       
-      
+      $(document).bind('keypress', function(e){
+          var char = String.fromCharCode(e.keyCode || e.charCode);
+          v.switchboard.trigger('keypress', char);
+          });
       
       // populate the color selector
       this.populateColorSelector();
@@ -49,7 +52,7 @@ var middguard = middguard || {};
       
       
       for (var groupSize in groups){
-        var newGroupSet = new GroupSetView({model:{size: groupSize, groups: groups[groupSize]}, switchboard:switchboard});
+        var newGroupSet = new GroupSetView({model:{size: groupSize, groups: groups[groupSize]}, switchboard:this.switchboard});
         $("#all-groups-container",this.$el).append(newGroupSet.el);
         
       };
@@ -298,7 +301,7 @@ var middguard = middguard || {};
     
     addDetails: function(model){
       var v = this;
-      var groupDetails = new GroupDetailView({model:model});
+      var groupDetails = new GroupDetailView({model:model,switchboard:this.switchboard});
       groupDetails.listenTo(middguard.state.Groups.selections, 'reset', groupDetails.remove);
       groupDetails.listenTo(middguard.state.Groups.selections, 'remove', function(removedModel){
         if (model === removedModel){
@@ -551,12 +554,20 @@ var middguard = middguard || {};
       "click .group-checkbox": "toggleChecked",
       "click #add-tag":"showDialog"
     },
-    initialize: function(){
+    initialize: function(options){
       var v = this;
       _.bindAll(this, 'update', 'toggleChecked', 'showDialog', 'render');
       var gid = this.model.get('id');
       this.$el.html(this.template({gid:gid}));
       this.$el.data('gid', gid);
+
+      this.listenTo(options.switchboard, 'keypress', function(char){
+          if (char === 'c'){
+            var checkbox = $('.group-checkbox', v.$el);
+            checkbox.prop('checked', ! checkbox.prop('checked'));
+            v.toggleChecked();
+          } });
+      
       
       this.update();
       
