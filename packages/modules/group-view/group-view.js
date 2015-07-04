@@ -23,9 +23,11 @@ var middguard = middguard || {};
       this.switchboard = _.extend({}, Backbone.Events);
       
       $(document).bind('keypress', function(e){
+
+        if (e.target == $('body')[0]){
           var char = String.fromCharCode(e.keyCode || e.charCode);
           v.switchboard.trigger('keypress', char);
-          });
+        }});
       
       // populate the color selector
       this.populateColorSelector();
@@ -566,6 +568,16 @@ var middguard = middguard || {};
             var checkbox = $('.group-checkbox', v.$el);
             checkbox.prop('checked', ! checkbox.prop('checked'));
             v.toggleChecked();
+          }else if (char === 'r'){
+            v.model.get('tags').push(34); // return alone
+            v.model.save();
+            v.model.trigger('change:tag', v.model); 
+            
+          }else if (char === 's'){
+            v.model.get('tags').push(33); // solo
+            v.model.save();
+            v.model.trigger('change:tag', v.model); 
+            
           } });
       
       
