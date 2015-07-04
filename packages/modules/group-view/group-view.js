@@ -168,6 +168,7 @@ var middguard = middguard || {};
                 var members = currentGroup.get('members');
                 members.splice(members.indexOf(pid), 1 );
                 if (members.length === 0){
+                  console.log('destroying');
                   currentGroup.destroy();
                 }else{
                   currentGroup.set('group_id', members[0]);
@@ -360,10 +361,10 @@ var middguard = middguard || {};
      
       this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.render);
       this.listenTo(middguard.state.Groups.selections, 'add remove reset', this.render);
-      this.listenTo(middguard.state.Groups.selections, 'change:addGroup', function(model) {
+      this.listenTo(middguard.entities.Groups, 'change:addGroup', function(model) {
         
         var members = model.get('members');
-        if (members.length === setSize){
+        if (members.length === setSize && v.model.groups.indexOf(model) === -1){
           // new member of this set
           v.model.groups.push(model);
           v.setup();
@@ -375,9 +376,9 @@ var middguard = middguard || {};
         }
       });
       
-      this.listenTo(middguard.state.Groups.selections, 'change:removeGroup', function(model) {
+      this.listenTo(middguard.entities.Groups, 'change:removeGroup', function(model) {
         var members = model.get('members');
-        if (members.length === setSize){
+        if (members.length === setSize && v.model.groups.indexOf(model) === -1){
           // new member of this set
           v.model.groups.push(model);
           v.setup();
@@ -389,6 +390,15 @@ var middguard = middguard || {};
         }
         
       });
+      
+      this.listenTo(middguard.entities.Groups, 'destroy', function(model){
+        if (v.model.groups.indexOf(model) !== -1){
+           v.model.groups.splice(v.model.groups.indexOf(model), 1);
+          v.setup();
+        }
+        
+      });
+      
       
       this.setup();
   
@@ -453,7 +463,7 @@ var middguard = middguard || {};
         
         if (d3.event.altKey){
           if (middguard.state.Groups.selections.find(function(g){
-            return d.get('group_id') === g.get('group_id') && v.listEquals(d.get('days'),g.get('days'));
+            return d.get('id') === g.get('id');
           })){
             // group is already a selection, remove it
              middguard.state.Groups.selections.remove(d);
@@ -497,7 +507,7 @@ var middguard = middguard || {};
       this.cells
       .attr('fill',function(d){
          if (middguard.state.Groups.selections.find(function(g){
-           return d.get('group_id') === g.get('group_id') && v.listEquals(d.get('days'),g.get('days'));
+           return d.get('id') === g.get('id');
          })){
           return '#00FF00';
         }else{
