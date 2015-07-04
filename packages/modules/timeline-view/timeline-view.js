@@ -84,7 +84,7 @@ var middguard = middguard || {};
       this.filters.forEach(function(filter){
         var input = globalThis.d3el
           .append('label')
-          .text(filter)
+          .text('  |  ' + filter)
           .style('font-family', 'Times New Roman, Times, serif')
           .append('input')
           .attr('type', 'checkbox')
