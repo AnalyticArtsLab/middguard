@@ -210,7 +210,7 @@ var middguard = middguard || {};
                   newGroup.trigger('change:addGroup', newGroup);
                   newGroup.save();
                 }else{
-                  days = [];
+                  var days = [];
                   currentGroup.get('days').forEach(function(day){
                     if (newGroup.get('days').indexOf(day) === -1){
                       days.push(day);
