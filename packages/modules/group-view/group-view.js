@@ -117,7 +117,7 @@ var middguard = middguard || {};
               // already a tag, just select it
               d3.select('#form-tag-list')
               .selectAll('option')
-              .property('selected', function(d){console.log(this, this.value, tagModel.id, (+this.value === tagModel.id)); return (+this.value === tagModel.id) ? true:this.selected;})
+              .property('selected', function(d){return (+this.value === tagModel.id) ? true:this.selected;})
             }else{
               // create a new tag, add it and select it
               middguard.entities.Tags.create({tag:newTag},{success:function(model, response, options){
