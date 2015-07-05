@@ -257,14 +257,17 @@ var middguard = middguard || {};
               d3.select(this).attr('fill', '#99ff66')
                 .attr('stroke', '#99ff66');
               d.clicked = true;
-              var newModel = new Backbone.Model({x: d.x, y: d.y})
-              middguard.state.Pois.selections.reset(newModel);
-              if (d3.event.altKey){
-                middguard.state.Pois.workingSet.add(newModel);
-              } else {
-                middguard.state.Pois.workingSet.reset(newModel);
+              var location = middguard.entities.Pois.findWhere({x:d.x, y:d.y});
+              if (! location){
+                location = {x:d.x, y:d.y};
               }
-              d.model = newModel;
+              middguard.state.Pois.selections.reset(location);
+              if (d3.event.altKey){
+                middguard.state.Pois.workingSet.add(location);
+              } else {
+                middguard.state.Pois.workingSet.reset(location);
+              }
+              d.model = location;
             }
           });
     

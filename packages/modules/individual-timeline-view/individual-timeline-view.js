@@ -224,7 +224,7 @@ var middguard = middguard || {};
             && current.end > start 
             && (current.type==='check-in' || current.end - current.start > 2*(6000))){
             // keep this if the type is a check-in or they have been standing there for
-            // more than two minutes
+            // more than two minutes (actually this is off by a power of ten at the moment...)
             // check-in overlaps current time at least
             // trim to fit
             current.start = new Date(Math.max(start, current.start));
@@ -279,25 +279,29 @@ var middguard = middguard || {};
       
       
       rects.on('click', function(d){
+        var location = middguard.entities.Pois.findWhere({x:d.x, y:d.y});
+        if (! location){
+          location = {x:d.x, y:d.y};
+        }
+ 
+        
          if (d3.event.altKey){
            var match = middguard.state.Pois.selections.findWhere({x:d.x, y:d.y})
-           console.log(d);
-           console.log(match);
-           
+
            if (match){
-             console.log('remove')
+
              middguard.state.Pois.selections.remove(match);
              middguard.state.Pois.workingSet.remove(match);
            }else{
-             middguard.state.Pois.workingSet.add({x:d.x, y:d.y});
-             middguard.state.Pois.selections.reset({x:d.x, y:d.y});
+             middguard.state.Pois.workingSet.add(location);
+             middguard.state.Pois.selections.add(location);
            }
            
          }else{
-           middguard.state.Pois.selections.reset({x:d.x, y:d.y});
-           middguard.state.Pois.workingSet.reset({x:d.x, y:d.y});
+           middguard.state.Pois.selections.reset(location);
+           middguard.state.Pois.workingSet.add(location);
          }
-         console.log(middguard.state.Pois.selections);
+         
       });
       
       
