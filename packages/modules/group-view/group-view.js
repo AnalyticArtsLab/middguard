@@ -9,7 +9,8 @@ var middguard = middguard || {};
   var GroupView = middguard.View.extend({
     id: 'group-view-rect',
 		template: _.template('<h1>Groups</h1><div><p>Color by: <select id="group-color-select"><option value="checked">Checked</option><option value="fri">Active Friday</option><option value="sat">Active Saturday</option><option value="sun">Active Sunday</option></select></p><div id="all-groups-container"></div><div id="group-details"></div></div>'),
-    tagFormTemplate: _.template('<div id="tag-form" title="Add New Tag"><form><fieldset><ul id="tag-list"></ul><label for="group-tag">Tag</label> <input type="text" name="tag" id="group-tag" class="text ui-widget-content ui-corner-all"></fieldset></form></div>'),
+    tagFormTemplateOld: _.template('<div id="tag-form" title="Add New Tag"><form><fieldset><ul id="tag-list"></ul><label for="group-tag">Tag</label> <input type="text" name="tag" id="group-tag" class="text ui-widget-content ui-corner-all"></fieldset></form></div>'),
+    tagFormTemplate: _.template('<div id="tag-form" title="Select tags"><fieldset><select id="form-tag-list" multiple size="20"></select><div id="tag-create-div"> <input type="text" name="tag" id="new-group-tag" > <button id="tag-create-button">Add tag</button></div></fieldset></div>'),
     events:{},
     
     initialize: function () {
@@ -69,39 +70,24 @@ var middguard = middguard || {};
       $('#tag-form', this.$el).dialog({
     		autoOpen: false,
     		height: 400,
-    		width: 400,
+    		width: 375,
     		modal: true,
         position: {my:'center', at:'center', of: '#group-view-rect'},
     		buttons: [
-    		  {text:"Add Tag", 
+    		  {text:"Add Tags", 
         click:function() {
           var group = $(this).data().group;
           var gid = group.id;
-    			var tag = $('#group-tag').val();
- 
-            
-          
-          var tagModel = middguard.entities.Tags.findWhere({tag:tag});
-          
-          if (tagModel){
-            // existing tag, just add it
+    			var tags = $('#form-tag-list').val();
+  
+          tags.forEach(function(tag){
+            var tagModel = middguard.entities.Tags.get(+tag);
             group.get('tags').push(tagModel.id);
-            group.save();
-            group.trigger('change:tag', group); 
-            
-          }else{
-            // new tag, need to create it
-            middguard.entities.Tags.create({tag:tag},{success:function(model, response, options)
-                    {
-                      group.get('tags').push(model.id);
-                      group.save();
-                      group.trigger('change:tag', group); 
-                    }} );
-          }
-            
-            
-
-    			    $(this).dialog("close");
+          });
+          group.save();
+          group.trigger('change:tag', group);
+      
+    			$(this).dialog("close");
     			}},
           {text:'Cancel',
       			click: function() {
@@ -112,37 +98,50 @@ var middguard = middguard || {};
         open:function(event, ui){
           
           var tags = middguard.entities.Tags.models.map(function(m){return m.get('tag');});
-          
-          var items = d3.select('#tag-list').selectAll('li').data(tags);
-          items.exit().remove();
-          items.enter().append('li');
-          
-          items.text(function(d){return d});
-          
-          
-          
-          $('#tag-list').menu(
-            {role:'listbox',
-            select:function(event, ui){
-              var tag = ui.item.prop('__data__');
-              $('#group-tag').val(tag);
+
+          var options = d3.select('#form-tag-list')
+          .selectAll('option')
+          .data(middguard.entities.Tags.models);
+      
+          options.exit().remove();
+      
+          options.enter().append('option');
+      
+          options.attr('value', function(d){return d.id;})
+          .html(function(d){return d.get('tag');});
+
+          document.getElementById('tag-create-button').onclick = function(){
+            var newTag = document.getElementById('new-group-tag').value;
+            var tagModel = middguard.entities.Tags.findWhere({tag:newTag});
+            if (tagModel){
+              // already a tag, just select it
+              d3.select('#form-tag-list')
+              .selectAll('option')
+              .property('selected', function(d){console.log(this, this.value, tagModel.id, (+this.value === tagModel.id)); return (+this.value === tagModel.id) ? true:this.selected;})
+            }else{
+              // create a new tag, add it and select it
+              middguard.entities.Tags.create({tag:newTag},{success:function(model, response, options){
+                d3.select('#form-tag-list')
+                .append('option')
+                .datum(model)
+                .attr('value', function(d){return d.id;})
+                .html(function(d){return d.get('tag');})
+                .property('selected', true);
+                
+                
+              }});
+              
+              
             }
-          }
-          );
           
-          $('#group-tag').autocomplete({
-            source:function( request, response ) {
-              var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( request.term ), "i" );
-              response( $.grep( tags, function( item ){
-                return matcher.test( item );
-              }) );
-            }
-          });
+          
+          
+          };
           
           
         },
         close:function(event,ui){
-          $('#tag-list').menu('destroy');
+          
         }
         
       });

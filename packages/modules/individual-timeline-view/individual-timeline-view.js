@@ -102,17 +102,6 @@ var middguard = middguard || {};
       
   		this.setupView();
       
-      // if (middguard.entities.Movementtraces.where({person_id: pid}).length === 0){
-//         // data needs to be fetched
-//         this.listenTo(middguard.entities.Movementtraces, 'sync reset', this.render);
-//
-//         // check if another view has taken responsibility for it
-//         if (! this.model.get('loading')){
-//           middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}, remove:false,  error:function(c,r,o){console.log(r);}});
-//
-//         }
-//       }
-      
       
     },
     
@@ -208,7 +197,7 @@ var middguard = middguard || {};
       
       var v = this;
       var pid = this.model.get('id');
-      //var traces = middguard.entities.Movementtraces.where({person_id: pid});
+     
       var events = [];
       
       var start = middguard.state.timeRange.start;
@@ -227,35 +216,6 @@ var middguard = middguard || {};
         events.push(current);
       });
       
-      
-      
-      // var current = {start: null, end: null, x: null, y: null, type:null};
-      //
-      // for (var i = 0; i < traces.length; i++){
-      //   var t = traces[i];
-      //   var timestamp = new Date(t.get('timestamp'));
-      //   var x = t.get('x');
-      //   var y = t.get('y');
-      //   var type = t.get('type');
-      //
-      //   if (current.start != null && current.start.getDay() === timestamp.getDay()){
-      //     current.end = timestamp;
-      //
-      //     if (current.start < end
-      //       && current.end > start
-      //       && (current.type==='check-in' || current.end - current.start > 2*(6000))){
-      //       // keep this if the type is a check-in or they have been standing there for
-      //       // more than two minutes (actually this is off by a power of ten at the moment...)
-      //       // check-in overlaps current time at least
-      //       // trim to fit
-      //       current.start = new Date(Math.max(start, current.start));
-      //       current.end = new Date(Math.min(end, current.end));
-      //       // save it
-      //       events.push(current);
-      //     }
-      //   }
-      //   current = {start: timestamp, end: null, x: x, y: y, type:type};
-      // }
       
       var rects = v.checkins.selectAll('rect')
       .data(events);
