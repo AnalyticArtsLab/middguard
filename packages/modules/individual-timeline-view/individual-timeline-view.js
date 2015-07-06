@@ -17,29 +17,97 @@ var middguard = middguard || {};
       
       this.$el.html(this.template);
       
+      this.currentModels = new Backbone.Collection();
+      _.extend(this.currentModels, Backbone.Events);
       
       this.listenTo(middguard.state.People.workingSet, 'add', this.addView)
-      this.listenTo(middguard.state.People.workingSet, 'reset', function(collection, options){
-        collection.models.forEach(function(model){v.addView(model);})
+      this.listenTo(middguard.state.People.workingSet, 'reset', this.reset);
+      this.listenTo(middguard.state.People.workingSet, 'remove', this.reset);
+      this.listenTo(middguard.state.Groups.selections, 'add', function(model, collection, options){
+        model.get('members').forEach(function(eachModel){
+          var modelObj = middguard.entities.People.get(eachModel);
+          v.addView(modelObj);
+        })
       });
-
+      this.listenTo(middguard.state.Groups.selections, 'reset', this.reset);
+      this.listenTo(middguard.state.Groups.selections, 'remove', this.reset);
+        
+      
       var v = this;
 			middguard.state.People.workingSet.forEach(function(m){v.addView(m); });
 
     },
     
-    addView: function(model){
-      var newTimeline = new IndividualTimelineView({model:model});
-      newTimeline.listenTo(middguard.state.People.workingSet, 'reset', newTimeline.remove);
-      newTimeline.listenTo(middguard.state.People.workingSet, 'remove', function(model){
-        if (model === v.model){
-          newTimeline.remove();
-        }
+    reset: function(){
+      var v = this;
+      var addList = [];
+      middguard.state.People.workingSet.models.forEach(function(model){
+        addList.push(model);
       });
+      middguard.state.Groups.selections.forEach(function(group){
+        group.get('members').forEach(function(pid){
+          var model = middguard.entities.People.get(pid);
+          addList.push(model);
+        })
+      });
+      this.currentModels.reset([addList]);
+      addList.forEach(function(model){
+        v.addView(model);
+      });
+      
+    },
+    
+    addView: function(model){
+      var v = this;
+      if (! v.currentModels.get(model.get('id'))){
+        v.currentModels.add(model);
+        var newTimeline = new IndividualTimelineView({model:model});
+        newTimeline.listenTo(this.currentModels, 'remove', function(removedModel){
+          if (model === removedModel) newTimeline.remove();
+        });
+        newTimeline.listenTo(this.currentModels, 'reset', newTimeline.remove)
+        /*
+        newTimeline.listenTo(middguard.state.People.workingSet, 'reset', function(){
+          if ( ! v.groupOverlaps[model.get('id')]){
+            //if the model is not contained in one of the selected groups
+            v.currentModels.remove(model.get('id'));
+            newTimeline.remove();
+          }
+        });
+        newTimeline.listenTo(middguard.state.People.workingSet, 'remove', function(model){
+          if (model === newTimeline.model && ! v.groupOverlaps[model.get('id')]){
+            //if the model is not contained in one of the selected groups
+            v.currentModels.remove(model.get('id'));
+            newTimeline.remove();
+          }
+        });
+        newTimeline.listenTo(middguard.state.Groups.selections, 'reset', function(){
+          if ( ! middguard.state.People.workingSet.findWhere({id: model.get('id')}) && !( v.groupOverlaps[model.get('id')] > 1)){
+            //if the model is not in the 'People' working set
+            v.currentModels.remove(model.get('id'));
+            v.groupOverlaps[model.get('id')] = 0;
+            newTimeline.remove();
+          } else if (model === newTimeline.model){
+            v.groupOverlaps[model.get('id')] -= 1;
+          }
+        });
+        newTimeline.listenTo(middguard.state.Groups.selections, 'remove', function(model){
+          debugger;
+          if (model === newTimeline.model && !( middguard.state.People.workingSet.findWhere({id: model.get('id')})) && !( v.groupOverlaps[model.get('id')] > 1) ){
+            //if the model is not in the 'People' working set
+            v.currentModels.remove(model.get('id'));
+            v.groupOverlaps[model.get('id')] = 0;
+            newTimeline.remove();
+          } else if (model === newTimeline.model){
+            v.groupOverlaps[model.get('id')] -= 1;
+          }
+        });
+        */
 
-      $("#individual-timeline-container",this.$el).append(newTimeline.el);
-      //make each div draggable
-      $("#individual-timeline-container",this.$el).sortable();
+        $("#individual-timeline-container",this.$el).append(newTimeline.el);
+        //make each div draggable
+        $("#individual-timeline-container",this.$el).sortable();
+      }
     }
     
 	});
@@ -212,7 +280,6 @@ var middguard = middguard || {};
                     x: poi.get('x'), 
                     y: poi.get('y'), 
                     type:interval.get('type')};
-                    console.log(current);
         events.push(current);
       });
       

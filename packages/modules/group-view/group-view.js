@@ -363,7 +363,7 @@ var middguard = middguard || {};
       });
       
      
-      this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.render);
+      //this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.render);
       this.listenTo(middguard.state.Groups.selections, 'add remove reset', this.render);
       this.listenTo(middguard.entities.Groups, 'change:addGroup', function(model) {
         
@@ -473,7 +473,7 @@ var middguard = middguard || {};
              middguard.state.Groups.selections.remove(d);
              
              // remove members from people working set by reseting and adding all from other groups back in
-             middguard.state.People.workingSet.reset();
+             /*middguard.state.People.workingSet.reset();
              middguard.state.Groups.selections.models.forEach(function(group){
                var members = [];
                group.get('members').forEach(function(member){
@@ -484,15 +484,16 @@ var middguard = middguard || {};
                
                middguard.state.People.workingSet.add(members);
              });
+             */
           }else{
             // just add to the selections
-            middguard.state.People.workingSet.add(members);
+            //middguard.state.People.workingSet.add(members);
             middguard.state.Groups.selections.add(d);
           }
         }else{
           // reset the selections
           middguard.state.People.selections.reset();
-          middguard.state.People.workingSet.reset(members);
+          middguard.state.People.workingSet.reset([]);
           middguard.state.Groups.selections.reset(d);
         }
         
@@ -515,6 +516,15 @@ var middguard = middguard || {};
          })){
           return '#00FF00';
         }else{
+          //perhaps get rid of these for loops and use a hash table in the future
+          for (var i = 0; i < middguard.state.Groups.selections.models.length; i++){
+            var memLength = middguard.state.Groups.selections.models[i].get('members').length;
+            for (var j = 0; j < memLength; j++){
+               if (_.contains(d.get('members'), middguard.state.Groups.selections.models[i].get('members')[j])){
+                 return 'rgb(0,100,255)';
+               }
+            }
+          }
           for (var i=0; i < middguard.state.People.workingSet.models.length; i++){
             if (_.contains(d.get('members'), middguard.state.People.workingSet.models[i].get('id'))){
               return 'rgb(0,100,255)';
