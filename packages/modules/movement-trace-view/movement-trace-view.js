@@ -26,8 +26,8 @@ var middguard = middguard || {};
       
       this.listenTo(middguard.entities.Movementtraces, 'sync', this.render);
       this.listenTo(middguard.entities.Movementtraces, 'reset', this.render);
-      this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.update);
-      this.listenTo(middguard.state.People.selections, 'add remove reset', this.render);
+      //this.listenTo(middguard.state.People.workingSet, 'add remove reset', this.update);
+      this.listenTo(middguard.state.People.selections, 'add remove reset', this.update);
       this.listenTo(middguard.state.Pois.selections, 'add remove reset', this.render)
       this.listenTo(middguard.state.timeRange, 'change',this.render);
 
@@ -37,7 +37,7 @@ var middguard = middguard || {};
       middguard.entities.Movementtraces.comparator = function(m){return m.get('timestamp');};
       
       
-			middguard.state.People.workingSet.forEach(function(m){
+			middguard.state.People.selections.forEach(function(m){
         var pid = m.get('id');
         v.tracked.add(pid);
         middguard.entities.Movementtraces.fetch({data:{where:{person_id:pid}}, remove:false,  error:function(c,r,o){console.log(r);}});
@@ -101,7 +101,7 @@ var middguard = middguard || {};
         middguard.entities.Movementtraces.reset();
         v.tracked.clear();
         
-        middguard.state.People.workingSet.forEach(function(m){
+        middguard.state.People.selections.forEach(function(m){
           var pid = m.get('id');
           v.tracked.add(pid);
           if (middguard.entities.Movementtraces.where({person_id:pid}).length === 0 && (! m.get('loading') || m.get('loading') === v)){
@@ -180,9 +180,9 @@ var middguard = middguard || {};
         .range(["#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf","#999999"])
       
       // if there is a selected person, put them on the back of the list so they will draw on top
-      if (pids.length > 0 && middguard.state.People.selections.length > 0){
-        pids.push(middguard.state.People.selections.models[0].id);
-      }
+      // if (pids.length > 0 && middguard.state.People.selections.length > 0){
+//         pids.push(middguard.state.People.selections.models[0].id);
+//       }
   
       var routes = canvas.selectAll('path').data(pids);
       routes.exit().remove();
@@ -192,7 +192,8 @@ var middguard = middguard || {};
    
    
      routes.attr("d", function(d){return routePath(routeCollection[d]);})
-     .attr('stroke', function(d){return (middguard.state.People.selections.get(d))? '#00FF00':color(d);})
+     //.attr('stroke', function(d){return (middguard.state.People.selections.get(d))? '#00FF00':color(d);})
+      .attr('stroke', function(d){return color(d);})
      .attr('stroke-width', 2)
      .attr('fill', 'none');
 
