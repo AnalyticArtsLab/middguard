@@ -205,14 +205,14 @@ var middguard = middguard || {};
     
       
       this.intervals.forEach(function(interval){
-        var poi = middguard.entities.Pois.get(interval.get('poi_id'));
+       
         
         var current = {start: new Date(interval.get('start')), 
                     end: new Date(interval.get('stop')), 
-                    x: poi.get('x'), 
-                    y: poi.get('y'), 
+                    x: interval.get('x'), 
+                    y: interval.get('y'), 
                     type:interval.get('type')};
-                    console.log(current);
+
         events.push(current);
       });
       
