@@ -273,18 +273,20 @@ var middguard = middguard || {};
                 var pid = group.get('members')[0];
                 var intervals = collection.where({person_id: pid});
 
+
                 if (intervals){
-                  var durations = {};
+                  var totalTime = 0;
+                  var durationByDay = {6:0, 7:0, 8:0};
                   for (var i = 0; i < intervals.length; i++){
                     var iStart = new Date(intervals[i].get('start'));
                     var iStop = new Date(intervals[i].get('stop'));
 
                   
-                    if (times === 'fri' && iStart.getDay() === 6){
+                    if (times === 'fri' && iStart.getDate() === 6){
                       return true;
-                    }else if (times === 'sat' && iStart.getDay() === 7){
+                    }else if (times === 'sat' && iStart.getDate() === 7){
                       return true;
-                    }else if (times === 'sun' && iStart.getDay() === 8){
+                    }else if (times === 'sun' && iStart.getDate() === 8){
                       return true;
                     }else if (times === 'current' && iStart<= current && iEnd >= current){
                       return true;
@@ -293,23 +295,19 @@ var middguard = middguard || {};
                     }else{
                       // we are doing durations, sum the length for our pois of interest
                       if (poiIds.indexOf(intervals[i].get('poi_id')) !== -1){
-                        if (durations[intervals[i].get('poi_id')]){
-                          durations[intervals[i].get('poi_id')] += iStop - iStart;
-                        }else{
-                          durations[intervals[i].get('poi_id')] += iStop - iStart;
-                        }
+                        durationByDay[iStart.getDate()]+= iStop - iStart;
+                        //totalTime += iStop - iStart;
                       }
                     }
                   }
                   
-                 if (times === 'duration'){
-                    poiIds.forEach(function(poitId){
-                      if(durations[poiId] >= duration[0] && durations[poiId] <= duration[1]){
-                        return true;
-                      }
-                    });
+                  if (times === 'duration'){
+                    return (durationByDay[6] >= duration[0] && durationByDay[6] <= duration[1]) || 
+                    (durationByDay[7] >= duration[0] && durationByDay[7] <= duration[1]) ||
+                    (durationByDay[8] >= duration[0] && durationByDay[8] <= duration[1]) ;
+                    //return totalTime >= duration[0] && totalTime <= duration[1];
+                  }
                 }
-              }
                 return false;
               });
 
