@@ -5,7 +5,7 @@ var middguard = middguard || {};
 
   var QueryView = middguard.View.extend({
     id: 'middguard-query',
-		template: _.template('<h1>Query</h1><div id="query-body"><div id="query-options"><div id="query-location-options"><h2>Location</h2><svg id="query-map-svg"><image xlink:href="/modules/query-view/images/map.jpg" id="query-map" x="0" y="0"/></svg><div id="query-location-list"><select id="query-locations" multiple size="5"></select></div></div><div id="query-time-div"><h2>Time</h2><select id="query-time-options" size="7"><option value="all" selected>All time</option><option value="range" id="query-range-time">Range </option><option value="current" id="query-current-time">Current </option><option value="fri">Friday </option><option value="sat">Saturday</option><option value="sun">Sunday</option><option id="query-duration_inc" value="duration_inc"></option><option id="query-duration_ex" value="duration_ex"></option></select><p>Duration  <span id="query-current-range"></span><input type="range" min="2" max="960" value="30" id="query-range-slider"/></div><div id="query-tags-div"><h2>Tags</h2><select id="query-tag-options" multiple size="15" ></select></div></div><div id="query-results"><h2>Results</h2><button id="query-button">Perform Lookup</button><p id="result-count"></p><select id="query-results-list" multiple size="60"></select></div></div>'),
+		template: _.template('<h1>Query</h1><div id="query-body"><div id="query-options"><div id="query-location-options"><h2>Location</h2><svg id="query-map-svg"><image xlink:href="/modules/query-view/images/map.jpg" id="query-map" x="0" y="0"/></svg><div id="query-location-list"><select id="query-locations" multiple size="5"></select></div></div><div id="query-time-div"><h2>Time</h2><select id="query-time-options" size="7"><option value="all" selected>All time</option><option value="range" id="query-range-time">Range </option><option value="current" id="query-current-time">Current </option><option value="fri">Friday </option><option value="sat">Saturday</option><option value="sun">Sunday</option><option id="query-duration" value="duration"></option><</select><p>Range  <span id="query-current-range"></span><div id="query-range-slider"></div></div><div id="query-tags-div"><h2>Tags</h2><select id="query-tag-options" multiple size="15" ></select></div></div><div id="query-results"><h2>Results</h2><button id="query-button">Perform Lookup</button><p id="result-count"></p><select id="query-results-list" multiple size="60"></select></div></div>'),
     
     events:{
       "click #query-button":"performQuery",
@@ -21,7 +21,7 @@ var middguard = middguard || {};
     
     initialize: function () {
       
-      _.bindAll(this, 'loadTags', 'setTime', 'loadLocations', 'performQuery', 'showResults', 'groupSelection', 'setDuration');
+      _.bindAll(this, 'loadTags', 'setTime', 'loadLocations', 'performQuery', 'showResults', 'groupSelection');
       var v = this;
       
       this.$el.html(v.template);
@@ -53,6 +53,35 @@ var middguard = middguard || {};
         }
       });
       
+      $('#query-range-slider', this.$el).slider({
+        min:2,
+        max:960,
+        range:true,
+        values:[0,60],
+        change: function(event, ui){
+          var values = $('#query-range-slider', this.$el).slider("option", "values");
+          
+          var range = [];
+          values.forEach(function(val){
+            if (val >= 60){
+              range.push( (val/60).toFixed(2) + ' hours');
+            }else{
+              range.push(val + ' minutes');
+            }
+            
+          });
+          
+      
+          $('#query-current-range', this.$el).html(range[0] + ' to ' + range[1]);
+          $('#query-duration', this.$el).html('Duration: ' + range[0] + ' to ' + range[1]);
+          v.performQuery();
+        }
+        
+      });
+      
+      
+      
+      
       this.results = middguard.entities.Groups.models;
       this.results.sort(function(a,b){ return a.id - b.id;});
       
@@ -63,7 +92,6 @@ var middguard = middguard || {};
       this.listenTo(middguard.state.Groups.selections, 'add remove reset', this.showResults);
       
       this.showResults();
-      this.setDuration();
       this.setTime();
       this.loadTags();
       this.loadLocations();
@@ -99,21 +127,7 @@ var middguard = middguard || {};
       this.performQuery();
     },
     
-    setDuration: function(){
-      var duration = $('#query-range-slider', this.$el).val();
-      
-      var metric = ' minutes';
-      if (duration >= 60){
-        duration = (duration/60).toFixed(2);
-        metric = ' hours';
-      }
-      
-      $('#query-current-range', this.$el).html(duration+metric);
-      $('#query-duration_inc', this.$el).html('At least: ' + duration+metric);
-      $('#query-duration_ex', this.$el).html('No more than: ' + duration+metric);
-      
-      this.performQuery();
-    },
+
     
     loadLocations: function(){
       var options = d3.select(this.el)
@@ -197,7 +211,12 @@ var middguard = middguard || {};
         var startStr = start.toISOString();
         var endStr = end.toISOString();
         var currentStr = current.toISOString();
-        var duration = +$('#query-range-slider', this.$el).val() * 60 * 1000; // convert to milliseconds
+        
+        var duration = $('#query-range-slider', this.$el).slider("option", "values");
+        // convert to milliseconds
+        duration = duration.map(function(val){return +val * 60 * 1000;});
+        
+        
         
         if (poiIds){
           var people = [];
@@ -244,10 +263,8 @@ var middguard = middguard || {};
                     }
                   }
                   
-                  if (times === 'duration_ex'){
-                    return totalTime <= duration;
-                  }else if (times === 'duration_inc'){
-                    return totalTime >= duration;
+                  if (times === 'duration'){
+                    return totalTime >= duration[0] && totalTime <= duration[1];
                   }
                 }
                 return false;
@@ -291,17 +308,15 @@ var middguard = middguard || {};
               (startStr < person.get('sat_enter') && endStr >= person.get('sat_enter'))) ||
               (group.get('days').indexOf(8) !== -1 && (startStr >= person.get('sun_enter') && startStr <= person.get('sun_exit')) ||
               (startStr < person.get('sun_enter') && endStr >= person.get('sun_enter')));
-            }else if (times === 'duration_ex'){
+            }else if (times === 'duration'){
               // spent no more than X amount of time in the park on a given day
-              return (group.get('days').indexOf(6) !== -1 && fri_exit - fri_enter <= duration) || 
-              (group.get('days').indexOf(7) !== -1 && sat_exit - sat_enter <= duration) ||
-              (group.get('days').indexOf(8) !== -1 && sun_exit - sun_enter <= duration);
+              var fri_duration = fri_exit - fri_enter;
+              var sat_duration = sat_exit - sat_enter;
+              var sun_duration = sun_exit - sun_enter;
+              return (group.get('days').indexOf(6) !== -1 && fri_duration >= duration[0] && fri_duration <= duration[1]) || 
+              (group.get('days').indexOf(7) !== -1 && sat_duration >= duration[0] && sat_duration <= duration[1]) ||
+              (group.get('days').indexOf(8) !== -1 && sun_duration >= duration[0] && sun_duration <= duration[1]);
              
-            }else if (times === 'duration_inc'){
-              // spent at least x amount of time in the park on a given day
-              return (group.get('days').indexOf(6) !== -1 && fri_exit - fri_enter >= duration) || 
-              (group.get('days').indexOf(7) !== -1 && sat_exit - sat_enter >= duration) ||
-              (group.get('days').indexOf(8) !== -1 && sun_exit - sun_enter >= duration);
             }
           });
 
