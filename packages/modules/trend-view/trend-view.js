@@ -212,8 +212,15 @@ var middguard = middguard || {};
     render: function(){
       this.d3el.selectAll('.trendGraphChildren').remove();
       this.d3el.selectAll('p').remove();
-      if (this.opt.poi){
-        var textHeader = 'X: ' + this.x + ' Y: ' + this.y + ' -- ' + ' Location Name: ' + this.opt.poi;
+      var poi = this.opt.poi;
+      if (!poi){
+        var poiModel = middguard.entities.Pois.findWhere({x: this.x, y: this.y});
+        if (poiModel){
+          poi = poiModel.get('name');
+        }
+      }
+      if (poi){
+        var textHeader = 'X: ' + this.x + ' Y: ' + this.y + ' -- ' + ' Location Name: ' + poi;
       } else {
         var textHeader = 'X: ' + this.x + ' Y: ' + this.y;
       }

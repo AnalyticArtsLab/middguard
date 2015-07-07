@@ -492,8 +492,8 @@ var middguard = middguard || {};
           }
         }else{
           // reset the selections
-          middguard.state.People.selections.reset();
-          middguard.state.People.workingSet.reset([]);
+          //middguard.state.People.selections.reset();
+          //middguard.state.People.workingSet.reset([]);
           middguard.state.Groups.selections.reset(d);
         }
         
@@ -597,7 +597,7 @@ var middguard = middguard || {};
 
       this.listenTo(this.model, 'change change:addGroup change:removeGroup change:tag sync', this.update);
 
-      this.listenTo(middguard.state.People.selections, 'add reset', this.render);
+      this.listenTo(middguard.state.People.selections, 'add remove reset', this.render);
       this.listenTo(middguard.state.Tags.selections, 'add reset', this.render);
 
     },
@@ -639,12 +639,29 @@ var middguard = middguard || {};
       members.html(function(d,i){return (i < v.model.get('members').length - 1)? d+', ': d ;})
       .on('click', function(d){
         var person = middguard.entities.People.get(d);
-        if (middguard.state.People.selections.get(d)){
-          // this is the selection, remove it
-          middguard.state.People.selections.reset();
+        if (d3.event.altKey){
+          if (middguard.state.People.selections.get(d)){
+            middguard.state.People.selections.reset();
+            middguard.state.People.workingSet.remove(person);
+          }else{
+            middguard.state.People.selections.reset(person);
+            middguard.state.People.workingSet.add(person);
+          }
+          
         }else{
-          middguard.state.People.selections.reset(person);
+          if (middguard.state.People.selections.get(d)){
+            // this is the selection, remove it
+            middguard.state.People.selections.reset();
+            middguard.state.People.workingSet.remove(person);
+          }else{
+            middguard.state.People.selections.reset(person);
+            middguard.state.People.workingSet.reset(person);
+          }
+          
+          
+          
         }
+        
         
       });
       

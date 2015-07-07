@@ -127,7 +127,6 @@ var middguard = middguard || {};
       var pid = this.model.get('id');
       this.intervals = new Backbone.Collection([],{model:middguard.entities.Intervals.model});
       this.intervals.url = 'intervals';
-      console.log(this.intervals);
       this.$el.html(this.template({pid:pid}));
       
   		this.timeScale= d3.time.scale();
