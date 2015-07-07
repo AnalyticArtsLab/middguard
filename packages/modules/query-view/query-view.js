@@ -5,15 +5,15 @@ var middguard = middguard || {};
 
   var QueryView = middguard.View.extend({
     id: 'middguard-query',
-		template: _.template('<h1>Query</h1><div id="query-body"><div id="query-options"><div id="query-location-options"><h2>Location</h2><svg id="query-map-svg"><image xlink:href="/modules/query-view/images/map.jpg" id="query-map" x="0" y="0"/></svg><div id="query-location-list"><select id="query-locations" multiple size="5"></select></div></div><div id="query-time-div"><h2>Time</h2><select id="query-time-options" size="7"><option value="all" selected>All time</option><option value="range" id="query-range-time">Range </option><option value="current" id="query-current-time">Current </option><option value="fri">Friday </option><option value="sat">Saturday</option><option value="sun">Sunday</option><option id="query-duration" value="duration"></option><</select><p>Range  <span id="query-current-range"></span><div id="query-range-slider"></div></div><div id="query-tags-div"><h2>Tags</h2><select id="query-tag-options" multiple size="15" ></select></div></div><div id="query-results"><h2>Results</h2><button id="query-button">Perform Lookup</button><p id="result-count"></p><select id="query-results-list" multiple size="60"></select></div></div>'),
+		template: _.template('<h1>Query</h1><div id="query-body"><div id="query-options"><div id="query-location-options"><h2>Location</h2><svg id="query-map-svg"><image xlink:href="/modules/query-view/images/map.jpg" id="query-map" x="0" y="0"/></svg><div id="query-location-list"><select id="query-locations" multiple size="5"></select></div></div><div id="query-count-div"><p>Number in group  <span id="query-group-count">2</span><input type="checkbox" name="groupCount" value="useCount" id="query-count-checkbox"/><div id="query-count-slider"></div> </div><div id="query-time-div"><h2>Time</h2><select id="query-time-options" size="7"><option value="all" selected>All time</option><option value="range" id="query-range-time">Range </option><option value="current" id="query-current-time">Current </option><option value="fri">Friday </option><option value="sat">Saturday</option><option value="sun">Sunday</option><option id="query-duration" value="duration"></option></select><p>Range  <span id="query-current-range"></span><div id="query-range-slider"></div></div><div id="query-tags-div"><h2>Tags</h2><select id="query-tag-options" multiple size="15" ></select></div></div><div id="query-results"><h2>Results</h2><button id="query-button">Perform Lookup</button><p id="result-count"></p><select id="query-results-list" multiple size="60"></select></div></div>'),
     
     events:{
       "click #query-button":"performQuery",
+      "click #query-count-checkbox":"performQuery",
       "change #query-results-list":"groupSelection",
       "change #query-locations":"performQuery",
       "change #query-time-options":"performQuery",
-      "change #query-tag-options":"performQuery",
-      "change #query-range-slider":"setDuration"
+      "change #query-tag-options":"performQuery"
     },
     
     mapWidth: 600,
@@ -71,9 +71,32 @@ var middguard = middguard || {};
             
           });
           
-      
           $('#query-current-range', this.$el).html(range[0] + ' to ' + range[1]);
           $('#query-duration', this.$el).html('Duration: ' + range[0] + ' to ' + range[1]);
+          
+      
+          v.performQuery();
+        }
+        
+      });
+      
+      $('#query-count-slider', this.$el).slider({
+        min:1,
+        max:44,
+        range:true,
+        values:[2,2],
+        change: function(event, ui){
+          var range = $('#query-count-slider', this.$el).slider("option", "values");
+
+          
+          
+          
+          if (range[0] === range[1]){
+            $('#query-group-count', this.$el).html(range[0]);
+          }else{
+            $('#query-group-count', this.$el).html(range[0] + ' to ' + range[1]);
+          }
+         
           v.performQuery();
         }
         
@@ -95,6 +118,7 @@ var middguard = middguard || {};
       this.setTime();
       this.loadTags();
       this.loadLocations();
+      this.performQuery();
 
     },
     
@@ -171,6 +195,18 @@ var middguard = middguard || {};
  
   
       this.results = middguard.entities.Groups.models;
+      
+      if ($("#query-count-checkbox", this.$el).prop("checked")){
+        var counts = $('#query-count-slider', this.$el).slider("option", "values");
+        this.results = this.results.filter(function(group){
+          return group.get('members').length >= counts[0] && group.get('members').length <= counts[1];
+          
+        });
+        
+      }
+      
+      
+      
       // trim group list down to groups matching the tag
       if (tagIds){
         this.results = this.results.filter(function(group){
@@ -237,9 +273,8 @@ var middguard = middguard || {};
                 var pid = group.get('members')[0];
                 var intervals = collection.where({person_id: pid});
 
-
                 if (intervals){
-                  var totalTime = 0;
+                  var durations = {};
                   for (var i = 0; i < intervals.length; i++){
                     var iStart = new Date(intervals[i].get('start'));
                     var iStop = new Date(intervals[i].get('stop'));
@@ -258,15 +293,23 @@ var middguard = middguard || {};
                     }else{
                       // we are doing durations, sum the length for our pois of interest
                       if (poiIds.indexOf(intervals[i].get('poi_id')) !== -1){
-                        totalTime += iStop - iStart;
+                        if (durations[intervals[i].get('poi_id')]){
+                          durations[intervals[i].get('poi_id')] += iStop - iStart;
+                        }else{
+                          durations[intervals[i].get('poi_id')] += iStop - iStart;
+                        }
                       }
                     }
                   }
                   
-                  if (times === 'duration'){
-                    return totalTime >= duration[0] && totalTime <= duration[1];
-                  }
+                 if (times === 'duration'){
+                    poiIds.forEach(function(poitId){
+                      if(durations[poiId] >= duration[0] && durations[poiId] <= duration[1]){
+                        return true;
+                      }
+                    });
                 }
+              }
                 return false;
               });
 
