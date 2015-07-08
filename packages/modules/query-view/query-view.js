@@ -227,11 +227,11 @@ var middguard = middguard || {};
           var person = middguard.entities.People.get(pid);
         
           for (var i=0; i < poiIds.length; i++){
-            if (person.get('locations').indexOf(poiIds[i]) === -1){
-              return false;
+            if (person.get('locations').indexOf(poiIds[i]) !== -1){
+              return true;
             }
           }
-          return true;
+          return false;
         });
       }
       

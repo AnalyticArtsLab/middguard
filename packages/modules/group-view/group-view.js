@@ -36,7 +36,7 @@ var middguard = middguard || {};
       this.listenTo(middguard.entities.Tags, 'add remove reset', this.populateColorSelector);
       d3.select(this.el).select('#group-color-select')
       .on('change', function(){
-        switchboard.trigger('select:change', this.value);
+        v.switchboard.trigger('select:change', this.value);
       });
       
       // create the group sets
