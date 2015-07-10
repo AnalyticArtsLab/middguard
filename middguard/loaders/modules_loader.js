@@ -1,18 +1,19 @@
 var fs = require('fs'),
     path = require('path'),
     settings = require('../config/settings');
-
-module.exports = function(callback) {
+	
+module.exports = function(url, callback) {
   var modules = {
     names: [],
     js: [],
     css: []
   };
+  
   var modulesCount;
   var push = Array.prototype.push;
   var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-  var modulesPath = settings.modulesPath;
+  var modulesPath = 'packages' + url + '/modules';//settings.modulesPath;
   var modulesAbsPath = path.resolve(modulesPath);
   var modulesDir = settings.modulesDir;
 

@@ -1,0 +1,14 @@
+.h1{
+  position: relative;
+  left: 50px;
+  margin: 5px;
+}
+
+#dwell-heatmap{
+  margin:15px 35px;
+  height: 1175px;
+}
+
+#dwell-heatmap h1{
+  font-size:14pt;
+}

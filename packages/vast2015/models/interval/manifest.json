@@ -1,0 +1,6 @@
+{
+  "name": "interval",
+  "model": "interval.js",
+  "customLoad":true,
+  "version": "0.0.1"
+}

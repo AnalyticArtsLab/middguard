@@ -1,0 +1,6 @@
+{
+  "name": "locationCount",
+  "model": "locationCount.js",
+  "customLoad": true,
+  "version": "0.0.1"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "Query",
+  "main": "QueryView",
+  "version": "0.0.1",
+  "js": [
+    "query-view.js"
+  ],
+  "css": [
+    "query-view-styles.css"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "Timeline",
+  "main": "TimelineView",
+  "version": "0.0.1",
+  "js": [
+    "timeline-view.js"
+  ],
+  "css": [
+    "timeline-styles.css"
+  ]
+}

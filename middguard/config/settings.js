@@ -12,23 +12,23 @@ module.exports = {
   modulesDir: 'modules',
 
   // Paths to each of the package directories from the root.
-  modulesPath: 'packages/modules',
-  modelsPath: 'packages/models',
-  analyticsPath: 'packages/analytics',
+  modulesPath: 'packages/vast2015/modules',
+  modelsPath: 'packages/vast2015/models',
+  analyticsPath: 'packages/vast2015/analytics',
 
   // The name of the SQLite database, stored at the root
-  db: 'vast2015',
+  db: 'middguardDB',
   
   //Set dbConfig appropriately for either an SQLite DB or a PostgreSQL DB
   //SQLITE EXAMPLE (DEFAULT)
-  /*
+  
 	dbConfig: {
 	 client: 'sqlite3',      // or 'pg',
 	 connection: {          // or the various connection settings for pg
-		 filename: 'vast_challenge_2015_#2.db'
+		 filename: 'middguardDB.db'
 	  }
 	},
-  */ //POSTGRESQL EXAMPLE
+  /* //POSTGRESQL EXAMPLE
   dbConfig: {
   	  client: 'pg',
   	  connection: {	
@@ -38,6 +38,6 @@ module.exports = {
   	    database: 'vast2015'
   		}
   	},
-  
+  */
   SECRET_KEY: process.env.SECRET_KEY || 'turn down for what'
 };
