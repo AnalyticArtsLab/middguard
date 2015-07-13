@@ -6,7 +6,7 @@ module.exports = function (app) {
   var register = app.get('bookshelf').collection('analytics');
   var AnalyticsPackage = app.get('bookshelf').model('AnalyticsPackage');
 
-  var analyticsPath = settings.analyticsPath;
+  var analyticsPath = 'packages/' + settings.app + '/analytics';
   var analyticsAbsPath = path.resolve(analyticsPath);
 
   fs.readdirSync(analyticsAbsPath).forEach(function (tool) {

@@ -5,13 +5,13 @@ var express = require('express'),
     SQLiteStore = require('connect-sqlite3')(session),
     KnexSessionStore = require('connect-session-knex')(session);
     path = require('path'),
-		settings = require('./settings'),
-		env = require('./settings').env,
-		knexConfig = require('./knex')[env],
-		knex = require('knex')(knexConfig);
+    settings = require('./settings'),
+    env = require('./settings').env,
+    knexConfig = require('./knex')[env],
+    knex = require('knex')(knexConfig);
 
 var root = settings.root;
-var modulesPath = settings.modulesPath;
+var modulesPath = 'packages/' + settings.app + '/modules';
 
 module.exports = function (app) {
   app.set('showStackError', true);

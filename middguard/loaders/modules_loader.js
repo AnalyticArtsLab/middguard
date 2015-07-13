@@ -15,7 +15,6 @@ module.exports = function(callback) {
 
   var modulesPath = 'packages/' + settings.app + '/modules'; //settings.modulesPath;
   var modulesAbsPath = path.resolve(modulesPath);
-  var modulesDir = settings.modulesDir;
 
   fs.readdir(modulesAbsPath, function (err, list) {
     if (err) throw new Error(err);
@@ -55,13 +54,13 @@ module.exports = function(callback) {
 
         if (hasOwnProperty.call(manifest, 'js') && manifest.js.length) {
           var prefixedJs = manifest.js.map(function (js) {
-            return path.join(modulesDir, module, js);
+            return path.join(modulesPath, module, js);
           });
           push.apply(modules.js, prefixedJs);
         }
         if (hasOwnProperty.call(manifest, 'css') && manifest.css.length) {
           var prefixedCss = manifest.css.map(function (css) {
-            return path.join(modulesDir, module, css);
+            return path.join(modulesPath, module, css);
           });
           push.apply(modules.css, prefixedCss);
         }

@@ -11,13 +11,6 @@ module.exports = {
   // `modulesPath` as defined below.
   modulesDir: 'modules',
 
-  // Paths to each of the package directories from the root.
-  modulesPath: 'packages/vast2015/modules',
-  modelsPath: 'packages/vast2015/models',
-  analyticsPath: 'packages/vast2015/analytics',
-
-  // The name of the SQLite database if it exists, stored at the same directory as this file
-  db: 'middguardDB',
   
   //Set dbConfig appropriately for either an SQLite DB or a PostgreSQL DB
   //SQLITE EXAMPLE (DEFAULT)
@@ -25,7 +18,7 @@ module.exports = {
 	dbConfig: {
 	 client: 'sqlite3',      // or 'pg',
 	 connection: {          // or the various connection settings for pg
-		 filename: 'middguardDB.db'
+		 filename: 'vast2015.db'
 	  }
 	},
   /* //POSTGRESQL EXAMPLE
