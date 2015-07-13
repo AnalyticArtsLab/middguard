@@ -16,7 +16,7 @@ module.exports = {
   modelsPath: 'packages/vast2015/models',
   analyticsPath: 'packages/vast2015/analytics',
 
-  // The name of the SQLite database, stored at the root
+  // The name of the SQLite database if it exists, stored at the same directory as this file
   db: 'middguardDB',
   
   //Set dbConfig appropriately for either an SQLite DB or a PostgreSQL DB
@@ -39,7 +39,6 @@ module.exports = {
   		}
   	},
   ,*/
-	app: 'demo', //******* write the name of the directory ('app') whose models/modules you want to run *********
   
   SECRET_KEY: process.env.SECRET_KEY || 'turn down for what'
 };

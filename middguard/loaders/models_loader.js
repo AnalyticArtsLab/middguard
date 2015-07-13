@@ -9,7 +9,7 @@ module.exports = function (app) {
 
   var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-  var modelsPath = settings.modelsPath;
+  var modelsPath = 'packages/' + settings.app + '/models';
   var modelsAbsPath = path.resolve(modelsPath);
   
   fs.readdirSync(modelsAbsPath).forEach(function (model) {

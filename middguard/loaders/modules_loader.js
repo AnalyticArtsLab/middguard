@@ -2,7 +2,7 @@ var fs = require('fs'),
     path = require('path'),
     settings = require('../config/settings');
 	
-module.exports = function(url, callback) {
+module.exports = function(callback) {
   var modules = {
     names: [],
     js: [],
@@ -13,7 +13,7 @@ module.exports = function(url, callback) {
   var push = Array.prototype.push;
   var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-  var modulesPath = 'packages' + url + '/modules';//settings.modulesPath;
+  var modulesPath = 'packages/' + settings.app + '/modules'; //settings.modulesPath;
   var modulesAbsPath = path.resolve(modulesPath);
   var modulesDir = settings.modulesDir;
 
