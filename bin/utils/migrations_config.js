@@ -16,7 +16,7 @@ module.exports = function (program) {
 
   if (program.model) {
     console.assert(!program.middguard, 'Only specify --model or --middguard');
-    config.directory = path.join(settings.root, settings.modelsPath,
+    config.directory = path.join(settings.root, 'packages', settings.app, 'models',
       program.model, 'migrations');
   }
 

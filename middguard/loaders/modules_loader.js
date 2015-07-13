@@ -54,13 +54,13 @@ module.exports = function(callback) {
 
         if (hasOwnProperty.call(manifest, 'js') && manifest.js.length) {
           var prefixedJs = manifest.js.map(function (js) {
-            return path.join(modulesPath, module, js);
+            return path.join('modules', module, js);
           });
           push.apply(modules.js, prefixedJs);
         }
         if (hasOwnProperty.call(manifest, 'css') && manifest.css.length) {
           var prefixedCss = manifest.css.map(function (css) {
-            return path.join(modulesPath, module, css);
+            return path.join('modules', module, css);
           });
           push.apply(modules.css, prefixedCss);
         }

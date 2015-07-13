@@ -1,0 +1,11 @@
+{
+  "name": "Bar Chart Messages",
+  "main": "BarChartMessagesView",
+  "version": "0.0.1",
+  "js": [
+    "bar-chart-messages-view.js"
+  ],
+  "css": [
+    "bar-chart-messages-styles.css"
+  ]
+}
