@@ -6,13 +6,15 @@ var middguard = middguard || {};
   middguard.AppView = Backbone.View.extend({
     initialize: function () {
       this.$body = $('body');
+      this.header = new middguard.HeaderView();
       this.packages = new middguard.PackagesView();
       this.chat = new middguard.ChatView();
       this.render();
     },
     render: function () {
-      this.$body.append(this.packages.render().el);
-      this.$body.append(this.chat.render().el);
+      this.$body.append(this.header.render().el);
+      $('#middguard-header').append(this.packages.render().el);
+      $('#middguard-header').append(this.chat.render().el);
     }
   });
 })();

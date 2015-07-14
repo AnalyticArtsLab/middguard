@@ -68,6 +68,5 @@ var middguard = middguard || {};
       return this;
     }
   });
-  console.log('here1');
   middguard.addModule('BarChartMessagesView', BarChartMessagesView);
 })();

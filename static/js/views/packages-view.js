@@ -6,24 +6,22 @@ var middguard = middguard || {};
   middguard.PackagesView = Backbone.View.extend({
     id: 'middguard-packages',
     template: _.template(
-      '<h1 id="middguard-header">MiddGuard</h1>' +
-      '<div id="middguard-user"><% print(middguard.user.username) %>' +
-        '<form class="logout" action="/logout" method="post">' +
-          '<input type="submit" value="Logout">' +
-        '</form></div>' +
       '<div id="middguard-packages-list">' +
         '<h3>Modules</h3><div id="middguard-packages-modules"></div>' +
         '<h3>Models</h3><div id="middguard-packages-models"></div>' +
         '<h3>Analytics</h3><div id="middguard-packages-analytics"></div>' +
       '</div>'
     ),
+    events: {
+      'click #swap_button' : 'divSwap'
+    },
     initialize: function () {
       _.bindAll(this,
         'addAllModules',
         'addAllModels',
         'addAllAnalytics',
         'addAll');
-
+        
       this.listenTo(middguard.PackagedModules, 'reset', this.addAllModules);
       this.listenTo(middguard.PackagedModels, 'reset', this.addAllModels);
       this.listenTo(middguard.PackagedAnalytics, 'reset', this.addAllAnalytics);
@@ -42,6 +40,9 @@ var middguard = middguard || {};
       this.$models = this.$('#middguard-packages-models');
       this.$analytics = this.$('#middguard-packages-analytics');
       return this;
+    },
+    divSwap: function(){
+      console.log('swap');
     },
     addAllModules: function () {
       this.addAll(middguard.PackagedModules, 'module', this.$modules);
@@ -119,6 +120,9 @@ var middguard = middguard || {};
       } else {
         var module = new middguard.__modules[this.model.get('main')].ctor;
         middguard.__modules[this.model.get('main')].live = module;
+        console.log(module.width+module.margin.left + module.margin.right);
+        console.log($('body')[0].scrollWidth);
+        //$('body')[0].scrollWidth += module.width+module.margin.left + module.margin.right;
         $('body').append(module.render().el);
       }
       this.active = !this.active;

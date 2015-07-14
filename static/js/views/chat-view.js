@@ -6,8 +6,6 @@ var middguard = middguard || {};
   middguard.ChatView = Backbone.View.extend({
     id: 'middguard-chat',
     template: _.template(
-      '<div id="middguard-chat-header">Observations' +
-      '<button id="middguard-chat-collapse">&mdash;</button></div>' +
       '<div id="middguard-chat-log"></div>' +
       '<textarea id="middguard-chat-input"></textarea>'
     ),
@@ -117,11 +115,6 @@ var middguard = middguard || {};
     restoreState: function () {
       var state = JSON.parse(this.model.get('state'));
       middguard.state.set(state)
-			/*
-			middguard.state.set({'timeRange' : {'start' : new Date("2014-01-08"),
-																			'end' : new Date("2014-01-20")}
-													});
-			*/
     }
   });
 })();

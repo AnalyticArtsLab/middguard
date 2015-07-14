@@ -20,6 +20,7 @@ module.exports = {
     'views/packages-view.js',
     'views/chat-view.js',
     'views/app-view.js',
+    'views/header-view.js',
 
     'app.js'
   ]

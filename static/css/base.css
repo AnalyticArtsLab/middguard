@@ -12,15 +12,44 @@ html, body {
 body {
   font-family: "Helvetica Neue", Helvetica, Tahoma;
   height:100%;
- 
+  display: inline-block;
+  overflow-x: scroll;
+}
+#view-options{
+  width: 300px;
+  margin: auto;
+}
+
+#view-options .viewOption{
+  outline: 0;
+  width: 150px;
+  cursor: pointer;
+  color: white;
+  background-color: black;
+  border-radius: 5px 5px 0px 0px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black;
+}
+
+#view-options .viewOption:hover{
+  outline: 0;
+  width: 150px;
+  cursor: pointer;
+  color: black;
+  background-color: white;
+  border-radius: 5px 5px 0px 0px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: white;
+  
 }
 
 #middguard-chat {
+  display: none;
   position: absolute;
-  right: 20px;
-  bottom: 0;
+  left: 0;
   width: 300px;
-  border-top: 1px solid #999;
   border-right: 1px solid #999;
   border-left: 1px solid #999;
   border-top-right-radius: 3px;
@@ -33,20 +62,8 @@ body {
   background-color: #333;
 }
 
-#middguard-chat-collapse {
-  margin: 0;
-  padding: 0 5px;
-  outline: none;
-  border: none;
-  float: right;
-  color: #fff;
-  background-color: inherit;
-  font-size: inherit;
-  cursor: pointer;
-}
-
 #middguard-chat-log {
-  height: 434px;
+  height: 460px;
   overflow-y: auto;
   overflow-x: hidden;
   background-color: #e9eaed;
@@ -98,12 +115,28 @@ body {
   padding: 3px 0;
 }
 
+#middguard-header {
+  float: left;
+  width: 300px;
+  height: 100%;
+  border-right: 1px solid #999;
+  background-color: #e9eaed;
+  overflow: scroll;
+}
+#middguard-header h1,
+#middguard-header h2,
+#middguard-header h3,
+#middguard-header #middguard-user {
+  padding: 0 20px;
+}
+
 #middguard-packages {
   float: left;
   width: 300px;
   height: 100%;
   border-right: 1px solid #999;
   background-color: #e9eaed;
+  overflow: scroll;
 }
 
 .logout {
@@ -141,7 +174,7 @@ body {
 
 .middguard-module {
   float: left;
-  height: 100%;
+  height: inherit;
   overflow-y: auto;
   overflow-x: auto;
 }
