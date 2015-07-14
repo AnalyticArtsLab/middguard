@@ -3,15 +3,14 @@ var middguard = middguard || {};
 (function () {
   'use strict';
 
-  middguard.ChatView = Backbone.View.extend({
-    id: 'middguard-chat',
+  middguard.ObsView = Backbone.View.extend({
+    id: 'middguard-obs',
     template: _.template(
-      '<div id="middguard-chat-log"></div>' +
-      '<textarea id="middguard-chat-input"></textarea>'
+      '<div id="middguard-obs-log"></div>' +
+      '<textarea id="middguard-obs-input"></textarea>'
     ),
     events: {
-      'keydown #middguard-chat-input': 'sendMessage',
-      'click #middguard-chat-collapse': 'toggleCollapsed',
+      'keydown #middguard-obs-input': 'sendMessage',
       'click': 'focusInput'
     },
     initialize: function () {
@@ -25,9 +24,10 @@ var middguard = middguard || {};
     },
     render: function () {
       this.$el.html(this.template());
-      this.$chatlog = this.$('#middguard-chat-log');
-      this.$collapse = this.$('#middguard-chat-collapse');
-      this.$input = this.$('#middguard-chat-input');
+      this.$obslog = this.$('#middguard-obs-log');
+      this.$collapse = this.$('#middguard-obs-collapse');
+      this.$input = this.$('#middguard-obs-input');
+      console.log('here');
       return this;
     },
     messageContents: function () {
@@ -39,8 +39,8 @@ var middguard = middguard || {};
       }
     },
     addOne: function (message) {
-      var view = new middguard.ChatMessageView({model: message});
-      this.$chatlog.append(view.render().el);
+      var view = new middguard.ObsMessageView({model: message});
+      this.$obslog.append(view.render().el);
     },
     addAll: function () {
       middguard.Messages.each(this.addOne);
@@ -51,22 +51,9 @@ var middguard = middguard || {};
         var message = middguard.Messages.create(this.messageContents());
         this.$input.val('');
 				//scroll to bottom when a message is entered
-				var messageHeight = document.getElementsByClassName('middguard-chat-message')[0].clientHeight;
-				document.getElementById('middguard-chat-log').scrollTop = document.getElementsByClassName('middguard-chat-message').length*messageHeight
+				var messageHeight = document.getElementsByClassName('middguard-obs-message')[0].clientHeight;
+				document.getElementById('middguard-obs-log').scrollTop = document.getElementsByClassName('middguard-obs-message').length*messageHeight;
         return false;
-      }
-    },
-    toggleCollapsed: function () {
-      if (this.collapsed) {
-        this.$chatlog.show();
-        this.$input.show();
-        this.$collapse.html('&mdash;');
-        this.collapsed = false;
-      } else {
-        this.$chatlog.hide();
-        this.$input.hide();
-        this.$collapse.html('+');
-        this.collapsed = true;
       }
     },
     focusInput: function () {
@@ -74,13 +61,13 @@ var middguard = middguard || {};
     }
   });
 
-  middguard.ChatMessageView = Backbone.View.extend({
+  middguard.ObsMessageView = Backbone.View.extend({
     tagName: 'div',
-    className: 'middguard-chat-message',
+    className: 'middguard-obs-message',
     template: _.template(
-      '<div class="middguard-chat-message-meta"><%= analyst %>' +
+      '<div class="middguard-obs-message-meta"><%= analyst %>' +
       '<span class="timeOrRestore"><%= time %></span></div>' +
-      '<div class="middguard-chat-message-content"><%= content %></div>'
+      '<div class="middguard-obs-message-content"><%= content %></div>'
     ),
     events: {
       'mouseover': 'showRestoreState',
