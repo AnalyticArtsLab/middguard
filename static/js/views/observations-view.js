@@ -27,7 +27,6 @@ var middguard = middguard || {};
       this.$obslog = this.$('#middguard-obs-log');
       this.$collapse = this.$('#middguard-obs-collapse');
       this.$input = this.$('#middguard-obs-input');
-      console.log('here');
       return this;
     },
     messageContents: function () {

@@ -12,9 +12,6 @@ var middguard = middguard || {};
         '<h3>Analytics</h3><div id="middguard-packages-analytics"></div>' +
       '</div>'
     ),
-    events: {
-      'click #swap_button' : 'divSwap'
-    },
     initialize: function () {
       _.bindAll(this,
         'addAllModules',
@@ -39,10 +36,9 @@ var middguard = middguard || {};
       this.$modules = this.$('#middguard-packages-modules');
       this.$models = this.$('#middguard-packages-models');
       this.$analytics = this.$('#middguard-packages-analytics');
+      var sWidth = screen.width;
+      $('body').append('<div id="modules-container" style="width: ' + (sWidth-300) + '"/>');
       return this;
-    },
-    divSwap: function(){
-      console.log('swap');
     },
     addAllModules: function () {
       this.addAll(middguard.PackagedModules, 'module', this.$modules);
@@ -120,10 +116,7 @@ var middguard = middguard || {};
       } else {
         var module = new middguard.__modules[this.model.get('main')].ctor;
         middguard.__modules[this.model.get('main')].live = module;
-        console.log(module.width+module.margin.left + module.margin.right);
-        console.log($('body')[0].scrollWidth);
-        //$('body')[0].scrollWidth += module.width+module.margin.left + module.margin.right;
-        $('body').append(module.render().el);
+        $('#modules-container').append(module.render().el);
       }
       this.active = !this.active;
       this.render();
