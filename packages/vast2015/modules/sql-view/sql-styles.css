@@ -1,0 +1,60 @@
+#SQLView .SQLRowHeader{
+  background-color: white;
+  border: solid;
+  border-width: 5px;
+  border-color: white;
+  border-radius: 0px;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  text-align: center;
+}
+
+#SQLView .SQLRow td{
+  background-color: white;
+  border: solid;
+  border-width: 3px;
+  border-color: white;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  text-align: center;
+}
+
+#SQLView {
+  background-color: #848484;
+  border: 3px solid;
+  border-color: #848484;
+  border-radius: 3px 0px 3px 3px;
+}
+#enter-changes{
+  background-color: #CCCCCC;
+  outline: none;
+  border: 1px solid;
+  border-color: #CCCCCC;
+  border-radius: 2px 2px 0px 0px;
+  cursor: pointer;
+  width: 50%;
+  height: 19px;
+  display: inline-block;
+}
+
+#table-changes{
+  height: 20px;
+  width: 100%;
+  display: inline-block;
+}
+#model-name-div, #enter-change-div{
+  height: 100%;
+  width: 50%;
+  position:relative;
+  top: 0px;
+  font-size: 12px;
+  display: inline-block;
+  text-align: center;
+}
+#model-name-text{
+  width: 50%;
+  display: inline-block;
+  height: 20px;
+  margin: 0px;
+  padding: 0px;
+  font-size: 12px;
+  text-align: center;
+}

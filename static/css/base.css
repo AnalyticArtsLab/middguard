@@ -171,7 +171,7 @@ body {
   padding: 10px 20px;
 }
 
-#middguard-packages .middguard-package.module {
+#middguard-packages .middguard-package.module, .middguard-package.model {
   cursor: pointer;
 }
 

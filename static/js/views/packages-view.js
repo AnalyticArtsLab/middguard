@@ -100,6 +100,11 @@ var middguard = middguard || {};
       this.type = _.result(options, 'type');
 
       _.bindAll(this, 'toggleActive');
+      if (this.type === 'model' && ! middguard.state.activeModel){
+        middguard.state.activeModel = {};
+        _.extend(middguard.state.activeModel, Backbone.Events);
+        middguard.state.activeModel.current = this;
+      }
     },
     render: function () {
       this.$el.html(this.template({name: this.model.get('name')}));
@@ -108,17 +113,26 @@ var middguard = middguard || {};
       return this;
     },
     toggleActive: function () {
-      if (this.type !== 'module') return;
-
-      if (this.active) {
-        middguard.__modules[this.model.get('main')].live.remove();
-        middguard.__modules[this.model.get('main')].live = null;
+      if (this.type !== 'module' && this.type !== 'model') return;
+      if (this.type === 'module'){
+        if (this.active) {
+          middguard.__modules[this.model.get('main')].live.remove();
+          middguard.__modules[this.model.get('main')].live = null;
+        } else {
+          var module = new middguard.__modules[this.model.get('main')].ctor;
+          middguard.__modules[this.model.get('main')].live = module;
+          $('#modules-container').append(module.render().el);
+        }
+        this.active = !this.active;
       } else {
-        var module = new middguard.__modules[this.model.get('main')].ctor;
-        middguard.__modules[this.model.get('main')].live = module;
-        $('#modules-container').append(module.render().el);
+        //if this.type === model
+        
+        middguard.state.activeModel.current.active = false;
+        middguard.state.activeModel.current.render();
+        this.active = true;
+        middguard.state.activeModel.current = this;
+        middguard.state.activeModel.trigger('changedModel');
       }
-      this.active = !this.active;
       this.render();
     }
   });
