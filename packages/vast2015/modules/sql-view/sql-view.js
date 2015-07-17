@@ -2,11 +2,51 @@ var middguard = middguard || {};
 
 (function () {
   'use strict';
+  
+  var SQLView = middguard.View.extend({
+    template: _.template('<h3>SQL Database Interaction</h3>'),
+    
+    initialize: function(){
+      this.$el.html(this.template);
+      var table = new TableView();
+      var query = new QueryView();
+      this.$el.append(table.render().el);
+      this.$el.append(query.render().el)
+    },
+    
+    render: function(){
+      return this;
+    }
+  });
+  
+  
+  var QueryView = middguard.View.extend({
+    id: 'query-view',
+    
+    template: _.template('<h5>Model Table Query Entry</h5><div id="submission-div"><p id="query-beginning">SELECT * FROM [model table name] WHERE:</p><div id="query-entry-div"><input type="text" id="query-text"/><input type="submit" id="query-submit" value="Add Query"></div></div>'),
+    
+    events: {
+      'click #query-submit': 'queryTrigger'
+    },
+    
+    initialize: function(){
+      this.$el.html(this.template);
+    },
+    
+    queryTrigger: function(){
+      console.log(document.getElementById('query-text').value);
+    },
+    
+    render: function(){
+      return this;
+    }
+    
+  });
 
   var TableView = middguard.View.extend({
-    id: 'tableView',
+    id: 'table-view',
     
-    template: _.template('<div id="table-view"><h1>SQL Table View</h1></div><div id="table-changes"><p id="model-name-text"> <- Select Model </p><input type="submit" id="enter-changes" value="Enter Changes" style="visibility:hidden"/></div><table id="SQLView" style="visibility:hidden"></table>'),
+    template: _.template('<h5>Current SQL Table/Results</h5><div id="table-changes"><p id="model-name-text"> <- Select Model </p><input type="submit" id="enter-changes" value="Enter Changes" style="visibility:hidden"/></div><table id="SQL-table" style="visibility:hidden"></table>'),
     
     events: {
       'click #enter-changes' : 'enterChanges',
@@ -17,10 +57,14 @@ var middguard = middguard || {};
       this.$el.html(this.template);
       
       middguard.state.changedModels = [];
+      middguard.state.currentQuery = {query: null, entity: null};
+      _.extend(middguard.state.currentQuery, Backbone.Events);
       
-      this.listenTo(middguard.entities.Locationcounts, 'sync', function(col, resp, opt){
-        this.render(col, resp, opt);
-      });
+      this.listenTo(middguard.state.currentQuery, 'search', function(){
+        var entity = this.capitalize(pluralize(middguard.state.currentQuery.entity));
+        this.queryDB(entity, middguard.state.currentQuery.query);
+      })
+      
       if (!middguard.state.activeModel || !middguard.state.activeModel.current){
         //make sure that a view has been linked to middguard.state.activeModel.current
         middguard.state.activeModel = {current: null};
@@ -39,10 +83,18 @@ var middguard = middguard || {};
         modName = this.capitalize(pluralize(modName));
         globalThis.queryDB(modName, {limit: '5'});
       }
+      
     },
     queryDB: function(entityName, query){
+      var globalThis = this;
       middguard.entities[entityName].fetch({
-        data: query, source: 'tableView'
+        data: query, source: 'tableView',
+        success: function(col, resp, opt){
+          globalThis.render(col, resp, opt);
+        },
+        error: function(){
+          console.log('failure');
+        }
       });
     },
     
@@ -67,13 +119,17 @@ var middguard = middguard || {};
         } else {
           var tableName = '&lt;- Select Model';
         }
-        document.getElementById('model-name-text').innerHTML = 'Model: ' + tableName;
+        var modNameText = document.getElementById('model-name-text');
+        modNameText.innerHTML = 'Model: ' + tableName;
+        modNameText.style['background-color'] = '#848484';
+        modNameText.style['border-color'] = '#848484';
+        modNameText.style.color = 'white';
         document.getElementById('enter-changes').style.visibility = 'visible';
-        document.getElementById('SQLView').style.visibility = 'visible';
+        document.getElementById('SQL-table').style.visibility = 'visible';
         d3.selectAll('.SQLRow').remove();
         d3.selectAll('.SQLRowHeader').remove();
         
-        var table = document.getElementById('SQLView');
+        var table = document.getElementById('SQL-table');
         var row = table.insertRow(0);
         row.className = 'SQLRowHeader';
         var j = 0;
@@ -151,5 +207,5 @@ var middguard = middguard || {};
     
   });
 
-  middguard.addModule('TableView', TableView);
+  middguard.addModule('SQLView', SQLView);
 })();

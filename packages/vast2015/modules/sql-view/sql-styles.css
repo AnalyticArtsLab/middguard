@@ -1,4 +1,4 @@
-#SQLView .SQLRowHeader{
+#SQL-table .SQLRowHeader{
   background-color: white;
   border: solid;
   border-width: 5px;
@@ -8,7 +8,7 @@
   text-align: center;
 }
 
-#SQLView .SQLRow td{
+#SQL-table .SQLRow td{
   background-color: white;
   border: solid;
   border-width: 3px;
@@ -18,12 +18,32 @@
   text-align: center;
 }
 
-#SQLView {
+#SQL-table {
   background-color: #848484;
   border: 3px solid;
   border-color: #848484;
-  border-radius: 3px 0px 3px 3px;
+  border-radius: 0px 3px 3px 3px;
 }
+#table-changes{
+  height: 20px;
+  width: 100%;
+  display: inline-block;
+}
+#model-name-text{
+  width: 100px;
+  display: inline-block;
+  height: 100%;
+  margin: 0px;
+  font-size: 12px;
+  text-align: center;
+  color: black;
+  border: 1px solid;
+  border-color: white;
+  border-radius: 2px 2px 0px 0px;
+  position: relative;
+  top: -2px;
+}
+
 #enter-changes{
   background-color: #CCCCCC;
   outline: none;
@@ -31,31 +51,38 @@
   border-color: #CCCCCC;
   border-radius: 2px 2px 0px 0px;
   cursor: pointer;
-  width: 50%;
-  height: 19px;
-  display: inline-block;
-}
-
-#table-changes{
-  height: 20px;
-  width: 100%;
-  display: inline-block;
-}
-#model-name-div, #enter-change-div{
+  width: 100px;
   height: 100%;
-  width: 50%;
-  position:relative;
-  top: 0px;
-  font-size: 12px;
   display: inline-block;
+  position: relative;
+  top: 0px;
+}
+#enter-changes:hover{
+  background-color: #A0A0A0;
+  border-color: #A0A0A0;
+}
+#enter-changes:active{
+  background-color: #707070;
+  border-color: #707070;
+}
+#query-beginning{
+  font-family: "Courier New", Courier, monospace;
+  font-size: 14px;
+}
+#query-view{
+  margin: 5px;
+  width: 600px;
+}
+#query-beginning{
   text-align: center;
 }
-#model-name-text{
-  width: 50%;
-  display: inline-block;
-  height: 20px;
-  margin: 0px;
-  padding: 0px;
-  font-size: 12px;
-  text-align: center;
+#query-entry-div{
+  width: 300px;
+  margin-left: 150px;
+}
+#query-text{
+  width: 75%;
+}
+#query-submit{
+  width: 25%;
 }
