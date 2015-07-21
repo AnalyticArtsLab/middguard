@@ -37,7 +37,7 @@ var middguard = middguard || {};
       this.$models = this.$('#middguard-packages-models');
       this.$analytics = this.$('#middguard-packages-analytics');
       var sWidth = screen.width;
-      $('body').append('<div id="modules-container" style="width: ' + (sWidth-300) + '"/>');
+      $('body').append('<div id="modules-container"/>');
       return this;
     },
     addAllModules: function () {
@@ -124,16 +124,18 @@ var middguard = middguard || {};
           $('#modules-container').append(module.render().el);
         }
         this.active = !this.active;
+        this.render();
       } else {
         //if this.type === model
-        
-        middguard.state.activeModel.current.active = false;
-        middguard.state.activeModel.current.render();
-        this.active = true;
-        middguard.state.activeModel.current = this;
-        middguard.state.activeModel.trigger('changedModel');
+        if (this.active) {
+          $('#sql-model-view-' + this.model.get('name')).remove();
+        } else {
+          var module = new middguard.SQLView.ctor({model: this.model});
+          $('#modules-container').append(module.render().el);
+        }
+        this.active = !this.active;
+        this.$el.toggleClass('active', this.active);
       }
-      this.render();
     }
   });
 })();

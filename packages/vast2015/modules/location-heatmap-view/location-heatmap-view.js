@@ -55,7 +55,6 @@ var middguard = middguard || {};
         this.render(globalThis.col, globalThis.resp, globalThis.opt);
       });
       this.listenTo(middguard.state.Pois.selections, 'remove', function(model){
-        console.log('here');
         if (middguard.state.heatmapChoice == 'all'){
           //if all locations
           

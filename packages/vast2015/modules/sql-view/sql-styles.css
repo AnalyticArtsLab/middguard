@@ -1,4 +1,9 @@
-#SQL-table .SQLRowHeader{
+.SQLInteractDiv{
+  width: 500px;
+  overflow: scroll;
+  display: inline-block;
+}
+.SQL-table .SQLRowHeader{
   background-color: white;
   border: solid;
   border-width: 5px;
@@ -8,7 +13,7 @@
   text-align: center;
 }
 
-#SQL-table .SQLRow td{
+.SQL-table .SQLRow td{
   background-color: white;
   border: solid;
   border-width: 3px;
@@ -18,19 +23,19 @@
   text-align: center;
 }
 
-#SQL-table {
+.SQL-table {
   background-color: #848484;
   border: 3px solid;
   border-color: #848484;
   border-radius: 0px 3px 3px 3px;
 }
-#table-changes{
+.table-changes{
   height: 20px;
   width: 100%;
   display: inline-block;
 }
-#model-name-text{
-  width: 100px;
+.model-name-text{
+  width: 100%;
   display: inline-block;
   height: 100%;
   margin: 0px;
@@ -44,45 +49,43 @@
   top: -2px;
 }
 
-#enter-changes{
+.enter-changes{
   background-color: #CCCCCC;
   outline: none;
   border: 1px solid;
   border-color: #CCCCCC;
-  border-radius: 2px 2px 0px 0px;
+  border-radius: 4px;
   cursor: pointer;
-  width: 100px;
+  width: 100%;
   height: 100%;
   display: inline-block;
   position: relative;
   top: 0px;
 }
-#enter-changes:hover{
+.enter-changes:hover{
   background-color: #A0A0A0;
   border-color: #A0A0A0;
 }
-#enter-changes:active{
+.enter-changes:active{
   background-color: #707070;
   border-color: #707070;
 }
-#query-beginning{
+.query-beginning{
   font-family: "Courier New", Courier, monospace;
   font-size: 14px;
+  text-align: center;
 }
-#query-view{
+.query-view{
   margin: 5px;
   width: 600px;
 }
-#query-beginning{
-  text-align: center;
-}
-#query-entry-div{
+.query-entry-div{
   width: 300px;
   margin-left: 150px;
 }
-#query-text{
+.query-text{
   width: 75%;
 }
-#query-submit{
+.query-submit{
   width: 25%;
 }

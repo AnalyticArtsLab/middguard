@@ -6,35 +6,46 @@ var middguard = middguard || {};
   var SQLView = middguard.View.extend({
     template: _.template('<h3>SQL Database Interaction</h3>'),
     
-    initialize: function(){
+    className: 'SQLInteractDiv',
+    
+    initialize: function(opts){
+      this.model = opts.model
       this.$el.html(this.template);
-      var table = new TableView();
-      var query = new QueryView();
-      this.$el.append(table.render().el);
-      this.$el.append(query.render().el)
+      this.$el.attr('id', 'sql-model-view-' + this.model.get('name'));
     },
     
     render: function(){
+      this.table = new TableView({model: this.model});
+      this.query = new QueryView({tableView: this.table, model: this.model});
+      this.$el.append(this.query.render().el);
+      this.$el.append(this.table.render().el);
       return this;
     }
   });
   
   
   var QueryView = middguard.View.extend({
-    id: 'query-view',
+    className: 'query-view',
     
-    template: _.template('<h5>Model Table Query Entry</h5><div id="submission-div"><p id="query-beginning">SELECT * FROM [model table name] WHERE:</p><div id="query-entry-div"><input type="text" id="query-text"/><input type="submit" id="query-submit" value="Add Query"></div></div>'),
+    template: '<h5>Model Table Query Entry</h5><div class="submission-div"><p class="query-beginning">SELECT * FROM [model table name] WHERE:</p><div class="query-entry-div"><input type="text" id="query-text-%modelName%"class="query-text"/><input type="submit" class="query-submit" value="Add Query"></div></div>',
     
     events: {
       'click #query-submit': 'queryTrigger'
     },
     
-    initialize: function(){
+    initialize: function(opts){
+      this.model = opts.model;
+      this.template = this.template.replace(/%modelName%/g, this.model.get('name'));
       this.$el.html(this.template);
+      this.tableView = opts.tableView;
     },
     
     queryTrigger: function(){
-      console.log(document.getElementById('query-text').value);
+      //this.$el.html(this.template({name: this.model.get('name')}));
+      var qText = document.getElementById('query-text-' + this.model.get('name'));
+      var modName = middguard.state.activeModel.current.model.get('name');
+      modName = this.tableView.capitalize(pluralize(modName));
+      this.tableView.queryDB({whereRaw: qText.value});
     },
     
     render: function(){
@@ -46,48 +57,28 @@ var middguard = middguard || {};
   var TableView = middguard.View.extend({
     id: 'table-view',
     
-    template: _.template('<h5>Current SQL Table/Results</h5><div id="table-changes"><p id="model-name-text"> <- Select Model </p><input type="submit" id="enter-changes" value="Enter Changes" style="visibility:hidden"/></div><table id="SQL-table" style="visibility:hidden"></table>'),
+    template: '<h5>Current SQL Table/Results</h5><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"> <- Select Model </p></div><table id="%modelName%-table" class="SQL-table" style="visibility:hidden"></table><input type="submit" class="enter-changes" id="enter-changes-%modelName%" value="Submit Changes" style="visibility:hidden"/>',
     
     events: {
-      'click #enter-changes' : 'enterChanges',
+      'click .enter-changes' : 'enterChanges',
     },
     
-    initialize: function () {
+    initialize: function (opts) {
       var globalThis = this;
+      this.model = opts.model;
+      this.template = this.template.replace(/%modelName%/g, this.model.get('name'));
       this.$el.html(this.template);
-      
       middguard.state.changedModels = [];
-      middguard.state.currentQuery = {query: null, entity: null};
-      _.extend(middguard.state.currentQuery, Backbone.Events);
       
-      this.listenTo(middguard.state.currentQuery, 'search', function(){
-        var entity = this.capitalize(pluralize(middguard.state.currentQuery.entity));
-        this.queryDB(entity, middguard.state.currentQuery.query);
-      })
-      
-      if (!middguard.state.activeModel || !middguard.state.activeModel.current){
-        //make sure that a view has been linked to middguard.state.activeModel.current
-        middguard.state.activeModel = {current: null};
-        _.extend(middguard.state.activeModel, Backbone.Events);
-      }
-      this.listenTo(middguard.state.activeModel, 'changedModel', function(){
-        if (middguard.state.activeModel.current.active){
-          var modName = middguard.state.activeModel.current.model.get('name');
-          modName = this.capitalize(pluralize(modName));
-          globalThis.queryDB(modName, {limit: '5'});
-        }
-      });
-      
-      if (middguard.state.activeModel.current.active){
-        var modName = middguard.state.activeModel.current.model.get('name');
-        modName = this.capitalize(pluralize(modName));
-        globalThis.queryDB(modName, {limit: '5'});
-      }
+      var modName = this.model.get('name');
+      this.collection = new Backbone.Collection([], {model: middguard.entities[this.capitalize(pluralize(modName))].model});
+      this.collection.url = pluralize(modName);
+      this.queryDB({limit: '5'});
       
     },
-    queryDB: function(entityName, query){
+    queryDB: function(query){
       var globalThis = this;
-      middguard.entities[entityName].fetch({
+      this.collection.fetch({
         data: query, source: 'tableView',
         success: function(col, resp, opt){
           globalThis.render(col, resp, opt);
@@ -105,35 +96,31 @@ var middguard = middguard || {};
     enterChanges: function(){
       var globalThis = this;
       //save all changed models to DB
-      middguard.state.changedModels.forEach(function(item){
-        middguard.entities[item.entityName].findWhere({id: item.id}).save();
-      });
-      middguard.state.changedModels.length = 0;
+      for (var item in middguard.state.changedModels){
+        console.log(middguard.state.changedModels[item].cssId);
+        middguard.state.changedModels[item].collection.findWhere({id: middguard.state.changedModels[item].id}).save();
+        $('#' + middguard.state.changedModels[item].cssId).css('color', 'black');
+      }
+      middguard.state.changedModels = {};
     },
 
     render: function(col, resp, opt){
+      var globalThis = this;
       if (opt && opt.source === 'tableView'){
         //make sure call is coming from the intended place
-        if (middguard.state.activeModel.current.active){
-          var tableName = middguard.state.activeModel.current.model.get('name'); 
-        } else {
-          var tableName = '&lt;- Select Model';
-        }
-        var modNameText = document.getElementById('model-name-text');
+        
+        var tableName = this.model.get('name'); 
+        var modNameText = document.getElementById(tableName + '-model-name-text');
         modNameText.innerHTML = 'Model: ' + tableName;
         modNameText.style['background-color'] = '#848484';
         modNameText.style['border-color'] = '#848484';
         modNameText.style.color = 'white';
-        document.getElementById('enter-changes').style.visibility = 'visible';
-        document.getElementById('SQL-table').style.visibility = 'visible';
-        d3.selectAll('.SQLRow').remove();
-        d3.selectAll('.SQLRowHeader').remove();
-        
-        var table = document.getElementById('SQL-table');
+        document.getElementById('enter-changes-' + this.model.get('name')).style.visibility = 'visible';
+        var table = document.getElementById(this.model.get('name') + '-table');
+        table.style.visibility = 'visible';
         var row = table.insertRow(0);
         row.className = 'SQLRowHeader';
-        var j = 0;
-        
+        var j = 0;        
         for (var attr in resp[0]){
           //list attribute names
           var cell = row.insertCell(j);
@@ -142,7 +129,6 @@ var middguard = middguard || {};
           cell.contentEditable = true;
           j++;
         }
-        
         resp.forEach(function(model, i){
           var row = table.insertRow(i+1);
           var rowView = new RowView(model);
@@ -151,11 +137,12 @@ var middguard = middguard || {};
           var j = 0;
           for (var attr in model){
             var cell = row.insertCell(j);
-            var cellView = new CellView(model, attr);
+            var cellView = new CellView(globalThis.collection, model, attr);
             cell.innerHTML = model[attr];
             cell.contentEditable = true;
             cell.className = 'table-cell';
             cellView.setElement(cell);
+            cellView.$el.attr('id', globalThis.collection.url + '-' + model.id+ '-' + attr);
             j++;
           }
         });
@@ -183,7 +170,8 @@ var middguard = middguard || {};
       'input ' : 'trackChanges',
     },
     
-    initialize: function(model, attr){
+    initialize: function(collection, model, attr){
+      this.collection = collection;
       this.model = model;
       this.attr = attr;
     },
@@ -193,12 +181,10 @@ var middguard = middguard || {};
     },
     
     trackChanges: function(){
-      var entityName = middguard.state.activeModel.current.model.get('name');
-      entityName = this.capitalize(pluralize(entityName));
-      console.log(this.capitalize);
       //apply the changed attribute to its model, store the model for future saving to DB
-      middguard.entities[entityName].findWhere({id: this.model.id}).set(this.attr, this.el.innerHTML);
-      middguard.state.changedModels.push({entityName: entityName, id: this.model.id});
+      this.collection.findWhere({id: this.model.id}).set(this.attr, this.el.innerHTML);
+      this.$el.css('color', 'red');
+      middguard.state.changedModels[this.collection.url + '-' + this.model.id] = {collection: this.collection, id: this.model.id, cssId: this.collection.url + '-' + this.model.id + '-' + this.attr};
     },
     
     render: function(){
@@ -207,5 +193,5 @@ var middguard = middguard || {};
     
   });
 
-  middguard.addModule('SQLView', SQLView);
+  middguard.SQLView =  {ctor: SQLView};
 })();
