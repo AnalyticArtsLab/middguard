@@ -41,7 +41,6 @@ var middguard = middguard || {};
     },
     
     queryTrigger: function(){
-      //this.$el.html(this.template({name: this.model.get('name')}));
       var qText = document.getElementById('query-text-' + this.model.get('name'));
       var modName = middguard.state.activeModel.current.model.get('name');
       modName = this.tableView.capitalize(pluralize(modName));
@@ -55,20 +54,17 @@ var middguard = middguard || {};
   });
 
   var TableView = middguard.View.extend({
-    template: '<h5>Current SQL Table/Results</h5><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"> <- Select Model </p></div><table id="%modelName%-table" class="SQL-table" style="visibility:hidden"></table><div class="submit-restore-div"><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Submit Changes" style="visibility:hidden"/><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Restore Edits" style="visibility:hidden"/></div>',
+    template: '<h5>Current SQL Table/Results</h5><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"> <- Select Model </p></div><table id="%modelName%-table" class="SQL-table" "></table><div class="submit-restore-div"><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Submit Changes" /><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="restore-%modelName%" value="Restore Edits" /></div>',
     
     className: 'table-view',
     
-    events: {
-      'click .enter-changes' : 'enterChanges',
-    },
     
     initialize: function (opts) {
       var globalThis = this;
       this.model = opts.model;
       this.template = this.template.replace(/%modelName%/g, this.model.get('name'));
       this.$el.html(this.template);
-      middguard.state.changedModels = [];
+      middguard.state.changedModels = {};
       
       var modName = this.model.get('name');
       this.collection = new Backbone.Collection([], {model: middguard.entities[this.capitalize(pluralize(modName))].model});
@@ -78,10 +74,16 @@ var middguard = middguard || {};
     },
     queryDB: function(query){
       var globalThis = this;
+      console.log('here1');
       this.collection.fetch({
         data: query, source: 'tableView',
         success: function(col, resp, opt){
           globalThis.render(col, resp, opt);
+          //we need to bind the listener for these buttons after the buttons have been added into the DOM
+          $('#enter-changes-' +globalThis.model.get('name')).click(globalThis.enterChanges);
+          $('#restore-' +globalThis.model.get('name')).click(function(){
+            globalThis.restore(globalThis);
+          });
         },
         error: function(){
           console.log('failure');
@@ -97,11 +99,22 @@ var middguard = middguard || {};
       var globalThis = this;
       //save all changed models to DB
       for (var item in middguard.state.changedModels){
-        console.log(middguard.state.changedModels[item].cssId);
         middguard.state.changedModels[item].collection.findWhere({id: middguard.state.changedModels[item].id}).save();
         $('#' + middguard.state.changedModels[item].cssId).css('color', 'black');
       }
       middguard.state.changedModels = {};
+    },
+    
+    restore: function(globalThis){
+      //save all changed models to DB
+      for (var item in middguard.state.changedModels){
+        debugger;
+        var id = middguard.state.changedModels[item].id;
+        globalThis.collection.remove(id);
+        globalThis.collection.add(middguard.state.changedModels[item].restore);
+        $('#' + middguard.state.changedModels[item].cssId).css('color', 'black');
+      }
+      globalThis.render(globalThis.collection);
     },
 
     render: function(col, resp, opt){
@@ -115,14 +128,11 @@ var middguard = middguard || {};
         modNameText.style['background-color'] = '#848484';
         modNameText.style['border-color'] = '#848484';
         modNameText.style.color = 'white';
-        document.getElementById('enter-changes-' + this.model.get('name')).style.visibility = 'visible';
-        $('.submit-restore-' + this.model.get('name')).css('visibilty', 'visible');
         var table = document.getElementById(this.model.get('name') + '-table');
-        table.style.visibility = 'visible';
         var row = table.insertRow(0);
         row.className = 'SQLRowHeader';
         var j = 0;        
-        for (var attr in resp[0]){
+        for (var attr in col.models[0].attributes){
           //list attribute names
           var cell = row.insertCell(j);
           cell.innerHTML = attr;
@@ -130,16 +140,16 @@ var middguard = middguard || {};
           cell.contentEditable = true;
           j++;
         }
-        resp.forEach(function(model, i){
+        col.models.forEach(function(model, i){
           var row = table.insertRow(i+1);
           var rowView = new RowView(model);
           //rowView.setElement(row);
           row.className = 'SQLRow';
           var j = 0;
-          for (var attr in model){
+          for (var attr in model.attributes){
             var cell = row.insertCell(j);
             var cellView = new CellView(globalThis.collection, model, attr);
-            cell.innerHTML = model[attr];
+            cell.innerHTML = model.get(attr);
             cell.contentEditable = true;
             cell.className = 'table-cell';
             cellView.setElement(cell);
@@ -186,9 +196,13 @@ var middguard = middguard || {};
     
     trackChanges: function(){
       //apply the changed attribute to its model, store the model for future saving to DB
+      var saveObj = {restore: this.model.clone()};
       this.collection.findWhere({id: this.model.id}).set(this.attr, this.el.innerHTML);
       this.$el.css('color', 'red');
-      middguard.state.changedModels[this.collection.url + '-' + this.model.id] = {collection: this.collection, id: this.model.id, cssId: this.collection.url + '-' + this.model.id + '-' + this.attr};
+      saveObj.collection = this.collection;
+      saveObj.id = this.model.id;
+      saveObj.cssId = this.collection.url + '-' + this.model.id + '-' + this.attr;
+      middguard.state.changedModels[this.collection.url + '-' + this.model.id] = saveObj;
     },
     
     render: function(){

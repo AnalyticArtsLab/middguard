@@ -57,6 +57,7 @@
   display: inline-block;
   position: relative;
   top: 0px;
+  margin: 1px;
 }
 .enter-changes:hover{
   background-color: #A0A0A0;
@@ -84,7 +85,6 @@
 .query-submit{
   width: 15%;
 }
-.table-view{
-  margin-left: 5px;
-  width: 500px;
+.submit-restore{
+  
 }
