@@ -6,7 +6,7 @@ var middguard = middguard || {};
   var SQLView = middguard.View.extend({
     template: _.template('<h3>SQL Database Interaction</h3>'),
     
-    className: 'SQLInteractDiv',
+    className: 'SQLInteractDiv middguard-module',
     
     initialize: function(opts){
       this.model = opts.model
@@ -55,9 +55,9 @@ var middguard = middguard || {};
   });
 
   var TableView = middguard.View.extend({
-    id: 'table-view',
+    template: '<h5>Current SQL Table/Results</h5><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"> <- Select Model </p></div><table id="%modelName%-table" class="SQL-table" style="visibility:hidden"></table><div class="submit-restore-div"><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Submit Changes" style="visibility:hidden"/><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Restore Edits" style="visibility:hidden"/></div>',
     
-    template: '<h5>Current SQL Table/Results</h5><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"> <- Select Model </p></div><table id="%modelName%-table" class="SQL-table" style="visibility:hidden"></table><input type="submit" class="enter-changes" id="enter-changes-%modelName%" value="Submit Changes" style="visibility:hidden"/>',
+    className: 'table-view',
     
     events: {
       'click .enter-changes' : 'enterChanges',
@@ -116,6 +116,7 @@ var middguard = middguard || {};
         modNameText.style['border-color'] = '#848484';
         modNameText.style.color = 'white';
         document.getElementById('enter-changes-' + this.model.get('name')).style.visibility = 'visible';
+        $('.submit-restore-' + this.model.get('name')).css('visibilty', 'visible');
         var table = document.getElementById(this.model.get('name') + '-table');
         table.style.visibility = 'visible';
         var row = table.insertRow(0);
@@ -154,6 +155,8 @@ var middguard = middguard || {};
   var RowView = middguard.View.extend({
     template: _.template('<tr class="table-row"></tr>'),
     
+    className: '', //overriding 'middguard-module' default
+    
     initialize: function (model){
       this.$el.html(this.template);
       this.model = model;
@@ -169,6 +172,7 @@ var middguard = middguard || {};
     events: {
       'input ' : 'trackChanges',
     },
+    className: '', //overriding 'middguard-module' default
     
     initialize: function(collection, model, attr){
       this.collection = collection;

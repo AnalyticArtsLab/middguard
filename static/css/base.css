@@ -180,7 +180,7 @@ body {
 }
 
 .middguard-module {
-  display: inline-block;
+  display: table-cell;
   position: relative;
   left: 0px;
   height: inherit;

@@ -1,7 +1,5 @@
 .SQLInteractDiv{
   width: 500px;
-  overflow: scroll;
-  display: inline-block;
 }
 .SQL-table .SQLRowHeader{
   background-color: white;
@@ -31,11 +29,10 @@
 }
 .table-changes{
   height: 20px;
-  width: 100%;
+  width: 300px;
   display: inline-block;
 }
 .model-name-text{
-  width: 100%;
   display: inline-block;
   height: 100%;
   margin: 0px;
@@ -56,7 +53,6 @@
   border-color: #CCCCCC;
   border-radius: 4px;
   cursor: pointer;
-  width: 100%;
   height: 100%;
   display: inline-block;
   position: relative;
@@ -73,19 +69,22 @@
 .query-beginning{
   font-family: "Courier New", Courier, monospace;
   font-size: 14px;
-  text-align: center;
+  text-align: left;
 }
 .query-view{
   margin: 5px;
   width: 600px;
 }
 .query-entry-div{
-  width: 300px;
-  margin-left: 150px;
+  margin-left: 5px;
 }
 .query-text{
-  width: 75%;
+  width: 35%;
 }
 .query-submit{
-  width: 25%;
+  width: 15%;
+}
+.table-view{
+  margin-left: 5px;
+  width: 500px;
 }
