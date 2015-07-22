@@ -71,7 +71,6 @@ var middguard = middguard || {};
     },
     queryDB: function(query){
       var globalThis = this;
-      console.log(query, this.collection);
       this.collection.fetch({
         data: query, source: 'tableView',
         success: function(col, resp, opt){
@@ -96,8 +95,11 @@ var middguard = middguard || {};
       var globalThis = this;
       //save all changed models to DB
       for (var item in middguard.state.changedModels){
-        middguard.state.changedModels[item].collection.findWhere({id: middguard.state.changedModels[item].id}).save();
-        $('#' + middguard.state.changedModels[item].cssId).css('color', 'black');
+        var current = middguard.state.changedModels[item];
+        var model = current.collection.findWhere({id: current.id});
+        model.set(current.attrName, $('#' + item).html().trim());
+        model.save();
+        $('#' + item).css('color', 'black');
       }
       middguard.state.changedModels = {};
     },
@@ -107,9 +109,10 @@ var middguard = middguard || {};
       
       for (var item in middguard.state.changedModels){
         var selection = $('#' + item);
-        selection.html(middguard.state.changedModels[item]);
+        selection.html(middguard.state.changedModels[item].restore);
         selection.css('color', 'black');
       }
+      middguard.state.changedModels = {};
     },
 
     render: function(col, resp, opt){
@@ -128,7 +131,7 @@ var middguard = middguard || {};
         var row = table.insertRow(0);
         row.className = 'SQLRowHeader';
         var j = 0;        
-        for (var attr in resp[0]){
+        for (var attr in col.models[0].attributes){
           //list attribute names
           var cell = row.insertCell(j);
           cell.innerHTML = attr;
@@ -136,20 +139,20 @@ var middguard = middguard || {};
           cell.contentEditable = true;
           j++;
         }
-        resp.forEach(function(model, i){
+        col.models.forEach(function(model, i){
           var row = table.insertRow(i+1);
-          var rowView = new RowView(model);
+          var rowView = new RowView({model: model});
           //rowView.setElement(row);
           row.className = 'SQLRow';
           var j = 0;
-          for (var attr in model){
+          for (var attr in model.attributes){
             var cell = row.insertCell(j);
             var cellView = new CellView(globalThis.collection, model, attr);
-            cell.innerHTML = model[attr];
+            cell.innerHTML = model.get(attr);
             cell.contentEditable = true;
             cell.className = 'table-cell';
             cellView.setElement(cell);
-            cellView.$el.attr('id', globalThis.collection.url + '-' + model.id+ '-' + String(attr).replace(/ /g, '-'));
+            cellView.$el.attr('id', globalThis.collection.url + '-' + model.get('id') + '-' + String(attr).replace(/ /g, '-'));
             j++;
           }
         });
@@ -163,9 +166,10 @@ var middguard = middguard || {};
     
     className: '', //overriding 'middguard-module' default
     
-    initialize: function (model){
+    initialize: function (modelObj){
+      console.log('here');
       this.$el.html(this.template);
-      this.model = model;
+      this.model = modelObj.model;
     },
     
     render: function(){
@@ -193,7 +197,12 @@ var middguard = middguard || {};
     trackChanges: function(){
       //apply the changed attribute to its model, store the model for future saving to DB
       this.$el.css('color', 'red');
-      middguard.state.changedModels[this.collection.url + '-' + this.model.id + '-' + String(this.attr).replace(/ /g, '-')] = this.model[this.attr];
+      middguard.state.changedModels[this.collection.url + '-' + this.model.get('id') + '-' + String(this.attr).replace(/ /g, '-')] = {
+        collection: this.collection,
+        restore: this.model.get(this.attr), 
+        id: this.model.get('id'), 
+        attrName: this.attr
+      };
     },
     
     render: function(){
