@@ -28,10 +28,12 @@ var middguard = middguard || {};
       return this;
     },
     obsShow: function(){
+      $('#middguard-packages').css('display', 'none');
       $('#middguard-obs').css('display', 'initial');
     },
     obsHide: function(){
       $('#middguard-obs').css('display', 'none');
+      $('#middguard-packages').css('display', 'initial');
     }
   });
 })();

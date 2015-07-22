@@ -21,6 +21,7 @@ var middguard = middguard || {};
       this.listenTo(middguard.Messages, 'reset', this.addAll);
       middguard.Analysts.fetch();
       middguard.Messages.fetch({reset: true});
+      this.$el.css('display', 'none');
     },
     render: function () {
       this.$el.html(this.template());

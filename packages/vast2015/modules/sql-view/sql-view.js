@@ -4,13 +4,13 @@ var middguard = middguard || {};
   'use strict';
   
   var SQLView = middguard.View.extend({
-    template: _.template('<h3>SQL Database Interaction</h3>'),
+    template: '<h3>"%modelName%" DB Table</h3>',
     
     className: 'SQLInteractDiv middguard-module',
     
     initialize: function(opts){
       this.model = opts.model
-      this.$el.html(this.template);
+      this.$el.html(this.template.replace('%modelName%', this.model.get('name')));
       this.$el.attr('id', 'sql-model-view-' + this.model.get('name'));
     },
     
@@ -27,10 +27,10 @@ var middguard = middguard || {};
   var QueryView = middguard.View.extend({
     className: 'query-view',
     
-    template: '<h5>Model Table Query Entry</h5><div class="submission-div"><p class="query-beginning">SELECT * FROM [model table name] WHERE:</p><div class="query-entry-div"><input type="text" id="query-text-%modelName%"class="query-text"/><input type="submit" class="query-submit" value="Add Query"></div></div>',
+    template: '<h5>Query Entry</h5><div class="submission-div"><p class="query-beginning">SELECT * FROM %modelName% table WHERE:</p><div class="query-entry-div"><input type="text" id="query-text-%modelName%"class="query-text"/><input type="submit" id="query-submit-%modelName%" class="query-submit" value="Add Query"></div></div>',
     
     events: {
-      'click #query-submit': 'queryTrigger'
+      'click .query-submit': 'queryTrigger'
     },
     
     initialize: function(opts){
@@ -42,8 +42,6 @@ var middguard = middguard || {};
     
     queryTrigger: function(){
       var qText = document.getElementById('query-text-' + this.model.get('name'));
-      var modName = middguard.state.activeModel.current.model.get('name');
-      modName = this.tableView.capitalize(pluralize(modName));
       this.tableView.queryDB({whereRaw: qText.value});
     },
     
@@ -57,7 +55,6 @@ var middguard = middguard || {};
     template: '<h5>Current SQL Table/Results</h5><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"> <- Select Model </p></div><table id="%modelName%-table" class="SQL-table" "></table><div class="submit-restore-div"><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Submit Changes" /><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="restore-%modelName%" value="Restore Edits" /></div>',
     
     className: 'table-view',
-    
     
     initialize: function (opts) {
       var globalThis = this;
@@ -74,6 +71,7 @@ var middguard = middguard || {};
     },
     queryDB: function(query){
       var globalThis = this;
+      console.log(query, this.collection);
       this.collection.fetch({
         data: query, source: 'tableView',
         success: function(col, resp, opt){
@@ -111,17 +109,7 @@ var middguard = middguard || {};
         var selection = $('#' + item);
         selection.html(middguard.state.changedModels[item]);
         selection.css('color', 'black');
-        /*
-        for (var attribute in item.attr){
-          model.set(attribute, item.attr[attribute]);
-          $('#' + middguard.state.changedModels[item].cssId).html(model.get)
-        }
-        model.save();
-        $('#' + middguard.state.changedModels[item].cssId).css('color', 'black');
-        selection.css('color', 'black');
-        */
       }
-      //globalThis.render(globalThis.collection);
     },
 
     render: function(col, resp, opt){
@@ -129,7 +117,8 @@ var middguard = middguard || {};
       if (opt && opt.source === 'tableView'){
         //make sure call is coming from the intended place
 
-        var tableName = this.model.get('name'); 
+        var tableName = this.model.get('name');
+        $('#' + this.model.get('name') + '-table tbody').remove();
         var modNameText = document.getElementById(tableName + '-model-name-text');
         modNameText.innerHTML = 'Model: ' + tableName;
         modNameText.style['background-color'] = '#848484';

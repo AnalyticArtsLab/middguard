@@ -51,16 +51,11 @@ body {
   border-color: white;
   
 }
-
+#obs-control-div{
+  height: calc(100% - 133px);
+}
 #middguard-obs {
-  display: none;
-  position: absolute;
-  left: 0;
   width: 300px;
-  border-right: 1px solid #999;
-  border-left: 1px solid #999;
-  border-top-right-radius: 3px;
-  border-top-left-radius: 3px;
 }
 
 #middguard-obs-header {
@@ -70,7 +65,7 @@ body {
 }
 
 #middguard-obs-log {
-  height: 460px;
+  height: calc(100% - 28px);
   overflow-y: auto;
   overflow-x: hidden;
   background-color: #e9eaed;

@@ -13,8 +13,9 @@ var middguard = middguard || {};
     },
     render: function () {
       this.$body.append(this.header.render().el);
-      $('#middguard-header').append(this.packages.render().el);
-      $('#middguard-header').append(this.obs.render().el);
+      $('#middguard-header').append('<div id="obs-control-div">');
+      $('#obs-control-div').append(this.packages.render().el);
+      $('#obs-control-div').append(this.obs.render().el);
     }
   });
 })();
