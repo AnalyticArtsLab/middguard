@@ -5,7 +5,8 @@ var _ = require('lodash'),
     message = require('./message'),
     models = require('./models'),
     modules = require('./modules'),
-    Bookshelf = require('../../app').get('bookshelf');
+    Bookshelf = require('../../app').get('bookshelf'),
+    io = require('socket.io')();
 
 module.exports = function (err, socket, session) {
   // Only set up sockets if we have a logged in user
@@ -60,16 +61,18 @@ function patchModelToEmit(socket, modelName, model) {
         // a callback and do a broadcast.emit for everyone else.
         // The create listener will take care of this.
         if (!options.clientCreate) {
-          socket.emit(modelName + ':create', model.toJSON());
+          io.emit(pluralize(modelName) + ':create', model.toJSON());
+        }else{
+          socket.broadcast.emit(pluralize(modelName) + ':create', model.toJSON());
         }
       });
 
       this.on('updated', function (model) {
-        socket.emit(modelName + ':update', model.toJSON());
+        socket.broadcast.emit(pluralize(modelName) + ':update', model.toJSON());
       });
 
       this.on('destroyed', function (model) {
-        socket.emit(modelName + ':delete', model.toJSON());
+        socket.broadcast.emit(pluralize(modelName) + ':delete', model.toJSON());
       });
     };
 
@@ -104,8 +107,8 @@ function setupSocketEvents(socket, modelName, model) {
   });
 
   socket.on(pluralize(modelName) + ':read', function (data, callback) {
-    
-    
+
+
     if (data){
       var fetchData = new model().query(data).fetchAll();
     } else {
