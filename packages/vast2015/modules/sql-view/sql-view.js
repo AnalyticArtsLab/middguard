@@ -97,6 +97,14 @@ var middguard = middguard || {};
       for (var item in middguard.state.changedModels){
         var current = middguard.state.changedModels[item];
         var model = current.collection.findWhere({id: current.id});
+        var htmlString = $('#' + item).html().trim();
+        if (current.attrName === 'id'){
+          htmlString = parseInt(htmlString);
+          if (isNaN(htmlString)){
+            console.log(Error('id value must be a unique integer'));
+            //globalThis.restore(globalThis);
+          }
+        }
         model.set(current.attrName, $('#' + item).html().trim());
         model.save();
         $('#' + item).css('color', 'black');
@@ -105,8 +113,7 @@ var middguard = middguard || {};
     },
     
     restore: function(globalThis){
-      //save all changed models to DB
-      
+      //restore all changes to models that haven't been saved
       for (var item in middguard.state.changedModels){
         var selection = $('#' + item);
         selection.html(middguard.state.changedModels[item].restore);
@@ -167,7 +174,6 @@ var middguard = middguard || {};
     className: '', //overriding 'middguard-module' default
     
     initialize: function (modelObj){
-      console.log('here');
       this.$el.html(this.template);
       this.model = modelObj.model;
     },
@@ -188,6 +194,7 @@ var middguard = middguard || {};
       this.collection = collection;
       this.model = model;
       this.attr = attr;
+      this.originalId = this.model.get('id');
     },
     
     capitalize: function (string) {
@@ -197,7 +204,7 @@ var middguard = middguard || {};
     trackChanges: function(){
       //apply the changed attribute to its model, store the model for future saving to DB
       this.$el.css('color', 'red');
-      middguard.state.changedModels[this.collection.url + '-' + this.model.get('id') + '-' + String(this.attr).replace(/ /g, '-')] = {
+      middguard.state.changedModels[this.collection.url + '-' + this.originalId + '-' + String(this.attr).replace(/ /g, '-')] = {
         collection: this.collection,
         restore: this.model.get(this.attr), 
         id: this.model.get('id'), 
