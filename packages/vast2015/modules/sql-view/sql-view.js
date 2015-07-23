@@ -4,7 +4,7 @@ var middguard = middguard || {};
   'use strict';
   
   var SQLView = middguard.View.extend({
-    template: '<h3>"%modelName%" DB Table</h3>',
+    template: '<h3 style="margin:5px">"%modelName%" DB Table</h3>',
     
     className: 'SQLInteractDiv middguard-module',
     
@@ -27,7 +27,7 @@ var middguard = middguard || {};
   var QueryView = middguard.View.extend({
     className: 'query-view',
     
-    template: '<h5>Query Entry</h5><div class="submission-div"><p class="query-beginning">SELECT * FROM %modelName% table WHERE:</p><div class="query-entry-div"><input type="text" id="query-text-%modelName%"class="query-text"/><input type="submit" id="query-submit-%modelName%" class="query-submit" value="Add Query"></div></div>',
+    template: '<h5>Query Entry</h5><div class="submission-div"><p class="query-beginning">SELECT * FROM %modelName% table WHERE:</p><div class="query-entry-div"><input type="text" id="query-text-%modelName%"class="query-text"/><input type="submit" id="query-submit-%modelName%" class="query-submit" value="Enter Query"></div></div>',
     
     events: {
       'click .query-submit': 'queryTrigger'
@@ -42,7 +42,9 @@ var middguard = middguard || {};
     
     queryTrigger: function(){
       var qText = document.getElementById('query-text-' + this.model.get('name'));
-      this.tableView.queryDB({whereRaw: qText.value});
+      this.tableView.curQuery = {whereRaw: qText.value};
+      this.tableView.curOffset = 0;
+      this.tableView.queryDB(this.tableView.curQuery);
     },
     
     render: function(){
@@ -52,7 +54,12 @@ var middguard = middguard || {};
   });
 
   var TableView = middguard.View.extend({
-    template: '<h5>Current SQL Table/Results</h5><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"> <- Select Model </p></div><table id="%modelName%-table" class="SQL-table" "></table><div class="submit-restore-div"><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Submit Changes" /><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="restore-%modelName%" value="Restore Edits" /></div>',
+    template: '<h5>Current SQL Table/Results</h5><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"> <- Select Model </p></div><table id="%modelName%-table" class="SQL-table"></table><div class="pagination" id="pagination-%modelName%"><input type="submit" class="paginate-button-prev" value="<< Previous Page"><input type="submit" class="paginate-button-next" value="Next Page >>"></div><div class="submit-restore-div"><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Submit Changes" /><input type="submit" class="restore-edits" class="submit-restore-%modelName%" id="restore-%modelName%" value="Restore Edits" /></div>',
+    
+    events: {
+      "click .paginate-button-next": "paginateNext",
+      "click .paginate-button-prev": "paginatePrev"
+    },
     
     className: 'table-view',
     
@@ -62,15 +69,33 @@ var middguard = middguard || {};
       this.template = this.template.replace(/%modelName%/g, this.model.get('name'));
       this.$el.html(this.template);
       middguard.state.changedModels = {};
+      this.curOffset = 0;
+      this.curQuery = {};
       
       var modName = this.model.get('name');
       this.collection = new Backbone.Collection([], {model: middguard.entities[this.capitalize(pluralize(modName))].model});
       this.collection.url = pluralize(modName);
-      this.queryDB({limit: '5'});
+      this.queryDB(this.curQuery);
       
     },
+    
+    paginateNext: function(){
+      this.curOffset += 10;
+      this.queryDB(this.curQuery);
+    },
+    
+    paginatePrev: function(){
+      this.curOffset -= 10;
+      if (this.curOffset < 0){
+        this.curOffset = 0;
+      }
+      this.queryDB(this.curQuery);
+    },
+    
     queryDB: function(query){
       var globalThis = this;
+      query.limit = '10';
+      query.offset = this.curOffset;
       this.collection.fetch({
         data: query, source: 'tableView',
         success: function(col, resp, opt){
@@ -129,6 +154,13 @@ var middguard = middguard || {};
 
         var tableName = this.model.get('name');
         $('#' + this.model.get('name') + '-table tbody').remove();
+        var $table = $('#' + this.model.get('name') + '-table');
+        //don't show anything if there are no results
+        if (col.models.length === 0) return $table.css('visibility', 'hidden');
+        
+        if ($table.css('visibility') === 'hidden'){
+          $table.css('visibility', 'visible');
+        }
         var modNameText = document.getElementById(tableName + '-model-name-text');
         modNameText.innerHTML = 'Model: ' + tableName;
         modNameText.style['background-color'] = '#848484';
@@ -163,6 +195,9 @@ var middguard = middguard || {};
             j++;
           }
         });
+        var tableWidth = $(table).css('width');
+        this.$el.css('width', tableWidth);
+        $('#pagination-' + this.model.get('name')).css('width', tableWidth);
       }
       return this;
     }

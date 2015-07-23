@@ -1,5 +1,6 @@
 .SQLInteractDiv{
   width: 500px;
+  margin: 5px;
 }
 .SQL-table .SQLRowHeader{
   background-color: white;
@@ -32,6 +33,9 @@
   width: 300px;
   display: inline-block;
 }
+.table-view{
+  margin: 5px;
+}
 .model-name-text{
   display: inline-block;
   height: 100%;
@@ -47,6 +51,7 @@
 }
 
 .enter-changes{
+  width: 50%;
   background-color: #CCCCCC;
   outline: none;
   border: 1px solid;
@@ -58,6 +63,25 @@
   position: relative;
   top: 0px;
   margin: 1px;
+}
+.restore-edits{
+  width: 50%;
+  background-color: #CCCCCC;
+  outline: none;
+  border: 1px solid;
+  border-color: #CCCCCC;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 100%;
+  margin: 1px;
+}
+.restore-edits:hover{
+  background-color: #A0A0A0;
+  border-color: #A0A0A0;
+}
+.restore-edits:active{
+  background-color: #707070;
+  border-color: #707070;
 }
 .enter-changes:hover{
   background-color: #A0A0A0;
@@ -84,4 +108,42 @@
 }
 .query-submit{
   width: 15%;
+}
+.pagination{
+  width: 100%;
+}
+.paginate-button-prev{
+  width: 50%;
+  background-color: #CCCCCC;
+  outline: none;
+  border: 1px solid;
+  border-color: #CCCCCC;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 100%;
+  color: white;
+  margin: 1px;
+}
+.paginate-button-next{
+  width: 50%;
+  background-color: #CCCCCC;
+  outline: none;
+  border: 1px solid;
+  border-color: #CCCCCC;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 100%;
+  color: white;
+  margin: 1px;
+}
+.paginate-button-prev:hover, .paginate-button-next:hover{
+  background-color: #A0A0A0;
+  border-color: #A0A0A0;
+}
+.paginate-button-prev:active, .paginate-button-next:active{
+  background-color: #707070;
+  border-color: #707070;
+}
+.table-header{
+  width: 100%;
 }
