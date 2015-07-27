@@ -17,10 +17,9 @@ var middguard = middguard || {};
       //create infinite scroll capability
       this.$el.scroll(function(){
         var scrollBottom = globalThis.$el.scrollTop() + globalThis.$el.height();
-        if (scrollBottom/globalThis.el.scrollHeight > 0.9){
-          globalThis.table.curOffset += 100;
-          globalThis.table.queryDB(globalThis.table.curQuery, true);
-        }
+        
+        if (globalThis.el.scrollHeight - scrollBottom <= 5 ) globalThis.table.addResults();
+        
       })
     },
     
@@ -37,10 +36,11 @@ var middguard = middguard || {};
   var QueryView = middguard.View.extend({
     className: 'query-view',
     
-    template: '<h5>Query Entry</h5><div class="submission-div"><p class="query-beginning">SELECT * FROM %modelName% table WHERE:</p><div class="query-entry-div"><input type="text" id="query-text-%modelName%"class="query-text"/><input type="submit" id="query-submit-%modelName%" class="query-submit" value="Enter Query"></div></div>',
+    template: '<h5>Query Entry</h5><div class="submission-div"><p class="query-beginning">SELECT * FROM %modelName% table WHERE:</p><div class="query-entry-div"><input type="text" id="query-text-%modelName%"class="query-text"/><input type="submit" id="query-submit-%modelName%" class="query-submit" value="Enter Query"><input type="submit" id="table-restore-%modelName%" class="table-restore" value="Restore Initial Table"></div></div>',
     
     events: {
-      'click .query-submit': 'queryTrigger'
+      'click .query-submit': 'queryTrigger',
+      'click .table-restore': 'restoreTable'
     },
     
     initialize: function(opts){
@@ -50,10 +50,17 @@ var middguard = middguard || {};
       this.tableView = opts.tableView;
     },
     
+    restoreTable: function(){
+      this.tableView.numRows = 0;
+      this.tableView.curOffset = 0;
+      this.tableView.queryDB({}, false);
+    },
+    
     queryTrigger: function(){
       var qText = document.getElementById('query-text-' + this.model.get('name'));
       this.tableView.curQuery = {whereRaw: qText.value};
       this.tableView.curOffset = 0;
+      this.tableView.numRows = 0;
       this.tableView.queryDB(this.tableView.curQuery, false);
     },
     
@@ -64,12 +71,7 @@ var middguard = middguard || {};
   });
 
   var TableView = middguard.View.extend({
-    template: '<h5>Current SQL Table/Results</h5><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"> <- Select Model </p></div><table id="%modelName%-table" class="SQL-table"></table><div class="pagination" id="pagination-%modelName%"><input type="submit" class="paginate-button-prev" value="<< Previous Page"><input type="submit" class="paginate-button-next" value="Next Page >>"></div><div class="submit-restore-div"><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Submit Changes" /><input type="submit" class="restore-edits" class="submit-restore-%modelName%" id="restore-%modelName%" value="Restore Edits" /></div>',
-    
-    events: {
-      "click .paginate-button-next": "paginateNext",
-      "click .paginate-button-prev": "paginatePrev"
-    },
+    template: '<h5>Current SQL Table/Results</h5><div class="submit-restore-div"><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Submit Changes" /><input type="submit" class="restore-edits" class="submit-restore-%modelName%" id="restore-%modelName%" value="Restore Edits" /></div><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"> <- Select Model </p></div><table id="%modelName%-table" class="SQL-table"></table>',
     
     className: 'table-view',
     
@@ -81,26 +83,20 @@ var middguard = middguard || {};
       middguard.state.changedModels = {};
       this.curOffset = 0;
       this.numRows = 0;
+      this.full = false;
       this.curQuery = {};
       
       var modName = this.model.get('name');
       this.collection = new Backbone.Collection([], {model: middguard.entities[this.capitalize(pluralize(modName))].model});
       this.collection.url = pluralize(modName);
       this.queryDB(this.curQuery, false);
+      this.subtracted = false;
       
     },
     
-    paginateNext: function(){
-      this.curOffset += 100;
-      this.queryDB(this.curQuery, false);
-    },
-    
-    paginatePrev: function(){
-      this.curOffset -= 100;
-      if (this.curOffset < 0){
-        this.curOffset = 0;
-      }
-      this.queryDB(this.curQuery, false);
+    addResults: function(){
+      if (!this.full) this.curOffset += 100;
+      this.queryDB(this.curQuery, true);
     },
     
     queryDB: function(query, extend){
@@ -108,6 +104,7 @@ var middguard = middguard || {};
       query.limit = '100';
       query.offset = this.curOffset;
       var lastRow = (extend) ? this.numRows: 0;
+      console.log(query);
       this.collection.fetch({
         data: query, source: 'tableView',
         extend: extend,
@@ -164,17 +161,16 @@ var middguard = middguard || {};
       var globalThis = this;
       if (opt && opt.source === 'tableView'){
         //make sure call is coming from the intended place
-
+        
         var tableName = this.model.get('name');
         var $table = $('#' + this.model.get('name') + '-table');
         var table = document.getElementById(this.model.get('name') + '-table');
-        
         if (!opt.extend){
           //if the table is being replaced, not extended
           $('#' + this.model.get('name') + '-table tbody').remove();
           //don't show anything if there are no results
           if (col.models.length === 0) return $table.css('visibility', 'hidden');
-        
+      
           if ($table.css('visibility') === 'hidden'){
             $table.css('visibility', 'visible');
           }
@@ -195,8 +191,8 @@ var middguard = middguard || {};
             cell.contentEditable = true;
             j++;
           }
-          
         }
+        
         
         col.models.forEach(function(model, i){
           var row = table.insertRow(globalThis.numRows + 1);
@@ -217,9 +213,6 @@ var middguard = middguard || {};
           globalThis.numRows++;
         });
         
-        var tableWidth = $(table).css('width');
-        this.$el.css('width', tableWidth);
-        $('#pagination-' + this.model.get('name')).css('width', tableWidth);
       }
       return this;
     }

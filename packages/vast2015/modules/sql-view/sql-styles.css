@@ -52,9 +52,7 @@
   position: relative;
   top: -2px;
 }
-
 .enter-changes{
-  width: 50%;
   background-color: #CCCCCC;
   outline: none;
   border: 1px solid;
@@ -68,7 +66,6 @@
   margin: 1px;
 }
 .restore-edits{
-  width: 50%;
   background-color: #CCCCCC;
   outline: none;
   border: 1px solid;
@@ -116,7 +113,6 @@
   width: 100%;
 }
 .paginate-button-prev{
-  width: 50%;
   background-color: #CCCCCC;
   outline: none;
   border: 1px solid;
@@ -128,7 +124,6 @@
   margin: 1px;
 }
 .paginate-button-next{
-  width: 50%;
   background-color: #CCCCCC;
   outline: none;
   border: 1px solid;
