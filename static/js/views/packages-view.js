@@ -98,7 +98,7 @@ var middguard = middguard || {};
       this.active = false;
 
       this.type = _.result(options, 'type');
-
+      this.maxModHeight = 0;
       _.bindAll(this, 'toggleActive');
       if (this.type === 'model' && ! middguard.state.activeModel){
         middguard.state.activeModel = {};
@@ -122,9 +122,14 @@ var middguard = middguard || {};
           var module = new middguard.__modules[this.model.get('main')].ctor;
           middguard.__modules[this.model.get('main')].live = module;
           $('#modules-container').append(module.render().el);
+          var curWidth = parseFloat($('#modules-container').css('width'));
+          $('#modules-container').css('width', curWidth + parseFloat(module.$el.css('width')));
+          if (parseFloat(module.$el.css('height')) > this.maxModHeight) this.maxModHeight = parseFloat(module.$el.css('height'));
+          //$('middguard-header').css('height', $(document).height());
         }
         this.active = !this.active;
         this.render();
+        $('middguard-header').css('height', $(document).height());
       } else {
         //if this.type === model
         if (this.active) {
@@ -132,9 +137,15 @@ var middguard = middguard || {};
         } else {
           var module = new middguard.SQLView.ctor({model: this.model});
           $('#modules-container').append(module.render().el);
+          var curWidth = parseFloat($('#modules-container').css('width'));
+          $('#modules-container').css('width', curWidth + parseFloat(module.$el.css('width')));
+          if (parseFloat(module.$el.css('height')) > this.maxModHeight) this.maxModHeight = parseFloat(module.$el.css('height'));
+          $('middguard-header').css('height', this.maxModHeight);
         }
         this.active = !this.active;
         this.$el.toggleClass('active', this.active);
+        this.render();
+        $('middguard-header').css('height', $(document).height());
       }
     }
   });

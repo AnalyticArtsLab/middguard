@@ -4,7 +4,7 @@ var middguard = middguard || {};
   'use strict';
   
   var SQLView = middguard.View.extend({
-    template: '<h3 style="margin:5px">"%modelName%" DB Table</h3>',
+    template: '<h3 style="margin:5px">"%modelName%" DB Table</h3><div class="table-view-wrapper">',
     
     className: 'SQLInteractDiv middguard-module',
     
@@ -80,12 +80,12 @@ var middguard = middguard || {};
     },
     
     paginateNext: function(){
-      this.curOffset += 10;
+      this.curOffset += 100;
       this.queryDB(this.curQuery);
     },
     
     paginatePrev: function(){
-      this.curOffset -= 10;
+      this.curOffset -= 100;
       if (this.curOffset < 0){
         this.curOffset = 0;
       }
@@ -94,7 +94,7 @@ var middguard = middguard || {};
     
     queryDB: function(query){
       var globalThis = this;
-      query.limit = '10';
+      query.limit = '100';
       query.offset = this.curOffset;
       this.collection.fetch({
         data: query, source: 'tableView',

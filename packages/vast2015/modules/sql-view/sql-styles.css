@@ -36,6 +36,9 @@
 .table-view{
   margin: 5px;
 }
+.table-view-wrapper{
+  overflow-y: scroll;
+}
 .model-name-text{
   display: inline-block;
   height: 100%;

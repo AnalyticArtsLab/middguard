@@ -175,10 +175,11 @@ body {
 }
 
 .middguard-module {
-  display: table-cell;
+  display: inline-block;
+  float: left;
   position: relative;
   left: 0px;
-  height: inherit;
-  overflow-y: auto;
+  height: 100%;
+  overflow-y: scroll;
   overflow-x: auto;
 }
