@@ -20,6 +20,7 @@ body {
   margin: 0px;
   position: absolute;
   white-space: nowrap;
+  z-index: 1;
 }
 
 #view-options{
@@ -121,9 +122,11 @@ body {
   float: left;
   width: 300px;
   height: 100%;
+  position: fixed;
   border-right: 1px solid #999;
   background-color: #e9eaed;
   overflow: scroll;
+  z-index: 10000;
 }
 #middguard-header h1,
 #middguard-header h2,
@@ -139,6 +142,7 @@ body {
   border-right: 1px solid #999;
   background-color: #e9eaed;
   overflow: scroll;
+  z-index: 1;
 }
 
 .logout {
