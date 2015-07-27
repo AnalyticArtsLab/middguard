@@ -12,6 +12,16 @@ var middguard = middguard || {};
       this.model = opts.model
       this.$el.html(this.template.replace('%modelName%', this.model.get('name')));
       this.$el.attr('id', 'sql-model-view-' + this.model.get('name'));
+      var globalThis = this;
+      
+      //create infinite scroll capability
+      this.$el.scroll(function(){
+        var scrollBottom = globalThis.$el.scrollTop() + globalThis.$el.height();
+        if (scrollBottom/globalThis.el.scrollHeight > 0.9){
+          globalThis.table.curOffset += 100;
+          globalThis.table.queryDB(globalThis.table.curQuery, true);
+        }
+      })
     },
     
     render: function(){
@@ -44,7 +54,7 @@ var middguard = middguard || {};
       var qText = document.getElementById('query-text-' + this.model.get('name'));
       this.tableView.curQuery = {whereRaw: qText.value};
       this.tableView.curOffset = 0;
-      this.tableView.queryDB(this.tableView.curQuery);
+      this.tableView.queryDB(this.tableView.curQuery, false);
     },
     
     render: function(){
@@ -70,18 +80,19 @@ var middguard = middguard || {};
       this.$el.html(this.template);
       middguard.state.changedModels = {};
       this.curOffset = 0;
+      this.numRows = 0;
       this.curQuery = {};
       
       var modName = this.model.get('name');
       this.collection = new Backbone.Collection([], {model: middguard.entities[this.capitalize(pluralize(modName))].model});
       this.collection.url = pluralize(modName);
-      this.queryDB(this.curQuery);
+      this.queryDB(this.curQuery, false);
       
     },
     
     paginateNext: function(){
       this.curOffset += 100;
-      this.queryDB(this.curQuery);
+      this.queryDB(this.curQuery, false);
     },
     
     paginatePrev: function(){
@@ -89,15 +100,17 @@ var middguard = middguard || {};
       if (this.curOffset < 0){
         this.curOffset = 0;
       }
-      this.queryDB(this.curQuery);
+      this.queryDB(this.curQuery, false);
     },
     
-    queryDB: function(query){
+    queryDB: function(query, extend){
       var globalThis = this;
       query.limit = '100';
       query.offset = this.curOffset;
+      var lastRow = (extend) ? this.numRows: 0;
       this.collection.fetch({
         data: query, source: 'tableView',
+        extend: extend,
         success: function(col, resp, opt){
           globalThis.render(col, resp, opt);
           //we need to bind the listener for these buttons after the buttons have been added into the DOM
@@ -153,33 +166,40 @@ var middguard = middguard || {};
         //make sure call is coming from the intended place
 
         var tableName = this.model.get('name');
-        $('#' + this.model.get('name') + '-table tbody').remove();
         var $table = $('#' + this.model.get('name') + '-table');
-        //don't show anything if there are no results
-        if (col.models.length === 0) return $table.css('visibility', 'hidden');
-        
-        if ($table.css('visibility') === 'hidden'){
-          $table.css('visibility', 'visible');
-        }
-        var modNameText = document.getElementById(tableName + '-model-name-text');
-        modNameText.innerHTML = 'Model: ' + tableName;
-        modNameText.style['background-color'] = '#848484';
-        modNameText.style['border-color'] = '#848484';
-        modNameText.style.color = 'white';
         var table = document.getElementById(this.model.get('name') + '-table');
-        var row = table.insertRow(0);
-        row.className = 'SQLRowHeader';
-        var j = 0;        
-        for (var attr in col.models[0].attributes){
-          //list attribute names
-          var cell = row.insertCell(j);
-          cell.innerHTML = attr;
-          cell.className = 'header-cell';
-          cell.contentEditable = true;
-          j++;
+        
+        if (!opt.extend){
+          //if the table is being replaced, not extended
+          $('#' + this.model.get('name') + '-table tbody').remove();
+          //don't show anything if there are no results
+          if (col.models.length === 0) return $table.css('visibility', 'hidden');
+        
+          if ($table.css('visibility') === 'hidden'){
+            $table.css('visibility', 'visible');
+          }
+          
+          var modNameText = document.getElementById(tableName + '-model-name-text');
+          modNameText.innerHTML = 'Model: ' + tableName;
+          modNameText.style['background-color'] = '#848484';
+          modNameText.style['border-color'] = '#848484';
+          modNameText.style.color = 'white';
+          var row = table.insertRow(0);
+          row.className = 'SQLRowHeader';
+          var j = 0;        
+          for (var attr in col.models[0].attributes){
+            //list attribute names
+            var cell = row.insertCell(j);
+            cell.innerHTML = attr;
+            cell.className = 'header-cell';
+            cell.contentEditable = true;
+            j++;
+          }
+          
         }
+        
         col.models.forEach(function(model, i){
-          var row = table.insertRow(i+1);
+          var row = table.insertRow(globalThis.numRows + 1);
           var rowView = new RowView({model: model});
           //rowView.setElement(row);
           row.className = 'SQLRow';
@@ -194,7 +214,9 @@ var middguard = middguard || {};
             cellView.$el.attr('id', globalThis.collection.url + '-' + model.get('id') + '-' + String(attr).replace(/ /g, '-'));
             j++;
           }
+          globalThis.numRows++;
         });
+        
         var tableWidth = $(table).css('width');
         this.$el.css('width', tableWidth);
         $('#pagination-' + this.model.get('name')).css('width', tableWidth);
