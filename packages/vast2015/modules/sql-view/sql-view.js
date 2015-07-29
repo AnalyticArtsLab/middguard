@@ -104,10 +104,9 @@ var middguard = middguard || {};
       query.limit = '100';
       query.offset = this.curOffset;
       var lastRow = (extend) ? this.numRows: 0;
-      console.log(query);
       this.collection.fetch({
         data: query, source: 'tableView',
-        extend: extend,
+        remove: !extend,
         success: function(col, resp, opt){
           globalThis.render(col, resp, opt);
           //we need to bind the listener for these buttons after the buttons have been added into the DOM
@@ -137,7 +136,6 @@ var middguard = middguard || {};
           htmlString = parseInt(htmlString);
           if (isNaN(htmlString)){
             console.log(Error('id value must be a unique integer'));
-            //globalThis.restore(globalThis);
           }
         }
         model.set(current.attrName, $('#' + item).html().trim());
@@ -165,11 +163,11 @@ var middguard = middguard || {};
         var tableName = this.model.get('name');
         var $table = $('#' + this.model.get('name') + '-table');
         var table = document.getElementById(this.model.get('name') + '-table');
-        if (!opt.extend){
+        if (opt.remove){
           //if the table is being replaced, not extended
           $('#' + this.model.get('name') + '-table tbody').remove();
           //don't show anything if there are no results
-          if (col.models.length === 0) return $table.css('visibility', 'hidden');
+          if (resp.length === 0) return $table.css('visibility', 'hidden');
       
           if ($table.css('visibility') === 'hidden'){
             $table.css('visibility', 'visible');
@@ -183,7 +181,7 @@ var middguard = middguard || {};
           var row = table.insertRow(0);
           row.className = 'SQLRowHeader';
           var j = 0;        
-          for (var attr in col.models[0].attributes){
+          for (var attr in resp[0]){
             //list attribute names
             var cell = row.insertCell(j);
             cell.innerHTML = attr;
@@ -194,20 +192,20 @@ var middguard = middguard || {};
         }
         
         
-        col.models.forEach(function(model, i){
+        resp.forEach(function(model, i){
           var row = table.insertRow(globalThis.numRows + 1);
           var rowView = new RowView({model: model});
           //rowView.setElement(row);
           row.className = 'SQLRow';
           var j = 0;
-          for (var attr in model.attributes){
+          for (var attr in model){
             var cell = row.insertCell(j);
             var cellView = new CellView(globalThis.collection, model, attr);
-            cell.innerHTML = model.get(attr);
+            cell.innerHTML = model[attr];
             cell.contentEditable = true;
             cell.className = 'table-cell';
             cellView.setElement(cell);
-            cellView.$el.attr('id', globalThis.collection.url + '-' + model.get('id') + '-' + String(attr).replace(/ /g, '-'));
+            cellView.$el.attr('id', globalThis.collection.url + '-' + model.id + '-' + String(attr).replace(/ /g, '-'));
             j++;
           }
           globalThis.numRows++;
@@ -244,7 +242,7 @@ var middguard = middguard || {};
       this.collection = collection;
       this.model = model;
       this.attr = attr;
-      this.originalId = this.model.get('id');
+      this.originalId = this.model.id;
     },
     
     capitalize: function (string) {
@@ -256,8 +254,8 @@ var middguard = middguard || {};
       this.$el.css('color', 'red');
       middguard.state.changedModels[this.collection.url + '-' + this.originalId + '-' + String(this.attr).replace(/ /g, '-')] = {
         collection: this.collection,
-        restore: this.model.get(this.attr), 
-        id: this.model.get('id'), 
+        restore: this.model[this.attr], 
+        id: this.model.id, 
         attrName: this.attr
       };
     },
