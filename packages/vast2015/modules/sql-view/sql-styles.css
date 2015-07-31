@@ -39,6 +39,15 @@
 .table-view-wrapper{
   overflow-y: scroll;
 }
+.upload{
+  margin: 10px;
+}
+.upload-header{
+  margin: 1px;
+}
+.file-upload{
+  display: block;
+}
 .model-name-text{
   display: inline-block;
   height: 100%;

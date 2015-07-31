@@ -71,9 +71,13 @@ var middguard = middguard || {};
   });
 
   var TableView = middguard.View.extend({
-    template: '<h5>Current SQL Table/Results</h5><div class="submit-restore-div"><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Submit Changes" /><input type="submit" class="restore-edits" class="submit-restore-%modelName%" id="restore-%modelName%" value="Restore Edits" /></div><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"> <- Select Model </p></div><table id="%modelName%-table" class="SQL-table"></table>',
+    template: '<h5>Current SQL Table/Results</h5><div class="upload"><h6 class="upload-header">Upload CSV Data:</h6><input class="csv-file" type="file" accept=".csv"><input class="file-upload" type="submit" value="Upload"></div><div class="submit-restore-div"><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Submit Changes" /><input type="submit" class="restore-edits" class="submit-restore-%modelName%" id="restore-%modelName%" value="Restore Edits" /></div><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"></p></div><table id="%modelName%-table" class="SQL-table"></table>',
     
     className: 'table-view',
+    
+    events: {
+      "click .file-upload": "uploadHandle"
+    },
     
     initialize: function (opts) {
       var globalThis = this;
@@ -92,6 +96,12 @@ var middguard = middguard || {};
       this.queryDB(this.curQuery, false);
       this.subtracted = false;
       
+    },
+    
+    uploadHandle: function(){
+      //function sends file uploads to the server
+      var file = $('.csv-file')[0].files[0];
+      middguard.socket.emit('filetransfer', {file: file, filename: file.name});
     },
     
     addResults: function(){

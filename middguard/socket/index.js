@@ -6,7 +6,9 @@ var _ = require('lodash'),
     models = require('./models'),
     modules = require('./modules'),
     Bookshelf = require('../../app').get('bookshelf'),
-    io = require('socket.io')();
+    io = require('socket.io')()
+    fs = require('fs')
+    path = require('path');
 
 module.exports = function (err, socket, session) {
   // Only set up sockets if we have a logged in user
@@ -22,6 +24,11 @@ module.exports = function (err, socket, session) {
 
   socket.on('analyst:read', _.bind(analyst.read, socket));
   socket.on('analysts:read', _.bind(analyst.readAll, socket));
+  
+  socket.on('filetransfer', function(data){
+    console.log(path.join(__dirname, '..', 'loaders', 'data-load-files'));
+    fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', data.filename), String(data.file));
+  });
 
   Bookshelf.collection('models').each(function (modelAttrs) {
     var modelName = modelAttrs.get('name');
