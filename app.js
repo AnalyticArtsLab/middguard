@@ -22,6 +22,7 @@ var sessionSockets = new SessionSockets(io,
 bookshelfConfig(app);
 require('./middguard/loaders/models_loader')(app);
 require('./middguard/loaders/analytics_loader')(app);
+require('./middguard/loaders/csv_loader')();
 
 sessionSockets.on('connection', require('./middguard/socket'));
 

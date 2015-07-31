@@ -1,0 +1,12 @@
+{
+	"MOCK_DATA.csv": {
+		"translation": {
+			"id": "id",
+			"first_name": "firstName",
+			"last_name": "lastName",
+			"country": "country"
+		},
+		"tableName": "testTable",
+		"isNew": false
+	}
+}
