@@ -71,7 +71,7 @@ var middguard = middguard || {};
   });
 
   var TableView = middguard.View.extend({
-    template: '<h5>Current SQL Table/Results</h5><div class="upload"><h6 class="upload-header">Upload CSV Data:</h6><input class="csv-file" type="file" accept=".csv"><input class="file-upload" type="submit" value="Upload"></div><div class="submit-restore-div"><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Submit Changes" /><input type="submit" class="restore-edits" class="submit-restore-%modelName%" id="restore-%modelName%" value="Restore Edits" /></div><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"></p></div><table id="%modelName%-table" class="SQL-table"></table>',
+    template: '<h5>Current SQL Table/Results</h5><div class="upload"><h6 class="upload-header">Upload CSV Data:</h6><input class="csv-file" type="file" accept=".csv"><input class="file-upload" type="submit" value="Upload"><div class="dialog-box" id="dialog-box-%modelName%" title="Warning!" display="none"><p class="dialog-text" id="dialog-text-%modelName%" style="display:none">The data will only be uploaded correctly if each header column in the CSV file has the EXACT same name as a column in the database! (CSV file required to have a header)</p></div></div><div class="submit-restore-div"><input type="submit" class="enter-changes" class="submit-restore-%modelName%" id="enter-changes-%modelName%" value="Submit Changes" /><input type="submit" class="restore-edits" class="submit-restore-%modelName%" id="restore-%modelName%" value="Restore Edits" /></div><div class="table-changes" id="table-changes-%modelName%"><p class="model-name-text" id="%modelName%-model-name-text"></p></div><table id="%modelName%-table" class="SQL-table"></table>',
     
     className: 'table-view',
     
@@ -100,8 +100,21 @@ var middguard = middguard || {};
     
     uploadHandle: function(){
       //function sends file uploads to the server
+      var globalThis = this;
       var file = $('.csv-file')[0].files[0];
-      middguard.socket.emit('filetransfer', {file: file, filename: file.name});
+      $('#dialog-text-' + this.model.get('name')).css('display', 'inline');
+      $('#dialog-box-' + this.model.get('name')).dialog({
+        modal: true,
+        buttons: {
+          'Upload' : function(){
+            $( this ).dialog( "close" );
+            middguard.socket.emit('filetransfer', {file: file, filename: file.name, modelname: globalThis.model.get('name')});
+          },
+          Cancel: function(){
+            $( this ).dialog( "close" );
+          }
+        }
+      });
     },
     
     addResults: function(){

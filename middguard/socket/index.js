@@ -8,7 +8,8 @@ var _ = require('lodash'),
     Bookshelf = require('../../app').get('bookshelf'),
     io = require('socket.io')()
     fs = require('fs')
-    path = require('path');
+    path = require('path')
+    csv_load = require('../loaders/csv_loader');
 
 module.exports = function (err, socket, session) {
   // Only set up sockets if we have a logged in user
@@ -26,8 +27,17 @@ module.exports = function (err, socket, session) {
   socket.on('analysts:read', _.bind(analyst.readAll, socket));
   
   socket.on('filetransfer', function(data){
-    console.log(path.join(__dirname, '..', 'loaders', 'data-load-files'));
     fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', data.filename), String(data.file));
+    //TO DO: when file received, automatically put its data into DB and mark it as read
+    var readStream = fs.createReadStream(path.join(__dirname, '..', 'loaders', 'data-load-files', 'load-config.json'), {encoding: 'utf8'});
+    readStream.on('data', function(moreData){
+      var configObj = JSON.parse(moreData);
+      configObj[data.filename] = {isNew: true}
+      fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', 'load-config.json'), JSON.stringify(configObj, null, '\t'), function(err){
+        if (err) console.log(Error(err));
+      });
+      csv_load(Bookshelf, data.modelname);
+    });
   });
 
   Bookshelf.collection('models').each(function (modelAttrs) {

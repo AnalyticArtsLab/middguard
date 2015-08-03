@@ -26,6 +26,7 @@
   "homepage": "https://github.com/ProfBlack/middguard",
   "dependencies": {
     "bcrypt": "^0.8.0",
+    "babyparse": "^0.4.3",
     "bluebird": "^2.2.2",
     "body-parser": "^1.6.2",
     "bookshelf": "^0.7.7",

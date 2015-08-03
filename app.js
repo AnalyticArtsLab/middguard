@@ -20,9 +20,10 @@ var sessionSockets = new SessionSockets(io,
   app.get('cookieParser'));
 
 bookshelfConfig(app);
+
 require('./middguard/loaders/models_loader')(app);
 require('./middguard/loaders/analytics_loader')(app);
-require('./middguard/loaders/csv_loader')();
+require('./middguard/loaders/csv_loader')(app.get('bookshelf'));
 
 sessionSockets.on('connection', require('./middguard/socket'));
 
