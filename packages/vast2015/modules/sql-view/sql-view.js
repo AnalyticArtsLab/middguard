@@ -95,7 +95,10 @@ var middguard = middguard || {};
       this.collection.url = pluralize(modName);
       this.queryDB(this.curQuery, false);
       this.subtracted = false;
-      
+      _.extend(this, Backbone.Events);
+      this.listenTo(middguard.entities[this.capitalize(pluralize(modName))], 'change', function(){
+        //this.render(globalThis.col, globalThis.resp, globalThis.opt);
+      });
     },
     
     uploadHandle: function(){
@@ -180,6 +183,9 @@ var middguard = middguard || {};
 
     render: function(col, resp, opt){
       var globalThis = this;
+      this.col = col;
+      this.resp = resp;
+      this.opt = opt;
       if (opt && opt.source === 'tableView'){
         //make sure call is coming from the intended place
         
@@ -223,7 +229,7 @@ var middguard = middguard || {};
           var j = 0;
           for (var attr in model){
             var cell = row.insertCell(j);
-            var cellView = new CellView(globalThis.collection, model, attr);
+            var cellView = new CellView(globalThis.collection, globalThis.model, model, attr);
             cell.innerHTML = model[attr];
             cell.contentEditable = true;
             cell.className = 'table-cell';
@@ -261,11 +267,15 @@ var middguard = middguard || {};
     },
     className: '', //overriding 'middguard-module' default
     
-    initialize: function(collection, model, attr){
+    initialize: function(collection, modeltemp, model, attr){
       this.collection = collection;
       this.model = model;
       this.attr = attr;
       this.originalId = this.model.id;
+      this.realModel =  middguard.entities[this.capitalize(pluralize(modeltemp.get('name')))].get(this.originalId);
+      this.listenTo(this.realModel, 'change:' + this.attr, function(item){
+        console.log(item);
+      });
     },
     
     capitalize: function (string) {
