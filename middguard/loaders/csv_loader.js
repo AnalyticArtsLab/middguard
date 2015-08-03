@@ -11,35 +11,29 @@ var fs = require('fs'),
     //get every file in the 'data-load-files' directory
     //Bookshelf.model('locationCount').prototype.tableName;
 
-    fs.readdir(path.join(__dirname, 'data-load-files'), function(err, files){
-      files.forEach(function(filename){
-        if (filename.charAt(0) !== '.' && filename !== 'load-config.json'){
-          //prevent hidden files from being used
-          
-          fs.readFile(path.join(__dirname, 'data-load-files', 'load-config.json'), 'utf8', function(err, data){
-            
-            //get info on how to interpret csv file from load config file
-            var configData = JSON.parse(data);
-            if (configData[filename].isNew){
-              //only put CSV data into dataabase if it hasn't been put there before
-              if (configData[filename].tableName){
-                //if user has specified a table to put data in
-                readCSVFile(filename, configData[filename].tableName, configData[filename].translation)
-              } else if (Bookshelf.model(model)){
-                //otherwise, just put data in database corresponding to
-                //the model from whose view the data was uploaded
-                readCSVFile(filename, Bookshelf.model(model).prototype.tableName, configData[filename].translation)
-              }
-              configData[filename].isNew = false;
-              
-              //rewrite 'load-config.json' file to ensure data isn't re-inserted to DB
-              fs.writeFile(path.join(__dirname, 'data-load-files', 'load-config.json'), JSON.stringify(configData, null, '\t'), null, function(err){
-                if (err) console.log('Error: Write failed, csv data from ' + filename + ' may be re-inserted into the database the next time middguard is run!')
-              });
-            }
+    fs.readFile(path.join(__dirname, 'data-load-files', 'load-config.json'), 'utf8', function(err, data){
+      
+      //get info on how to interpret csv file from load config file
+      var configData = JSON.parse(data);
+      for (filename in configData){
+        if (configData[filename].isNew){
+          //only put CSV data into database if it hasn't been put there before
+          if (configData[filename].tableName){
+            //if user has specified a table to put data in
+            readCSVFile(filename, configData[filename].tableName, configData[filename].translation)
+          } else if (Bookshelf.model(model)){
+            //otherwise, just put data in database corresponding to
+            //the model from whose view the data was uploaded
+            readCSVFile(filename, Bookshelf.model(model).prototype.tableName, configData[filename].translation)
+          }
+          configData[filename].isNew = false;
+        
+          //rewrite 'load-config.json' file to ensure data isn't re-inserted to DB
+          fs.writeFile(path.join(__dirname, 'data-load-files', 'load-config.json'), JSON.stringify(configData, null, '\t'), null, function(err){
+            if (err) console.log('Error: Write failed, csv data from ' + filename + ' may be re-inserted into the database the next time middguard is run!')
           });
         }
-      })
+      }
     });
   }
   
