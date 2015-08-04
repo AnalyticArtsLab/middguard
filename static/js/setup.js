@@ -169,7 +169,8 @@ var middguard = middguard || {};
       var exists = this.get(data.id);
       if (exists) exists.set(data);
     },
-    serverDelete: function () {
+    serverDelete: function (data) {
+      console.log(data);
       // Already deleted from database, so don't need to model.destroy
       var exists = this.get(data.id);
       if (exists) this.remove(exists);
