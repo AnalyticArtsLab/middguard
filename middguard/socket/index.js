@@ -88,7 +88,7 @@ function patchModelToEmit(socket, modelName, model) {
         socket.broadcast.emit(pluralize(modelName) + ':update', model.toJSON());
       });
 
-      this.on('destroyed', function (model) {
+      this.on('destroying', function (model) {
         socket.broadcast.emit(pluralize(modelName) + ':delete', model.toJSON());
       });
     };
@@ -120,12 +120,12 @@ function setupSocketEvents(socket, modelName, model) {
   });
 
   socket.on(modelName + ':delete', function (data, callback) {
+    var x = new model({id: _.result(data, 'id')});
+    //console.log(String(x.destroy()._resolveFromSyncValue));
     new model({id: _.result(data, 'id')}).destroy();
   });
 
   socket.on(pluralize(modelName) + ':read', function (data, callback) {
-
-
     if (data){
       var fetchData = new model().query(data).fetchAll();
     } else {

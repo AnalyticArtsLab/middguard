@@ -268,13 +268,14 @@ var middguard = middguard || {};
     className: '', //overriding 'middguard-module' default
     
     initialize: function(collection, modeltemp, model, attr){
+      var globalThis = this;
       this.collection = collection;
       this.model = model;
       this.attr = attr;
       this.originalId = this.model.id;
       this.realModel =  middguard.entities[this.capitalize(pluralize(modeltemp.get('name')))].get(this.originalId);
       this.listenTo(this.realModel, 'change:' + this.attr, function(item){
-        console.log(item);
+        globalThis.$el.html(item.get(globalThis.attr));
       });
     },
     
