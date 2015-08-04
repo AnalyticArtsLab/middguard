@@ -17,7 +17,6 @@ var middguard = middguard || {};
       //create infinite scroll capability
       this.$el.scroll(function(){
         var scrollBottom = globalThis.$el.scrollTop() + globalThis.$el.height();
-        
         if (globalThis.el.scrollHeight - scrollBottom <= 5 ) globalThis.table.addResults();
         
       })
@@ -86,6 +85,7 @@ var middguard = middguard || {};
       this.$el.html(this.template);
       middguard.state.changedModels = {};
       this.curOffset = 0;
+      this.curMax = 100;
       this.numRows = 0;
       this.full = false;
       this.curQuery = {};
@@ -96,8 +96,12 @@ var middguard = middguard || {};
       this.queryDB(this.curQuery, false);
       this.subtracted = false;
       _.extend(this, Backbone.Events);
-      this.listenTo(middguard.entities[this.capitalize(pluralize(modName))], 'change', function(){
-        //this.render(globalThis.col, globalThis.resp, globalThis.opt);
+      this.listenTo(middguard.entities[this.capitalize(pluralize(modName))], 'remove', function(item){
+        globalThis.collection.remove(item.get('id'));
+        if (item.get('id') <= this.curMax) {
+          globalThis.numRows = 0;
+          globalThis.render(globalThis.collection, globalThis.opt, 'collect');
+        }
       });
     },
     
@@ -121,7 +125,10 @@ var middguard = middguard || {};
     },
     
     addResults: function(){
-      if (!this.full) this.curOffset += 100;
+      if (!this.full){
+        this.curOffset += 100;
+        this.curMax += 100;
+      }
       this.queryDB(this.curQuery, true);
     },
     
@@ -134,7 +141,7 @@ var middguard = middguard || {};
         data: query, source: 'tableView',
         remove: !extend,
         success: function(col, resp, opt){
-          globalThis.render(col, resp, opt);
+          globalThis.render(resp, opt, 'nocollect');
           //we need to bind the listener for these buttons after the buttons have been added into the DOM
           $('#enter-changes-' +globalThis.model.get('name')).click(globalThis.enterChanges);
           $('#restore-' +globalThis.model.get('name')).click(function(){
@@ -181,10 +188,8 @@ var middguard = middguard || {};
       middguard.state.changedModels = {};
     },
 
-    render: function(col, resp, opt){
+    render: function(baseData, opt, mode){
       var globalThis = this;
-      this.col = col;
-      this.resp = resp;
       this.opt = opt;
       if (opt && opt.source === 'tableView'){
         //make sure call is coming from the intended place
@@ -192,11 +197,13 @@ var middguard = middguard || {};
         var tableName = this.model.get('name');
         var $table = $('#' + this.model.get('name') + '-table');
         var table = document.getElementById(this.model.get('name') + '-table');
+        
+        var data = (mode === 'collect') ? baseData.models: baseData;
         if (opt.remove){
           //if the table is being replaced, not extended
           $('#' + this.model.get('name') + '-table tbody').remove();
           //don't show anything if there are no results
-          if (resp.length === 0) return $table.css('visibility', 'hidden');
+          if (data.length === 0) return $table.css('visibility', 'hidden');
       
           if ($table.css('visibility') === 'hidden'){
             $table.css('visibility', 'visible');
@@ -209,8 +216,8 @@ var middguard = middguard || {};
           modNameText.style.color = 'white';
           var row = table.insertRow(0);
           row.className = 'SQLRowHeader';
-          var j = 0;        
-          for (var attr in resp[0]){
+          var j = 0;
+          for (var attr in data[0]){
             //list attribute names
             var cell = row.insertCell(j);
             cell.innerHTML = attr;
@@ -220,9 +227,9 @@ var middguard = middguard || {};
           }
         }
         
-        
-        resp.forEach(function(model, i){
+        data.forEach(function(model, i){
           var row = table.insertRow(globalThis.numRows + 1);
+          if (mode === 'collect') model = model.attributes;
           var rowView = new RowView({model: model});
           //rowView.setElement(row);
           row.className = 'SQLRow';
