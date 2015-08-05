@@ -1,5 +1,6 @@
 {
   "name": "sample-person",
   "model": "sample-person.js",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "customLoad": true
 }

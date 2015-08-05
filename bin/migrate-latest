@@ -22,6 +22,6 @@ knex.migrate.latest(migrationsConfig).spread(function (batchNo, log) {
     ' migrations \n' + chalk.cyan(log.join('\n'))));
   process.exit(0);
 }).catch(function () {
-  chalk.red('Error migrating to latest');
+  console.log(chalk.red('Error migrating to latest'));
   process.exit(1);
 });

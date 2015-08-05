@@ -103,6 +103,21 @@ var middguard = middguard || {};
           globalThis.render(globalThis.collection, globalThis.opt, 'collect');
         }
       });
+      this.listenTo(middguard.entities[this.capitalize(pluralize(modName))], 'add', function(item){
+        globalThis.collection.add(item);
+        if (item.get('id') <= globalThis.curMax) {
+          globalThis.numRows = 0;
+          globalThis.render(globalThis.collection, globalThis.opt, 'collect');
+        }
+      });
+      middguard.entities[this.capitalize(pluralize(modName))].ioBind('update', this.serverCreate, this);
+    },
+    
+    serverCreate: function(data){
+      console.log(data);
+      var modelCopy = new Backbone.Model(JSON.parse(data));
+      this.collection.add(modelCopy);
+      middguard.entities[this.capitalize(pluralize(modName))].add(modelCopy);
     },
     
     uploadHandle: function(){
@@ -193,7 +208,7 @@ var middguard = middguard || {};
       this.opt = opt;
       if (opt && opt.source === 'tableView'){
         //make sure call is coming from the intended place
-        
+
         var tableName = this.model.get('name');
         var $table = $('#' + this.model.get('name') + '-table');
         var table = document.getElementById(this.model.get('name') + '-table');
@@ -217,7 +232,8 @@ var middguard = middguard || {};
           var row = table.insertRow(0);
           row.className = 'SQLRowHeader';
           var j = 0;
-          for (var attr in data[0]){
+          var header = (mode === 'collect') ? data[0].attributes: data[0];
+          for (var attr in header){
             //list attribute names
             var cell = row.insertCell(j);
             cell.innerHTML = attr;
@@ -228,6 +244,7 @@ var middguard = middguard || {};
         }
         
         data.forEach(function(model, i){
+
           var row = table.insertRow(globalThis.numRows + 1);
           if (mode === 'collect') model = model.attributes;
           var rowView = new RowView({model: model});

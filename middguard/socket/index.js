@@ -14,7 +14,7 @@ var _ = require('lodash'),
 module.exports = function (err, socket, session) {
   // Only set up sockets if we have a logged in user
   if (!session || !session.user) return;
-
+  
   // Set up sockets middguard internal sockets
   socket.on('messages:create', socketContext(message.create, socket, session));
   socket.on('messages:read', _.bind(message.readAll, socket));
@@ -36,7 +36,7 @@ module.exports = function (err, socket, session) {
       fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', 'load-config.json'), JSON.stringify(configObj, null, '\t'), function(err){
         if (err) console.log(Error(err));
       });
-      csv_load(Bookshelf, data.modelname);
+      csv_load(Bookshelf, data.modelname, data.filename);
     });
   });
 
