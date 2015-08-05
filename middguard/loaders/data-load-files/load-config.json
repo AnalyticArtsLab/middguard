@@ -1,7 +1,6 @@
 {
 	"MOCK_DATA.csv": {
-		"isNew": false,
-		"tableName": "peopleData"
+		"isNew": false
 	},
 	"MOCK_DATA copy.csv": {
 		"isNew": false

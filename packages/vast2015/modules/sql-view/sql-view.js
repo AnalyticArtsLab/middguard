@@ -110,7 +110,7 @@ var middguard = middguard || {};
           globalThis.render(globalThis.collection, globalThis.opt, 'collect');
         }
       });
-      middguard.entities[this.capitalize(pluralize(modName))].ioBind('update', this.serverCreate, this);
+      this.collection.ioBind('update', this.serverCreate, this);
     },
     
     serverCreate: function(data){
@@ -150,6 +150,7 @@ var middguard = middguard || {};
     queryDB: function(query, extend){
       var globalThis = this;
       query.limit = '100';
+      query.orderByRaw = 'id asc';
       query.offset = this.curOffset;
       var lastRow = (extend) ? this.numRows: 0;
       this.collection.fetch({
@@ -208,7 +209,6 @@ var middguard = middguard || {};
       this.opt = opt;
       if (opt && opt.source === 'tableView'){
         //make sure call is coming from the intended place
-
         var tableName = this.model.get('name');
         var $table = $('#' + this.model.get('name') + '-table');
         var table = document.getElementById(this.model.get('name') + '-table');
@@ -242,18 +242,17 @@ var middguard = middguard || {};
             j++;
           }
         }
-        
-        data.forEach(function(model, i){
 
+        data.forEach(function(model, i){
           var row = table.insertRow(globalThis.numRows + 1);
           if (mode === 'collect') model = model.attributes;
-          var rowView = new RowView({model: model});
+          var rowView = new RowView({model: model, modelTemp: globalThis.model});
           //rowView.setElement(row);
           row.className = 'SQLRow';
           var j = 0;
           for (var attr in model){
             var cell = row.insertCell(j);
-            var cellView = new CellView(globalThis.collection, globalThis.model, model, attr);
+            var cellView = new CellView(globalThis.collection, rowView, model, attr);
             cell.innerHTML = model[attr];
             cell.contentEditable = true;
             cell.className = 'table-cell';
@@ -276,7 +275,19 @@ var middguard = middguard || {};
     
     initialize: function (modelObj){
       this.$el.html(this.template);
-      this.model = modelObj.model;
+      this.model = middguard.entities[ this.capitalize(pluralize(modelObj.modelTemp.get('name'))) ].get(modelObj.model.id);
+      if (! this.model){
+        var model = modelObj.model
+        this.model = new Backbone.Model({model});
+        /*
+        this.model.set('url', pluralize(modelObj.modelTemp.get('name')) + '/' + modelObj.model.id);
+        console.log(this.model.get('url'));
+        */
+      }
+    },
+    
+    capitalize: function (string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
     },
     
     render: function(){
@@ -291,16 +302,18 @@ var middguard = middguard || {};
     },
     className: '', //overriding 'middguard-module' default
     
-    initialize: function(collection, modeltemp, model, attr){
+    initialize: function(collection, rowRef, model, attr){
       var globalThis = this;
       this.collection = collection;
       this.model = model;
       this.attr = attr;
       this.originalId = this.model.id;
-      this.realModel =  middguard.entities[this.capitalize(pluralize(modeltemp.get('name')))].get(this.originalId);
-      this.listenTo(this.realModel, 'change:' + this.attr, function(item){
+      //console.log(this.collection.get(this.model.id));
+      this.collection.get(this.model.id).save();
+      this.listenTo(this.collection.get(this.model.id), 'change:' + this.attr, function(item){
         globalThis.$el.html(item.get(globalThis.attr));
       });
+      
     },
     
     capitalize: function (string) {
