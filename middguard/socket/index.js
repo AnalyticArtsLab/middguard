@@ -28,7 +28,6 @@ module.exports = function (err, socket, session) {
   
   socket.on('filetransfer', function(data){
     fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', data.filename), String(data.file));
-    //TO DO: when file received, automatically put its data into DB and mark it as read
     var readStream = fs.createReadStream(path.join(__dirname, '..', 'loaders', 'data-load-files', 'load-config.json'), {encoding: 'utf8'});
     readStream.on('data', function(moreData){
       var configObj = JSON.parse(moreData);

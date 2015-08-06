@@ -51,15 +51,17 @@ var middguard = middguard || {};
     
     restoreTable: function(){
       this.tableView.numRows = 0;
-      this.tableView.curOffset = 0;
+      this.tableView.curQuery.offset = 0;
+      this.tableView.curQuery.limit = 100;
       this.tableView.queryDB({}, false);
     },
     
     queryTrigger: function(){
       var qText = document.getElementById('query-text-' + this.model.get('name'));
       this.tableView.curQuery = {whereRaw: qText.value};
-      this.tableView.curOffset = 0;
+      this.tableView.curQuery.offset = 0;
       this.tableView.numRows = 0;
+      this.tableView.curQuery.limit = 100;
       this.tableView.queryDB(this.tableView.curQuery, false);
     },
     
@@ -84,11 +86,12 @@ var middguard = middguard || {};
       this.template = this.template.replace(/%modelName%/g, this.model.get('name'));
       this.$el.html(this.template);
       middguard.state.changedModels = {};
-      this.curOffset = 0;
       this.curMax = 100;
       this.numRows = 0;
       this.full = false;
       this.curQuery = {};
+      this.curQuery.offset = 0;
+      this.curQuery.limit = 100;
       
       this.modName = this.model.get('name');
       this.collection = new Backbone.Collection([], {model: middguard.entities[this.capitalize(pluralize(this.modName))].model});
@@ -96,25 +99,29 @@ var middguard = middguard || {};
       this.queryDB(this.curQuery, false);
       this.subtracted = false;
       _.extend(this, Backbone.Events);
-      /*this.listenTo(middguard.entities[this.capitalize(pluralize(this.modName))], 'remove', function(item){
-        globalThis.collection.remove(item.get('id'));
-        if (item.get('id') <= this.curMax) {
-          globalThis.numRows = 0;
-          globalThis.render(globalThis.collection, globalThis.opt, 'collect');
-        }
+      //added models can show up in the table view if they were added on the client (assuming they fit the right criteria),
+      //but deleted models will not be removed from the table view unless they have been deleted on the server
+      this.listenTo(middguard.entities[this.capitalize(pluralize(this.modName))], 'add', function(model, col, opt){
+        console.log(model);
+        globalThis.serverCreate(model.attributes, opt);
       });
-      this.listenTo(middguard.entities[this.capitalize(pluralize(this.modName))], 'add', function(item){
-        globalThis.collection.add(item);
-        if (item.get('id') <= globalThis.curMax) {
-          globalThis.numRows = 0;
-          globalThis.render(globalThis.collection, globalThis.opt, 'collect');
-        }
-      });*/
+      this.collection.ioBind('create', this.serverCreate, this);
       this.collection.ioBind('update', this.serverUpdate, this);
+      this.collection.ioBind('delete', this.serverDelete, this);
+    },
+    
+    serverCreate: function(data, opts){
+      console.log('triggered', data.id);
+      if (!this.collection.get(data.id) && data.id < this.curMax && !opts.success && !opts.error){
+        //ensuring that the new query needs to be done and that this function hasn't been called from a 'fetch' call
+        console.log('conditional pass');
+        this.curQuery.limit = this.curMax;
+        this.curQuery.offset = 0;
+        this.queryDB(this.curQuery, false);
+      }
     },
     
     serverUpdate: function(data){
-      //var modelCopy = new Backbone.Model(JSON.parse(data));
       var curModel = this.collection.get(data.id);
       var curModelEnt = middguard.entities[this.capitalize(pluralize(this.modName))].get(data.id);
       if (curModel){
@@ -122,12 +129,16 @@ var middguard = middguard || {};
           curModel.set(attr, data[attr]);
         }
       }
-      if (curModelEnt){
-        for (var attr in data){
-          curModelEnt.set(attr, data[attr]);
-        }
+    },
+    
+    serverDelete: function(data, opts){
+      if (this.collection.get(data.id)){
+        //ensuring that the new query needs to be done and that this function hasn't been called from a 'fetch' call
+        var query = _.clone(this.curQuery);
+        this.curQuery.limit = this.curMax;
+        this.curQuery.offset = 0;
+        this.queryDB(query, false);
       }
-      //middguard.entities[this.capitalize(pluralize(this.modName))].add(modelCopy);
     },
     
     uploadHandle: function(){
@@ -151,22 +162,25 @@ var middguard = middguard || {};
     
     addResults: function(){
       if (!this.full){
-        this.curOffset += 100;
+        this.curQuery.offset += 100;
         this.curMax += 100;
+        this.curQuery.limit = 100;
       }
       this.queryDB(this.curQuery, true);
     },
     
     queryDB: function(query, extend){
+      console.log('queried');
       var globalThis = this;
-      query.limit = '100';
       query.orderByRaw = 'id asc';
-      query.offset = this.curOffset;
-      var lastRow = (extend) ? this.numRows: 0;
+      if (!query.limit) query.limit = '100';
+      if (! query.hasOwnProperty('offset')) query.offset = this.curOffset;
+      if (!extend) this.numRows = 0;
       this.collection.fetch({
         data: query, source: 'tableView',
         remove: !extend,
         success: function(col, resp, opt){
+          console.log('success');
           globalThis.render(resp, opt, 'nocollect');
           //we need to bind the listener for these buttons after the buttons have been added into the DOM
           $('#enter-changes-' +globalThis.model.get('name')).click(globalThis.enterChanges);
@@ -213,6 +227,25 @@ var middguard = middguard || {};
       }
       middguard.state.changedModels = {};
     },
+    
+    injectRow: function(table, model, mode, insertNum){
+      var globalThis = this;
+      var row = table.insertRow(insertNum);
+      if (mode === 'collect') model = model.attributes;
+      var rowView = new RowView({model: model});
+      row.className = 'SQLRow';
+      var j = 0;
+      for (var attr in model){
+        var cell = row.insertCell(j);
+        var cellView = new CellView(globalThis.collection, rowView, model, attr);
+        cell.innerHTML = model[attr];
+        cell.contentEditable = true;
+        cell.className = 'table-cell';
+        cellView.setElement(cell);
+        cellView.$el.attr('id', globalThis.collection.url + '-' + model.id + '-' + String(attr).replace(/ /g, '-'));
+        j++;
+      }
+    },
 
     render: function(baseData, opt, mode){
       var globalThis = this;
@@ -252,24 +285,11 @@ var middguard = middguard || {};
             j++;
           }
         }
-
+        
+        var insertNum;
         data.forEach(function(model, i){
-          var row = table.insertRow(globalThis.numRows + 1);
-          if (mode === 'collect') model = model.attributes;
-          var rowView = new RowView({model: model, modelTemp: globalThis.model});
-          //rowView.setElement(row);
-          row.className = 'SQLRow';
-          var j = 0;
-          for (var attr in model){
-            var cell = row.insertCell(j);
-            var cellView = new CellView(globalThis.collection, rowView, model, attr);
-            cell.innerHTML = model[attr];
-            cell.contentEditable = true;
-            cell.className = 'table-cell';
-            cellView.setElement(cell);
-            cellView.$el.attr('id', globalThis.collection.url + '-' + model.id + '-' + String(attr).replace(/ /g, '-'));
-            j++;
-          }
+          insertNum = globalThis.numRows + 1;
+          globalThis.injectRow(table, model, mode, insertNum);
           globalThis.numRows++;
         });
         
