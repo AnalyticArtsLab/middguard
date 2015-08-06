@@ -90,34 +90,44 @@ var middguard = middguard || {};
       this.full = false;
       this.curQuery = {};
       
-      var modName = this.model.get('name');
-      this.collection = new Backbone.Collection([], {model: middguard.entities[this.capitalize(pluralize(modName))].model});
-      this.collection.url = pluralize(modName);
+      this.modName = this.model.get('name');
+      this.collection = new Backbone.Collection([], {model: middguard.entities[this.capitalize(pluralize(this.modName))].model});
+      this.collection.url = pluralize(this.modName);
       this.queryDB(this.curQuery, false);
       this.subtracted = false;
       _.extend(this, Backbone.Events);
-      this.listenTo(middguard.entities[this.capitalize(pluralize(modName))], 'remove', function(item){
+      /*this.listenTo(middguard.entities[this.capitalize(pluralize(this.modName))], 'remove', function(item){
         globalThis.collection.remove(item.get('id'));
         if (item.get('id') <= this.curMax) {
           globalThis.numRows = 0;
           globalThis.render(globalThis.collection, globalThis.opt, 'collect');
         }
       });
-      this.listenTo(middguard.entities[this.capitalize(pluralize(modName))], 'add', function(item){
+      this.listenTo(middguard.entities[this.capitalize(pluralize(this.modName))], 'add', function(item){
         globalThis.collection.add(item);
         if (item.get('id') <= globalThis.curMax) {
           globalThis.numRows = 0;
           globalThis.render(globalThis.collection, globalThis.opt, 'collect');
         }
-      });
-      this.collection.ioBind('update', this.serverCreate, this);
+      });*/
+      this.collection.ioBind('update', this.serverUpdate, this);
     },
     
-    serverCreate: function(data){
-      console.log(data);
-      var modelCopy = new Backbone.Model(JSON.parse(data));
-      this.collection.add(modelCopy);
-      middguard.entities[this.capitalize(pluralize(modName))].add(modelCopy);
+    serverUpdate: function(data){
+      //var modelCopy = new Backbone.Model(JSON.parse(data));
+      var curModel = this.collection.get(data.id);
+      var curModelEnt = middguard.entities[this.capitalize(pluralize(this.modName))].get(data.id);
+      if (curModel){
+        for (var attr in data){
+          curModel.set(attr, data[attr]);
+        }
+      }
+      if (curModelEnt){
+        for (var attr in data){
+          curModelEnt.set(attr, data[attr]);
+        }
+      }
+      //middguard.entities[this.capitalize(pluralize(this.modName))].add(modelCopy);
     },
     
     uploadHandle: function(){
@@ -275,15 +285,6 @@ var middguard = middguard || {};
     
     initialize: function (modelObj){
       this.$el.html(this.template);
-      this.model = middguard.entities[ this.capitalize(pluralize(modelObj.modelTemp.get('name'))) ].get(modelObj.model.id);
-      if (! this.model){
-        var model = modelObj.model
-        this.model = new Backbone.Model({model});
-        /*
-        this.model.set('url', pluralize(modelObj.modelTemp.get('name')) + '/' + modelObj.model.id);
-        console.log(this.model.get('url'));
-        */
-      }
     },
     
     capitalize: function (string) {
@@ -308,8 +309,6 @@ var middguard = middguard || {};
       this.model = model;
       this.attr = attr;
       this.originalId = this.model.id;
-      //console.log(this.collection.get(this.model.id));
-      this.collection.get(this.model.id).save();
       this.listenTo(this.collection.get(this.model.id), 'change:' + this.attr, function(item){
         globalThis.$el.html(item.get(globalThis.attr));
       });
