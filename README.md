@@ -30,20 +30,22 @@ Three tables are built into the system:
  - type_1
  - type_2
 
-### Packages
+### Packages and their Structure
 
-A package is either a client-side module, a model with a schema, getters, and
-setters, or an analytic tool.  Models and analytic tools run on the server.
-Packages may depend on each other and should raise errors if a dependency is not
+A package is the instance or version of MiddGuard that will be run. For example, middguard comes with a ‘demo’ package, and a different package could be created for each analytics project in which Middguard is used. Middguard can run an unlimited number of packages, but only one at a time. To indicate which package MiddGuard should run, you must set the ‘app’ field in /middguard/config/settings.js’. Each package MUST contain 3 folders titled ‘modules’, ‘models’, and ‘analytics’, and the contents of these folders should correspond to the following descriptions:
+
+  *Models* — Data models that should correspond to a row in a relational database. (Server-side)	
+  *Modules* — Client-side views ('views' in the MVC sense)
+  *Analytics* — Analytic tools (Server-side)
+
+
+Modules, models, and analytic tools may depend on each other and should raise errors if a dependency is not
 found. Any client-side module should be able to run properly given only the information
 contained in a given state. (See static/js/setup.js for more detail on states)
 
 #### Structure
 
-Discoverable packages should be placed in one of three subdirectories of the
-**packages** top level directory.  The subdirectories are **modules**,
-**models**, and **analytics** and correspond directly to each of the types of
-packages.  The only required file in a package is a *manifest.json*, structured
+The only required file for a model/module/analytic tool is a *manifest.json*, structured
 as follows:
 
 ```
@@ -80,11 +82,17 @@ differently, add *model_path* to your *manifest.json*.
 
 **version**: The model's [SemVer][5] version.
 
-### Database and migrations
+### General Setup, Databases, and Migrations
 
-MiddGuard can operate on either a SQLite database or a PostgreSQL database. To ensure that middguard is configured to work with the type of database you are using, *make sure that you set the "dbConfig" field in the ./middguard/config/settings.js file appropriately.* (There are guidelines in the file). If you choose to use SQLite, MiddGuard will operate on a single SQLite database called *middguard.db* stored at
+####Setup
+For any package to run on MiddGuard, it *must* contain a config file within its directory. When getting started, simply copy the config file in the 'demo' package directory and put it in the directory of your new package. Then, change the information in the file as needed. (You will likely only need to change the database information at first, if that).
+
+####Database Setup
+MiddGuard can operate on either a SQLite database or a PostgreSQL database. To ensure that middguard is configured to work with the type of database you are using, *make sure that you set the "dbConfig" field in the ./middguard/__package_name__/config.js file appropriately.* (There are guidelines in the file). If you choose to use SQLite, MiddGuard will operate on a single SQLite database called *middguard.db* stored at
 the project root.  It will automatically be created when you run your first
 migration. Alternatively, if you would like to use a PostgreSQL database, fill in the appropriate information *in the ./middguard/config/settings.js file* to connect to a PostgreSQL database you have already set up.
+
+
 
 #### Make a MiddGuard migration
 
@@ -125,6 +133,17 @@ Run the migrations for a specific model.  Run this for each model in your
 ```sh
 $ bin/migrate latest --model <model name>
 ```
+
+### Examples
+
+#### Make a new model from scratch
+
+To make an empty table for the model's data to be stored in, create your own migration file in a 'migrations' folder that resides in the folder for your model. This migration file should specify the names and types of the columns in your database. Next, make a javascript file for your model that links it to a table of the same name as the one you created in the migration file. Then, make a manifest.json file with the appropriate fields. Lastly, from the command line on the server, run 'bin/migrate latest --model <modelname>'. Now your table has been created, and you will have models available for access once you load data into the table.
+
+
+package directory-->__model_name__ directory--> 'migrations' directory --> custom migration file
+                                                'manifest.json'
+                                                JavaScript file for model
 
 ### Install
 

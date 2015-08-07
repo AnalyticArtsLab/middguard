@@ -16,8 +16,8 @@ module.exports = {
   //SQLITE EXAMPLE (DEFAULT)
   /*
 	dbConfig: {
-	 client: 'sqlite3',      // or 'pg',
-	 connection: {          // or the various connection settings for pg
+	 client: 'sqlite3',      
+	 connection: {          
 		 filename: 'vast2015.db'
 	  }
 	},*/
