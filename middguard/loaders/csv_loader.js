@@ -5,6 +5,7 @@ var fs = require('fs'),
   knexConfig = require('../../middguard/config/knex')[env],
   knex = require('knex')(knexConfig)
   Baby = require('babyparse');
+  Converter = require('csvtojson').Converter;
   
   
   module.exports = function(Bookshelf, model, fileParam){
@@ -45,6 +46,13 @@ var fs = require('fs'),
     //translateReference contains translations of csv column names to DB column names
     
     var readStream = fs.createReadStream(path.join(__dirname, 'data-load-files', filename), {encoding: 'utf8'});
+    /*
+    -----UNDER CONSTRUCTION----
+    var count = 0;
+    var prevEnd = '';
+    var bulk = '';
+    var nextStart = '';
+    */
     readStream.on('data', function(data){
       var lines = Baby.parse(data, {header: true}).data;
       lines.forEach(function(line, i){
@@ -54,5 +62,57 @@ var fs = require('fs'),
           console.log(Error(error));
         });
       });
+    }).on('end', function(){
+      console.log('Data Loaded Successfully');
     });
+      
+    /*  TO DO: WORK ON MAKING BIG FILES WORK!
+    -----UNDER CONSTRUCTION----
+    var startoff = data.indexOf('\n');
+    var cutoff = data.lastIndexOf('\n');
+    //debugger;
+    //cut off the end of the previous chunk
+    if (count !== 0){
+      prevEnd = data.substr(0, startoff-1).trim();
+    } else {
+      prevEnd = '';
+    }
+    
+    console.log('prevEnd: ' + prevEnd);
+    
+    //insert (end of the previous chunk + beginning of current chunk) into the DB
+    if (prevEnd.length + nextStart.length){
+      console.log('combo: ' + nextStart+prevEnd);
+      var firstLine = Baby.parse(prevEnd+nextStart).data;
+      knex(tablename).insert(firstLine).then(function(record){
+        return;
+      }).catch(function(error){
+        console.log(Error(error));
+      });
+    }
+    
+    //cut off the end of the current chunk, use all the lines in the middle
+    if (cutoff !== data.length-1) {
+      bulk = data.substr(startoff, cutoff-1);
+      nextStart = data.substr(cutoff).trim();
+    } else {
+      bulk = data.substr(startoff);
+      nextStart = '';
+    }
+    console.log('nextStart: ' + nextStart);
+    
+    //insert all of the full lines into the DB
+    if (bulk.length){
+      var lines = Baby.parse(bulk, {header: true}).data;
+      lines.forEach(function(line, i){
+        knex(tablename).insert(line).then(function(record){
+          return;
+        }).catch(function(error){
+          console.log(Error(error));
+        });
+      });
+    }
+    count++;
+    */
+      
   }
