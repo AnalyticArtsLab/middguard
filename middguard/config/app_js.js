@@ -21,6 +21,7 @@ module.exports = {
     'views/observations-view.js',
     'views/app-view.js',
     'views/header-view.js',
+    'views/sql-view.js',
 
     'app.js'
   ]

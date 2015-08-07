@@ -27,15 +27,17 @@ module.exports = function (err, socket, session) {
   socket.on('analysts:read', _.bind(analyst.readAll, socket));
   
   socket.on('filetransfer', function(data){
-    fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', data.filename), String(data.file));
-    var readStream = fs.createReadStream(path.join(__dirname, '..', 'loaders', 'data-load-files', 'load-config.json'), {encoding: 'utf8'});
-    readStream.on('data', function(moreData){
-      var configObj = JSON.parse(moreData);
-      configObj[data.filename] = {isNew: true}
-      fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', 'load-config.json'), JSON.stringify(configObj, null, '\t'), function(err){
-        if (err) console.log(Error(err));
+    fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', data.filename), data.file, {encoding:'utf8'}, function(err){
+      if (err) console.log(Error(err));
+      var readStream = fs.createReadStream(path.join(__dirname, '..', 'loaders', 'data-load-files', 'load-config.json'), {encoding: 'utf8'});
+      readStream.on('data', function(moreData){
+        var configObj = JSON.parse(moreData);
+        configObj[data.filename] = {isNew: true}
+        fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', 'load-config.json'), JSON.stringify(configObj, null, '\t'), function(error){
+          if (error) console.log(Error(error));
+          csv_load(Bookshelf, data.modelname, data.filename);
+        });
       });
-      csv_load(Bookshelf, data.modelname, data.filename);
     });
   });
 

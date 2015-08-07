@@ -102,7 +102,6 @@ var middguard = middguard || {};
       //added models can show up in the table view if they were added on the client (assuming they fit the right criteria),
       //but deleted models will not be removed from the table view unless they have been deleted on the server
       this.listenTo(middguard.entities[this.capitalize(pluralize(this.modName))], 'add', function(model, col, opt){
-        console.log(model);
         globalThis.serverCreate(model.attributes, opt);
       });
       this.collection.ioBind('create', this.serverCreate, this);
@@ -111,10 +110,13 @@ var middguard = middguard || {};
     },
     
     serverCreate: function(data, opts){
-      console.log('triggered', data.id);
       if (!this.collection.get(data.id) && data.id < this.curMax && !opts.success && !opts.error){
         //ensuring that the new query needs to be done and that this function hasn't been called from a 'fetch' call
-        console.log('conditional pass');
+        this.curQuery.limit = this.curMax;
+        this.curQuery.offset = 0;
+        this.queryDB(this.curQuery, false);
+      } else if (this.collection.models.length === 0 && !opts.success && !opts.error){
+        //if there is no data in the collection yet--intended for when user has just uploaded a CSV and we want it to show up
         this.curQuery.limit = this.curMax;
         this.curQuery.offset = 0;
         this.queryDB(this.curQuery, false);
@@ -170,7 +172,6 @@ var middguard = middguard || {};
     },
     
     queryDB: function(query, extend){
-      console.log('queried');
       var globalThis = this;
       query.orderByRaw = 'id asc';
       if (!query.limit) query.limit = '100';
@@ -180,7 +181,6 @@ var middguard = middguard || {};
         data: query, source: 'tableView',
         remove: !extend,
         success: function(col, resp, opt){
-          console.log('success');
           globalThis.render(resp, opt, 'nocollect');
           //we need to bind the listener for these buttons after the buttons have been added into the DOM
           $('#enter-changes-' +globalThis.model.get('name')).click(globalThis.enterChanges);
@@ -188,8 +188,9 @@ var middguard = middguard || {};
             globalThis.restore(globalThis);
           });
         },
-        error: function(){
+        error: function(e){
           console.log('failure');
+          console.log(Error(e));
         }
       });
     },
@@ -355,6 +356,6 @@ var middguard = middguard || {};
     }
     
   });
-
+  
   middguard.SQLView =  {ctor: SQLView};
 })();

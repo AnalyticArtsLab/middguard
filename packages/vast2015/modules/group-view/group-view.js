@@ -720,10 +720,6 @@ var middguard = middguard || {};
     
     
   });
-  
-  
-  
- 
 	
 	middguard.addModule('GroupView', GroupView);
 })();

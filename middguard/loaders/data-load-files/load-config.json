@@ -4,5 +4,8 @@
 	},
 	"MOCK_DATA copy.csv": {
 		"isNew": false
+	},
+	"park-movement-Fri.csv": {
+		"isNew": false
 	}
 }

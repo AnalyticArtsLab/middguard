@@ -6,7 +6,7 @@ module.exports = function(callback) {
   var modules = {
     names: [],
     js: [],
-    css: []
+    css: ['static/css/sql-styles.css'] //this file needs to end up on the client side
   };
   
   var modulesCount;

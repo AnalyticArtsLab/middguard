@@ -137,6 +137,6 @@ var middguard = middguard || {};
     }
     
   });
-
+  
   middguard.addModule('CheckinHeatmap', CheckinHeatmap);
 })();
