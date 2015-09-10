@@ -138,12 +138,17 @@ $ bin/migrate latest --model <model name>
 
 #### Make a new model from scratch
 
-To make an empty table for the model's data to be stored in, create your own migration file in a 'migrations' folder that resides in the folder for your model. This migration file should specify the names and types of the columns in your database. Next, make a javascript file for your model that links it to a table of the same name as the one you created in the migration file. Then, make a manifest.json file with the appropriate fields. Lastly, from the command line on the server, run 'bin/migrate latest --model <modelname>'. Now your table has been created, and you will have models available for access once you load data into the table.
+To make an empty table for the new model's data to be stored in, create your own migration file \('model_migration_demo.js' in the 'demo-model' example\) in a 'migrations' folder that resides in the folder for your new model. This migration file should specify the names and types of the columns in your new database table. Next, make a javascript file \('demo-model.js' in the 'demo-model' example\) for your model that links it to the table you created in the migration file. Then, make a 'manifest.json' file with the appropriate fields. Lastly, from the command line on the server, run 'bin/migrate latest --model <modelname>'. Now your table has been created, and you will have models (each corresponding to a row of data) available for access once you load data into the table.
 
+The hierarchy below shows what the file system should look like when you are done making a new model for an existing package. \(Files/directories marked 'create' are ones that you must add when making your new model.\) For examples of the code each file that you add should contain to make everything work, see the 'demo-model' model in the 'demo' package.
 
-package directory-->__model_name__ directory--> 'migrations' directory --> custom migration file
-                                                'manifest.json'
-                                                JavaScript file for model
+*\[package name\] directory
+  *'models' directory
+    *\[model name\] directory **\(CREATE\)**
+    *'manifest.json' **\(CREATE\)**
+    *JavaScript file for model **\(CREATE\)**
+    *'migrations' directory **\(CREATE\)**
+      *custom migration file **\(CREATE\)**
 
 ### Install
 

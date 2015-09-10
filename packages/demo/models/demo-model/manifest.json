@@ -1,0 +1,6 @@
+{
+  "name": "demo-model",
+  "model": "demo-model",
+  "version": "0.0.1",
+  "customLoad":"true"
+}
