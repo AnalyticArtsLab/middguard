@@ -142,13 +142,13 @@ To make an empty table for the new model's data to be stored in, create your own
 
 The hierarchy below shows what the file system should look like when you are done making a new model for an existing package. \(Files/directories marked 'create' are ones that you must add when making your new model.\) For examples of the code each file that you add should contain to make everything work, see the 'demo-model' model in the 'demo' package.
 
-*\[package name\] directory
-  *'models' directory
-    *\[model name\] directory **\(CREATE\)**
-    *'manifest.json' **\(CREATE\)**
-    *JavaScript file for model **\(CREATE\)**
-    *'migrations' directory **\(CREATE\)**
-      *custom migration file **\(CREATE\)**
+* \[package name\] directory
+  * 'models' directory
+    * \[model name\] directory __\(CREATE\)__
+    * 'manifest.json' __\(CREATE\)__
+    * JavaScript file for model __\(CREATE\)__
+    * 'migrations' directory __\(CREATE\)__
+      * custom migration file __\(CREATE\)__
 
 ### Install
 

@@ -4,7 +4,8 @@ var fs = require('fs'),
   env = require('../../middguard/config/settings').env,
   knexConfig = require('../../middguard/config/knex')[env],
   knex = require('knex')(knexConfig),
-  Baby = require('babyparse');
+Baby = require('babyparse');
+  //Converter = require('csvtojson').Converter;
   
   
   module.exports = function(Bookshelf, model, fileParam){
