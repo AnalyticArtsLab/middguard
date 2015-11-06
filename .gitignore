@@ -7,3 +7,6 @@ bower_components/
 *.log
 nosync
 packages/demo/modules/bar-chart-messages2
+
+# Data is usually too big to store in git
+data/

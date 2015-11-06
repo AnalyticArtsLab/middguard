@@ -11,26 +11,27 @@ module.exports = {
   // `modulesPath` as defined below.
   modulesDir: 'modules',
 
-  
+
   //Set dbConfig appropriately for either an SQLite DB or a PostgreSQL DB
-  //SQLITE EXAMPLE (DEFAULT)
-  /*
-	dbConfig: {
-	 client: 'sqlite3',      
-	 connection: {          
-		 filename: 'vast2015.db'
-	  }
-	},*/
-  //POSTGRESQL EXAMPLE
+  // SQLite
+  //
+  // dbConfig: {
+  //  client: 'sqlite3',
+  //  connection: {
+  //    filename: 'vast2015.db'
+  //   }
+  // },
+
+  // PostgreSQL
   dbConfig: {
-  	  client: 'pg',
-  	  connection: {	
-  			host     : '127.0.0.1',
-  	    user     : 'candrews',
-  	    password : '',
-  	    database: 'vast2015'
-  		}
+    client: 'pg',
+    connection: {
+      host     : '127.0.0.1',
+      user     : 'candrews',
+      password : '',
+      database: 'vast2015'
+    }
   },
-  
+
   SECRET_KEY: process.env.SECRET_KEY || 'turn down for what'
 };

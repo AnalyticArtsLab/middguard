@@ -6,8 +6,9 @@ module.exports = {
   // The top level directory. This is where the db and packages are stored.
   // All other settings are defined from here.
   root: path.normalize(__dirname + '/../..'),
-  
-  app: 'vast2015', //******* write the name of the directory ('app') whose models/modules you want to run *********
-  
+
+  // hack, will be fixed when middguard is its own module
+  app: 'cycling',
+
   SECRET_KEY: process.env.SECRET_KEY || 'turn down for what'
 };
