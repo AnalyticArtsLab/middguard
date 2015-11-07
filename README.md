@@ -32,9 +32,12 @@ Three tables are built into the system:
 
 ### Packages and their Structure
 
+Important: Recent modifications (lazy data requests on the front end) mean only
+the "cycling" package will work.
+
 A package is the instance or version of MiddGuard that will be run. For example, middguard comes with a ‘demo’ package, and a different package could be created for each analytics project in which Middguard is used. Middguard can run an unlimited number of packages, but only one at a time. To indicate which package MiddGuard should run, you must set the ‘app’ field in /middguard/config/settings.js’. Each package MUST contain 3 folders titled ‘modules’, ‘models’, and ‘analytics’, and the contents of these folders should correspond to the following descriptions:
 
-  *Models* — Data models that should correspond to a row in a relational database. (Server-side)	
+  *Models* — Data models that should correspond to a row in a relational database. (Server-side)
   *Modules* — Client-side views ('views' in the MVC sense)
   *Analytics* — Analytic tools (Server-side)
 

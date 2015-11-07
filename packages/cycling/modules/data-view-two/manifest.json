@@ -1,0 +1,11 @@
+{
+  "name": "Cycling Data Two",
+  "main": "CyclingDataViewTwo",
+  "version": "0.0.1",
+  "js": [
+    "data-view-two.js"
+  ],
+  "css": [
+
+  ]
+}

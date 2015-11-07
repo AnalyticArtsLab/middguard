@@ -18,7 +18,7 @@ var middguard = middguard || {};
         'addAllModels',
         'addAllAnalytics',
         'addAll');
-        
+
       this.listenTo(middguard.PackagedModules, 'reset', this.addAllModules);
       this.listenTo(middguard.PackagedModels, 'reset', this.addAllModels);
       this.listenTo(middguard.PackagedAnalytics, 'reset', this.addAllAnalytics);
@@ -62,22 +62,20 @@ var middguard = middguard || {};
         var plural = pluralize(name);
         var capitalPlural = capitalize(plural);
 
-        middguard.entities[capital] = Backbone.Model.extend({url:name});
+        middguard.entities[capital] = Backbone.Model.extend({
+          url: name
+        });
         middguard.entities[capitalPlural] = new middguard.EntityCollection([], {
           url: plural,
           model: middguard.entities[capital]
         });
-				
+
         middguard.state[capitalPlural] = {selections: new Backbone.Collection(),
 																					workingSet: new Backbone.Collection()};
 				_.extend(middguard.state[capitalPlural], Backbone.Events);
-				
+
 				//here each entityCollection, which is a Backbone collection, adds the appropriate models to itself
         //if its name is not contained in the customLoads variable
-    
-        if (!model.get('customLoad')){
-          middguard.entities[capitalPlural].fetch();
-        }
       });
     }
   });
@@ -113,11 +111,42 @@ var middguard = middguard || {};
       return this;
     },
     toggleActive: function () {
+      // TODO: split this out into two functions based on target's class
       if (this.type !== 'module' && this.type !== 'model') return;
       if (this.type === 'module'){
         if (this.active) {
+          var viewMain = this.model.get('main');
+          console.log('About to remove view "' + viewMain + '".');
+
+          // For each model this view references
+          middguard.__modules[viewMain].live.middguard_entities.forEach(function (entityName) {
+            var collection = middguard.entities[entityName];
+
+            // First iteration to remove reference to this model
+            collection.each(function (model, i) {
+              if (model.get('middguard_views').indexOf(viewMain) > -1) {
+                removeFromArray(model.get('middguard_views'), viewMain);
+              }
+            });
+
+            // Get an array of models from this entity collection to remove
+            var toRemove = collection.filter(function (model) {
+              if (model.get('middguard_views').length === 0) {
+                return true;
+              }
+            });
+
+            console.log('Removing ' + toRemove.length +
+                        ' models that are no longer in use from collection "' +
+                        entityName +'".');
+            // remove them without sending anything to the server
+            collection.remove(toRemove, {silent: true});
+          });
+
+          // remove the view
           middguard.__modules[this.model.get('main')].live.remove();
           middguard.__modules[this.model.get('main')].live = null;
+          console.log('Done removing view "' + viewMain + '".');
         } else {
           var module = new middguard.__modules[this.model.get('main')].ctor;
           middguard.__modules[this.model.get('main')].live = module;
@@ -149,4 +178,16 @@ var middguard = middguard || {};
       }
     }
   });
+
+  // http://stackoverflow.com/questions/3954438
+  function removeFromArray(arr) {
+    var what, a = arguments, L = a.length, ax;
+    while (L > 1 && arr.length) {
+        what = a[--L];
+        while ((ax= arr.indexOf(what)) !== -1) {
+            arr.splice(ax, 1);
+        }
+    }
+    return arr;
+  }
 })();

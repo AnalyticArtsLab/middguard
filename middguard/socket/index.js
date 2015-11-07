@@ -14,7 +14,7 @@ var _ = require('lodash'),
 module.exports = function (err, socket, session) {
   // Only set up sockets if we have a logged in user
   if (!session || !session.user) return;
-  
+
   // Set up sockets middguard internal sockets
   socket.on('messages:create', socketContext(message.create, socket, session));
   socket.on('messages:read', _.bind(message.readAll, socket));
@@ -25,7 +25,7 @@ module.exports = function (err, socket, session) {
 
   socket.on('analyst:read', _.bind(analyst.read, socket));
   socket.on('analysts:read', _.bind(analyst.readAll, socket));
-  
+
   socket.on('filetransfer', function(data){
     fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', data.filename), data.file, {encoding:'utf8'}, function(err){
       if (err) console.log(Error(err));
@@ -128,7 +128,7 @@ function setupSocketEvents(socket, modelName, model) {
 
   socket.on(pluralize(modelName) + ':read', function (data, callback) {
     if (data){
-      var fetchData = new model().query(data).fetchAll();
+      var fetchData = new model().where(data).fetchAll();
     } else {
       //if fetching all models at once
       var fetchData = new model().fetchAll();

@@ -3,8 +3,8 @@ var middguard = middguard || {};
 (function () {
   'use strict';
 
-  var CyclingDataView = middguard.View.extend({
-    id: "cycling-data-view",
+  var CyclingDataViewTwo = middguard.View.extend({
+    id: "cycling-data-view-two",
 
     template: _.template('<p>(lat: <%- latitude %>, lon: <%- longitude %>)</p>'),
 
@@ -13,24 +13,17 @@ var middguard = middguard || {};
         data: {cyclist_id: 1},
         remove: false
       });
-
-      // The above is a convenience method so you don't have to specify
-      // middguard_view_name.
-      // It is equivalent to the following:
-
-      // this.entities = ['Gps-points'];
-      // middguard.entities['Gps-points'].fetch({
-      //   data: {cyclist_id: 1},
-      //   reset: false,
-      //   middguard_view_name: 'CyclingDataView'
-      // });
+      this.fetch('Gps-points', {
+        data: {cyclist_id: 2},
+        remove: false
+      });
 
       this.listenTo(middguard.entities['Gps-points'], 'sync', this.render);
     },
     render: function () {
       var data = middguard.entities['Gps-points'];
 
-      this.$el.append('<h4>View One</h4>');
+      this.$el.append('<h4>View Two</h4>');
 
       data.each(_.bind(function (point) {
         this.$el.append(this.template(point.attributes));
@@ -40,5 +33,5 @@ var middguard = middguard || {};
     }
   });
 
-  middguard.addModule('CyclingDataView', CyclingDataView);
+  middguard.addModule('CyclingDataViewTwo', CyclingDataViewTwo);
 })();

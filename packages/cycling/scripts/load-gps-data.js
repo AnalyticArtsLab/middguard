@@ -4,16 +4,16 @@ var gpxParse = require('gpx-parse');
 GPSPoint = app.get('bookshelf').model('gps-point');
 Cyclist = app.get('bookshelf').model('cyclist');
 
-var dana = Cyclist.forge({
-  name: 'Dana Silver',
-  location: 'Middlebury, VT'
+var aaron = Cyclist.forge({
+  name: 'Aaron Newell',
+  location: 'Queensbury, NY'
 });
 
-dana
+aaron
 .fetch()
 .then(function (cyclist) {
   if (!cyclist)
-    return dana.save();
+    return aaron.save();
 
   return cyclist;
 })
