@@ -130,6 +130,9 @@ var middguard = middguard || {};
   // Internal hash of module views
   middguard.__modules = {};
 
+  // Internal hash of submodule views
+  middguard.__submodules = {};
+
   /* middguard.addModule
    * Makes MiddGuard aware of a top level view.
    * Top level views are listed under "Modules" in the sidebar.
@@ -148,12 +151,14 @@ var middguard = middguard || {};
   };
 
   var _addView = function (name, view, topLevel) {
-    if (!Object.prototype.hasOwnProperty.call(this.__modules, name)) {
-      mainView.prototype.middguard_view_name = name;
-      mainView.prototype.middguard_entities = [];
+    if (!Object.prototype.hasOwnProperty.call(middguard.__modules, name)) {
+      view.prototype.middguard_view_name = name;
+      view.prototype.middguard_entities = [];
 
       if (topLevel) {
-        this.__modules[name] = {ctor: mainView, live: null};
+        middguard.__modules[name] = {ctor: view, live: null};
+      } else {
+        middguard.__submodules[name] = {ctor: view, live: null};
       }
     } else {
       throw new Error('Module ' + name + ' already loaded');
@@ -246,7 +251,66 @@ var middguard = middguard || {};
       }
 
       middguard.entities[collection].fetch(options);
+    },
+
+    /* middguard.View.prototype.remove
+     * Extend the view remove function to remove referenced models
+     *
+     * Important: If you need to extend remove functionality, you must call
+     * `middguard.View.prototype.remove.call(this)` as the super call instead
+     * of the usual `Backbone.View.prototype.remove.call(this)`.
+     */
+    remove: function () {
+      var viewName = this.middguard_view_name;
+
+      console.log('About to remove view "' + viewName + '".');
+
+      // For each model this view references
+      this.middguard_entities.forEach(function (entityName) {
+        var collection = middguard.entities[entityName];
+
+        // First iteration to remove reference to this model
+        collection.each(function (model, i) {
+          if (model.get('middguard_views').indexOf(viewName) > -1) {
+            removeFromArray(model.get('middguard_views'), viewName);
+          }
+        });
+
+        // Get an array of models from this entity collection to remove
+        var toRemove = collection.filter(function (model) {
+          if (model.get('middguard_views').length === 0) {
+            return true;
+          }
+        });
+
+        console.log('Removing ' + toRemove.length +
+                    ' models that are no longer in use from collection "' +
+                    entityName +'".');
+        // remove them without sending anything to the server
+        collection.remove(toRemove, {silent: true});
+      });
+
+      console.log('Done removing view "' + viewName + '".');
+
+      // call super
+      Backbone.View.prototype.remove.call(this);
     }
   });
+
+  /* Remove elements from an array.
+   * arr is the array to remove from (param 0).
+   * Elements to remove are arguments 1 .. n.
+   * Source: http://stackoverflow.com/questions/3954438
+   */
+  function removeFromArray(arr) {
+    var what, a = arguments, L = a.length, ax;
+    while (L > 1 && arr.length) {
+      what = a[--L];
+      while ((ax= arr.indexOf(what)) !== -1) {
+        arr.splice(ax, 1);
+      }
+    }
+    return arr;
+  }
 
 })();

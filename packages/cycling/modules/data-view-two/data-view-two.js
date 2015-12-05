@@ -10,7 +10,7 @@ var middguard = middguard || {};
 
     initialize: function () {
       this.fetch('Gps-points', {
-        data: {cyclist_id: 3},
+        data: {ride_id: 1},
         remove: false
       });
       // this.fetch('Gps-points', {
