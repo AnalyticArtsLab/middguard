@@ -1,0 +1,20 @@
+#ride-by-ride .ride-list {
+  float: left;
+}
+
+#ride-by-ride .feature {
+  fill: #ccc;
+}
+
+#ride-by-ride .mesh {
+  fill: none;
+  stroke: #fff;
+  stroke-width: .5px;
+  stroke-linejoin: round;
+}
+
+#ride-by-ride .outline {
+  fill: #ddd;
+  stroke: #000;
+  stroke-width: 1.5px;
+}

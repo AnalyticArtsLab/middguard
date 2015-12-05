@@ -42,7 +42,7 @@ function addRide(cyclist, file) {
   return gpxParse.parseGpxFromFileAsync(path.join(basePath, file))
   .then(function (data) {
     return cyclist.rides().create({
-      name: data.tracks.name
+      name: data.tracks[0].name
     })
     .then(_.partial(addGpsPoints, data));
   });
