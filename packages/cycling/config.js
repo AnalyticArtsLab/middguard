@@ -18,7 +18,11 @@ module.exports = {
    client: 'sqlite3',
    connection: {
      filename: 'cycling.db'
-    }
+   },
+   pool: {
+     min: 0,
+     max: 1
+   }
   },
 
   // PostgreSQL

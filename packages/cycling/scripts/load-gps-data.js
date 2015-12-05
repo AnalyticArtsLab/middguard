@@ -1,18 +1,25 @@
 var app = require('../../../app');
 var Promise = require('bluebird');
+var _ = require('lodash');
 var gpxParse = Promise.promisifyAll(require('gpx-parse'));
 var fs = require('fs');
 var path = require('path');
 
 var basePath = '/Users/dsilver/Documents/workspace/middguard/data/activities';
 
-GPSPoint = app.get('bookshelf').model('gps-point');
-Cyclist = app.get('bookshelf').model('cyclist');
+var GPSPoint = app.get('bookshelf').model('gps-point');
+var Cyclist = app.get('bookshelf').model('cyclist');
+var Ride = app.get('bookshelf').model('ride');
 
 var dana = Cyclist.forge({
-  name: 'Dana R. Silver',
+  name: 'Dana Silver',
   location: 'Middlebury, VT'
 });
+
+var files = fs.readdirSync(basePath);
+
+// limit to the last 10 rides for now
+files = files.slice(files.length - 10);
 
 dana
 .fetch()
@@ -23,32 +30,32 @@ dana
   return cyclist;
 })
 .then(function (cyclist) {
-
-  var files = fs.readdirSync(basePath);
-
-  return Promise.each(files, function (file) {
-    return gpxParse.parseGpxFromFileAsync(path.join(basePath, file))
-    .then(function (data) {
-      return Promise.map(data.tracks[0].segments[0], function (point) {
-        return cyclist.gpsPoints().create({
-          latitude: point.lat,
-          longitude: point.lon,
-          elevation: +point.elevation[0],
-          time: point.time,
-        });
-      });
-    });
-  })
-
-  // FIXME: should return gpxParse as a promise
-  // gpxParse.parseGpxFromFile('/Users/dsilver/Documents/workspace/middguard/data/ride-2015-11-04.gpx', function (error, data) {
-  //   data.tracks[0].segments[0].forEach(function (point) {
-  //     cyclist.gpsPoints().create({
-  //       latitude: point.lat,
-  //       longitude: point.lon,
-  //       elevation: +point.elevation[0],
-  //       time: point.time,
-  //     });
-  //   });
-  // });
+  return Promise.each(files, _.partial(addRide, cyclist));
+})
+.then(function () {
+  app.get('bookshelf').knex.destroy();
 });
+
+
+function addRide(cyclist, file) {
+  console.log('Adding ride from file', file);
+  return gpxParse.parseGpxFromFileAsync(path.join(basePath, file))
+  .then(function (data) {
+    return cyclist.rides().create({
+      name: data.tracks.name
+    })
+    .then(_.partial(addGpsPoints, data));
+  });
+}
+
+function addGpsPoints(data, ride) {
+  return Promise.map(data.tracks[0].segments[0], function (point) {
+    return ride.gpsPoints().create({
+      latitude: point.lat,
+      longitude: point.lon,
+      elevation: +point.elevation[0],
+      time: point.time,
+      cyclist_id: ride.get('cyclist_id')
+    });
+  });
+}
