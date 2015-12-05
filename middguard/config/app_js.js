@@ -18,6 +18,7 @@ module.exports = {
     'collections/packaged-analytics.js',
 
     'views/packages-view.js',
+    'views/package-view.js',
     'views/observations-view.js',
     'views/app-view.js',
     'views/header-view.js',

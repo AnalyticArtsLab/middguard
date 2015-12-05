@@ -130,11 +130,31 @@ var middguard = middguard || {};
   // Internal hash of module views
   middguard.__modules = {};
 
-  middguard.addModule = function (name, mainView) {
+  /* middguard.addModule
+   * Makes MiddGuard aware of a top level view.
+   * Top level views are listed under "Modules" in the sidebar.
+   */
+  middguard.addModule = function (name, view) {
+    _addView(name, view, true /* top level */);
+  };
+
+  /* middguard.addSubview
+   * Makes MiddGuard aware of a subview (a view instantiated from another view)
+   * Subviews are not listed in the sidebar, but have models they fetch tracked
+   * and removed when the view is removed.
+   */
+  middguard.addSubview = function (name, view) {
+    _addView(name, view, false /* not top level */);
+  };
+
+  var _addView = function (name, view, topLevel) {
     if (!Object.prototype.hasOwnProperty.call(this.__modules, name)) {
       mainView.prototype.middguard_view_name = name;
       mainView.prototype.middguard_entities = [];
-      this.__modules[name] = {ctor: mainView, live: null};
+
+      if (topLevel) {
+        this.__modules[name] = {ctor: mainView, live: null};
+      }
     } else {
       throw new Error('Module ' + name + ' already loaded');
     }
@@ -229,7 +249,4 @@ var middguard = middguard || {};
     }
   });
 
-  middguard.fetch = function (collection, options) {
-
-  }
 })();
