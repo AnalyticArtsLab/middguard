@@ -1,0 +1,11 @@
+{
+  "name": "GPS Points List",
+  "main": "GPSPointsList",
+  "version": "0.0.1",
+  "js": [
+    "gps-points-list.js"
+  ],
+  "css": [
+
+  ]
+}

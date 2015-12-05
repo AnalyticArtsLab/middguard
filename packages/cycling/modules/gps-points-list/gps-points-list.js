@@ -3,7 +3,7 @@ var middguard = middguard || {};
 (function () {
   'use strict';
 
-  var CyclingDataView = middguard.View.extend({
+  var GPSPointsList = middguard.View.extend({
     id: "cycling-data-view",
 
     template: _.template('<p>(lat: <%- latitude %>, lon: <%- longitude %>)</p>'),
@@ -40,5 +40,5 @@ var middguard = middguard || {};
     }
   });
 
-  middguard.addModule('CyclingDataView', CyclingDataView);
+  middguard.addModule('GPSPointsList', GPSPointsList);
 })();
