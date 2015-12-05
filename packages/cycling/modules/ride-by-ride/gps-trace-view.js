@@ -11,6 +11,8 @@ var middguard = middguard || {};
 
       this.svg = this.mapView.svg;
 
+      this.el = '#ride-' + this.ride.id + '-path';
+
       this.fetch('Gps-points', {
         data: {ride_id: this.ride.id},
         remove: false
@@ -47,7 +49,8 @@ var middguard = middguard || {};
       return this;
     },
     remove: function () {
-      this.d3el.remove();
+      d3.selectAll(this.el).remove();
+      this.d3el = null;
 
       middguard.View.prototype.remove.call(this);
     }

@@ -215,7 +215,9 @@ var middguard = middguard || {};
 
       // get models added to the collection that match the criteria
       // we fetched for
-      collection.where(options.data).forEach(function (model) {
+      (options.data
+        ? collection.where(options.data)
+        : collection).forEach(function (model) {
         var currentViews = model.get('middguard_views');
 
         // if 'middguard_views' doesn't exist on the model, set it to an empty
@@ -279,13 +281,14 @@ var middguard = middguard || {};
         // Get an array of models from this entity collection to remove
         var toRemove = collection.filter(function (model) {
           if (model.get('middguard_views').length === 0) {
+            delete model.attributes.middguard_views;
             return true;
           }
         });
 
         console.log('Removing ' + toRemove.length +
                     ' models that are no longer in use from collection "' +
-                    entityName +'".');
+                    entityName + '".');
         // remove them without sending anything to the server
         collection.remove(toRemove, {silent: true});
       });
