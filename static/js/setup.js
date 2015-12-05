@@ -241,7 +241,7 @@ var middguard = middguard || {};
     fetch: function (collection, options) {
       // set the view name to add to the middguard_views when we create/update
       // the models
-      options.middguard_view_name = this.middguard_view_name;
+      options.middguard_view_name = this.cid;
 
       // add the entity to this view
       // so we can check the entities and remove the view from middguard_views
@@ -261,7 +261,7 @@ var middguard = middguard || {};
      * of the usual `Backbone.View.prototype.remove.call(this)`.
      */
     remove: function () {
-      var viewName = this.middguard_view_name;
+      var viewName = this.cid;
 
       console.log('About to remove view "' + viewName + '".');
 
