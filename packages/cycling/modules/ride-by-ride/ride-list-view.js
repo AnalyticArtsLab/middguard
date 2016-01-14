@@ -25,10 +25,11 @@ var middguard = middguard || {};
     },
 
     toggleGpsTrace: function () {
-      console.log(this.gpsTrace);
       if (!this.gpsTrace) {
+        this.$el.addClass('active');
         this.gpsTrace = new middguard.GPSTraceView({ride: this.model}).render();
       } else {
+        this.$el.removeClass('active');
         this.gpsTrace.remove();
         this.gpsTrace = null;
       }

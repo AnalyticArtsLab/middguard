@@ -290,7 +290,7 @@ var middguard = middguard || {};
                     ' models that are no longer in use from collection "' +
                     entityName + '".');
         // remove them without sending anything to the server
-        collection.remove(toRemove, {silent: true});
+        collection.remove(toRemove);
       });
 
       console.log('Done removing view "' + viewName + '".');

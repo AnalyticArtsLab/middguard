@@ -1,0 +1,13 @@
+{
+  "name": "Model Citizen",
+  "main": "ModelCitizen",
+  "version": "0.0.1",
+  "js": [
+    "model-citizen-view.js",
+    "collection-count-view.js",
+    "view-reference-count-view.js"
+  ],
+  "css": [
+    "model-citizen.css"
+  ]
+}

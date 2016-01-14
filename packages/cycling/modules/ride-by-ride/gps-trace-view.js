@@ -51,6 +51,8 @@ var middguard = middguard || {};
     remove: function () {
       d3.selectAll(this.el).remove();
       this.d3el = null;
+      this.mapView = null;
+      this.ride = null;
 
       middguard.View.prototype.remove.call(this);
     }

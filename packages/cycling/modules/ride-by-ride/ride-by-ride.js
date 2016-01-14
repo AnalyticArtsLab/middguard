@@ -92,6 +92,18 @@ var middguard = middguard || {};
         var view = new middguard.RideListView({model: model});
         _this.$('.ride-list').append(view.render().el);
       });
+    },
+
+    remove: function () {
+      d3.selectAll(this.el).remove();
+
+      this.svgHeight = null;
+      this.svgWidth = null;
+      this.projection = null;
+      this.svg = null;
+      this.d3el = null;
+
+      middguard.View.prototype.remove.call(this);
     }
   });
 

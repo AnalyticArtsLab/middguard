@@ -1,3 +1,7 @@
+#ride-by-ride {
+  margin-left: 10px;
+}
+
 #ride-by-ride .ride-list {
   float: left;
 }
@@ -17,4 +21,13 @@
   fill: #ddd;
   stroke: #000;
   stroke-width: 1.5px;
+}
+
+#ride-by-ride li a {
+  color: #000;
+  text-decoration: none;
+}
+
+#ride-by-ride li.active a {
+  color: steelblue;
 }
