@@ -1,0 +1,14 @@
+{
+  "name": "Ride By Ride",
+  "main": "RideByRide",
+  "version": "0.0.1",
+  "js": [
+    "topojson.v1.min.js",
+    "ride-by-ride.js",
+    "ride-list-view.js",
+    "gps-trace-view.js"
+  ],
+  "css": [
+    "map.css"
+  ]
+}

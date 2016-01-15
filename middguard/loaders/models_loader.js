@@ -11,7 +11,7 @@ module.exports = function (app) {
 
   var modelsPath = 'packages/' + settings.app + '/models';
   var modelsAbsPath = path.resolve(modelsPath);
-  
+
   fs.readdirSync(modelsAbsPath).forEach(function (model) {
     if (model[0] === '.' || !fs.lstatSync(path.join(modelsAbsPath, model)).isDirectory() ){
       // hidden directory, continue

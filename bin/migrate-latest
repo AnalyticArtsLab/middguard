@@ -10,18 +10,22 @@ program
   .version('0.0.1')
   .option('--model <model>', 'Run all migrations for model <model>')
   .option('--middguard', 'Run all migrations for MiddGuard')
+  .option('--package <app>', 'Run all model migrations for package <package>')
   .parse(process.argv);
 
-var migrationsConfig = require('./utils/migrations_config')(program);
-knex.migrate.latest(migrationsConfig).spread(function (batchNo, log) {
-  if (log.length === 0) {
-    console.log(chalk.cyan('Already up to date'));
+var migrationsConfigs = require('./utils/migrations_config')(program);
+
+migrationsConfigs.forEach(function(migrationsConfig) {
+  knex.migrate.latest(migrationsConfig).spread(function (batchNo, log) {
+    if (log.length === 0) {
+      console.log(chalk.cyan('Already up to date'));
+      process.exit(0);
+    }
+    console.log(chalk.green('Batch ' + batchNo + ' run: ' + log.length +
+      ' migrations \n' + chalk.cyan(log.join('\n'))));
     process.exit(0);
-  }
-  console.log(chalk.green('Batch ' + batchNo + ' run: ' + log.length +
-    ' migrations \n' + chalk.cyan(log.join('\n'))));
-  process.exit(0);
-}).catch(function () {
-  console.log(chalk.red('Error migrating to latest'));
-  process.exit(1);
+  }).catch(function () {
+    throw new Error('Error migrating to latest');
+    process.exit(1);
+  });
 });

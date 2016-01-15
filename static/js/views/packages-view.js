@@ -18,7 +18,7 @@ var middguard = middguard || {};
         'addAllModels',
         'addAllAnalytics',
         'addAll');
-        
+
       this.listenTo(middguard.PackagedModules, 'reset', this.addAllModules);
       this.listenTo(middguard.PackagedModels, 'reset', this.addAllModels);
       this.listenTo(middguard.PackagedAnalytics, 'reset', this.addAllAnalytics);
@@ -62,22 +62,20 @@ var middguard = middguard || {};
         var plural = pluralize(name);
         var capitalPlural = capitalize(plural);
 
-        middguard.entities[capital] = Backbone.Model.extend({url:name});
+        middguard.entities[capital] = Backbone.Model.extend({
+          url: name
+        });
         middguard.entities[capitalPlural] = new middguard.EntityCollection([], {
           url: plural,
           model: middguard.entities[capital]
         });
-				
+
         middguard.state[capitalPlural] = {selections: new Backbone.Collection(),
 																					workingSet: new Backbone.Collection()};
 				_.extend(middguard.state[capitalPlural], Backbone.Events);
-				
+
 				//here each entityCollection, which is a Backbone collection, adds the appropriate models to itself
         //if its name is not contained in the customLoads variable
-    
-        if (!model.get('customLoad')){
-          middguard.entities[capitalPlural].fetch();
-        }
       });
     }
   });
@@ -85,68 +83,4 @@ var middguard = middguard || {};
   var capitalize = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
-
-  middguard.PackageView = Backbone.View.extend({
-    className: 'middguard-package',
-    template: _.template(
-      '<div class="middguard-package-name"><%= name %></div>'
-    ),
-    events: {
-      'click': 'toggleActive'
-    },
-    initialize: function (model, options) {
-      this.active = false;
-
-      this.type = _.result(options, 'type');
-      this.maxModHeight = 0;
-      _.bindAll(this, 'toggleActive');
-      if (this.type === 'model' && ! middguard.state.activeModel){
-        middguard.state.activeModel = {};
-        _.extend(middguard.state.activeModel, Backbone.Events);
-        middguard.state.activeModel.current = this;
-      }
-    },
-    render: function () {
-      this.$el.html(this.template({name: this.model.get('name')}));
-      this.$el.toggleClass('active', this.active);
-      this.$el.addClass(this.type);
-      return this;
-    },
-    toggleActive: function () {
-      if (this.type !== 'module' && this.type !== 'model') return;
-      if (this.type === 'module'){
-        if (this.active) {
-          middguard.__modules[this.model.get('main')].live.remove();
-          middguard.__modules[this.model.get('main')].live = null;
-        } else {
-          var module = new middguard.__modules[this.model.get('main')].ctor;
-          middguard.__modules[this.model.get('main')].live = module;
-          $('#modules-container').append(module.render().el);
-          var curWidth = parseFloat($('#modules-container').css('width'));
-          $('#modules-container').css('width', curWidth + parseFloat(module.$el.css('width')));
-          if (parseFloat(module.$el.css('height')) > this.maxModHeight) this.maxModHeight = parseFloat(module.$el.css('height'));
-          //$('middguard-header').css('height', $(document).height());
-        }
-        this.active = !this.active;
-        this.render();
-        $('middguard-header').css('height', $(document).height());
-      } else {
-        //if this.type === model
-        if (this.active) {
-          $('#sql-model-view-' + this.model.get('name')).remove();
-        } else {
-          var module = new middguard.SQLView.ctor({model: this.model});
-          $('#modules-container').append(module.render().el);
-          var curWidth = parseFloat($('#modules-container').css('width'));
-          $('#modules-container').css('width', curWidth + parseFloat(module.$el.css('width')));
-          if (parseFloat(module.$el.css('height')) > this.maxModHeight) this.maxModHeight = parseFloat(module.$el.css('height'));
-          $('middguard-header').css('height', this.maxModHeight);
-        }
-        this.active = !this.active;
-        this.$el.toggleClass('active', this.active);
-        this.render();
-        $('middguard-header').css('height', $(document).height());
-      }
-    }
-  });
 })();

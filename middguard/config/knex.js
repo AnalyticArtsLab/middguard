@@ -1,8 +1,8 @@
 var path = require('path'),
-  settings = require('./settings'),
-  //make DB configuration dependent on indiv. config file
-  config = require('../../packages/' + settings.app + '/config');
+    settings = require('./settings'),
 
+    // Database is set at the package level
+    config = require(path.join('..', '..', 'packages', settings.app, 'config'));
 
 module.exports = {
   development: config.dbConfig,

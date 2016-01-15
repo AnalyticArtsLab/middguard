@@ -1,0 +1,12 @@
+{
+  "name": "Cycling Data Two",
+  "main": "CyclingDataViewTwo",
+  "version": "0.0.1",
+  "js": [
+    "topojson.v1.min.js",
+    "data-view-two.js"
+  ],
+  "css": [
+    "map.css"
+  ]
+}
