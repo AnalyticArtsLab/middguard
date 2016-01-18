@@ -1,7 +1,7 @@
 var Promise = require('bluebird'),
     bcrypt = Promise.promisifyAll(require('bcrypt')),
     Analyst = require('../models/analyst'),
-    io = require('../../app').get('io');
+    io = require('../../').get('io');
 
 exports.index = function (req, res) {
   res.render('auth');

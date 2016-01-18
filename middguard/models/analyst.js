@@ -1,5 +1,5 @@
 require('./message');
-var Bookshelf = require('../../app').get('bookshelf');
+var Bookshelf = require('../../').get('bookshelf');
 
 var Analyst = Bookshelf.Model.extend({
   tableName: 'analyst',

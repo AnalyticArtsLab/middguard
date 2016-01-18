@@ -1,4 +1,4 @@
-var Bookshelf = require('../../app').get('bookshelf');
+var Bookshelf = require('../../').get('bookshelf');
 
 var Relationship = Bookshelf.Model.extend({
   tableName: 'relationship'

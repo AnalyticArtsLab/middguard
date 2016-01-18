@@ -1,4 +1,4 @@
-var Bookshelf = require('../../app').get('bookshelf');
+var Bookshelf = require('../../').get('bookshelf');
 
 exports.readAll = function (data, callback) {
   var analytics = Bookshelf.collection('analytics');

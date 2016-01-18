@@ -11,7 +11,7 @@ module.exports = app;
 
 expressConfig(app);
 
-var server = http.createServer(app);
+var server = http.Server(app);
 var io = socketio(server);
 app.set('io', io);
 
@@ -28,8 +28,3 @@ require('./middguard/loaders/csv_loader')(app.get('bookshelf'));
 sessionSockets.on('connection', require('./middguard/socket'));
 
 require('./middguard/routes')(app);
-
-var port = process.env.PORT || 3000;
-server.listen(port, function () {
-  console.log('Listening on port %d...', port);
-});
