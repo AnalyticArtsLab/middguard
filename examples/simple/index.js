@@ -1,4 +1,4 @@
-var middguard = require('../../');
+var middguard = require('../..');
 
 var port = process.env.PORT || 3000;
 middguard.listen(port, function () {
