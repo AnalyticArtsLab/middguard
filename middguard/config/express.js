@@ -24,7 +24,8 @@ module.exports = function (app) {
   var cookieParser = connectCookieParser(settings.SECRET);
   app.set('cookieParser', cookieParser);
 
-  app.use(bodyParser());
+  app.use(bodyParser.urlencoded({extended: true}));
+  app.use(bodyParser.json());
   app.use(cookieParser);
   app.use(session({
     store: sessionStore,
