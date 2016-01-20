@@ -22,7 +22,6 @@ bookshelfConfig(middguard);
 
 require('./middguard/loaders/models_loader')(middguard);
 require('./middguard/loaders/analytics_loader')(middguard);
-require('./middguard/loaders/csv_loader')(middguard.get('bookshelf'));
 
 sessionSockets.on('connection', require('./middguard/socket'));
 
