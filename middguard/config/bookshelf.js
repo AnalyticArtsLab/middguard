@@ -1,8 +1,5 @@
-var env = require('./settings').env,
-    knexConfig = require('./knex')[env];
-
 module.exports = function (app) {
-  var knex = require('knex')(knexConfig);
+  var knex = require('knex')(app.get('knex config'));
 
   var Bookshelf = require('bookshelf')(knex);
 

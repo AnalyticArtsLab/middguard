@@ -1,7 +1,12 @@
 var middguard = require('../..');
 
-// only setting really required
-middguard.set('knex', require('./knexfile')[process.env.NODE_ENV]);
+var app = middguard({
+  // database
+  'knex config': require('./knexfile'),
+
+  // sessions
+  'secret key': process.env.SECRET_KEY || 'major 🔑'
+});
 
 var port = process.env.PORT || 3000;
 middguard.listen(port, function () {

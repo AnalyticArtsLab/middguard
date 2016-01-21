@@ -1,5 +1,5 @@
 var middguard = require('./middguard'),
-  auth = require('./auth');
+    auth = require('./auth');
 
 module.exports = function (app) {
   app.get('/', middguard);

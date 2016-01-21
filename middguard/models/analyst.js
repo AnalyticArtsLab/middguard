@@ -1,4 +1,6 @@
 require('./message');
+
+console.log(this.get);
 var Bookshelf = require('../../').get('bookshelf');
 
 var Analyst = Bookshelf.Model.extend({
