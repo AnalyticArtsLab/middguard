@@ -1,13 +1,12 @@
 'use strict';
 
-var express = require('express'),
-    _ = require('lodash'),
-    socketio = require('socket.io'),
-    SessionSockets = require('./middguard/config/session_socket'),
-    http = require('http'),
-    path = require('path'),
-    expressConfig = require('./middguard/config/express'),
-    bookshelfConfig = require('./middguard/config/bookshelf');
+/**
+ * Module dependencies.
+ */
+
+var _ = require('lodash');
+var express = require('express');
+var proto = require('./application');
 
 /**
  * Expose `createApplication()`.
@@ -29,44 +28,28 @@ function createApplication(settings) {
     app.set(key, value);
   });
 
-  expressConfig(app);
+  _.extend(app, proto);
 
-  var server = http.createServer(app);
-  var io = socketio(server);
-  app.set('io', io);
+  // expressConfig(app);
+  //
+  // var server = http.createServer(app);
+  // var io = socketio(server);
+  // app.set('io', io);
+  //
+  // var sessionSockets = new SessionSockets(io,
+  //   app.get('sessionStore'),
+  //   app.get('cookieParser'));
+  //
+  // bookshelfConfig(app);
+  //
+  // // require('./middguard/loaders/models_loader')(app);
+  // // require('./middguard/loaders/analytics_loader')(app);
+  //
+  // sessionSockets.on('connection', require('./middguard/socket'));
+  //
+  // require('./middguard/routes')(app);
 
-  var sessionSockets = new SessionSockets(io,
-    app.get('sessionStore'),
-    app.get('cookieParser'));
-
-  bookshelfConfig(app);
-
-  // require('./middguard/loaders/models_loader')(app);
-  // require('./middguard/loaders/analytics_loader')(app);
-
-  sessionSockets.on('connection', require('./middguard/socket'));
-
-  require('./middguard/routes')(app);
+  app.middguardInit();
 
   return app;
-};
-
-/**
- * Listen for connections.
- *
- * A node `http.Server` is returned, with this
- * application (which is a `Function`) as its
- * callback.
- *
- * This is the same as `express.listen`, but uses
- * the already created server, rather than creating
- * a new one in `listen`. The `http.Server` must
- * already be created to setup socket.io.
- *
- * @return {http.Server}
- * @public
- */
-
-exports.listen = function listen() {
-  return server.listen.apply(server, arguments);
 };
