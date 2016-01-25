@@ -1,14 +1,14 @@
 var fs = require('fs'),
     path = require('path'),
     settings = require('../config/settings');
-	
+
 module.exports = function(callback) {
   var modules = {
     names: [],
     js: [],
-    css: ['static/css/sql-styles.css'] //this file needs to end up on the client side
+    css: []
   };
-  
+
   var modulesCount;
   var push = Array.prototype.push;
   var hasOwnProperty = Object.prototype.hasOwnProperty;

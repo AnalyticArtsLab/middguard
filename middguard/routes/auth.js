@@ -1,13 +1,30 @@
+/**
+ * Module dependencies.
+ */
+
 var Promise = require('bluebird'),
     bcrypt = Promise.promisifyAll(require('bcrypt')),
-    Analyst = require('../models/analyst'),
-    io = require('../../').get('io');
+
+/**
+ * Logged out auth route.
+ *
+ * @this middguard
+ */
 
 exports.index = function (req, res) {
   res.render('auth');
 };
 
+/**
+ * Register a new user.
+ *
+ * @this middguard
+ */
+
 exports.register = function (req, res) {
+  var Analyst = this.get('bookshelf').model('Analyst');
+  var io = this.get('io');
+
   if (!req.body.username || !req.body.password || !req.body.passwordConfirm) {
     res.render('auth', {
       register: {
@@ -46,6 +63,12 @@ exports.register = function (req, res) {
   }
 };
 
+/**
+ * Login an existing user.
+ *
+ * @this middguard
+ */
+
 exports.login = function (req, res) {
   new Analyst({username: req.body.username}).fetch({require: true})
     .then(function (analyst) {
@@ -74,8 +97,14 @@ exports.login = function (req, res) {
     })
     .catch(function (error) {
       console.log(error);
-    })
+    });
 };
+
+/**
+ * Logout a logged in user.
+ *
+ * @this middguard
+ */
 
 exports.logout = function (req, res) {
   req.session.destroy(function (err) {

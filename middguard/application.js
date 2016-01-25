@@ -36,11 +36,9 @@ app.middguardInit = function () {
     this.get('cookieParser')
   );
 
-  sessionSockets.on('connection', require(''))
+  sessionSockets.on('connection', require('./socket'));
 
-
-  this.middguardRoutes();
-  this.middguardSockets();
+  require('./routes')(this);
 };
 
 /**
@@ -72,14 +70,6 @@ app.middguardMiddleware = function middguardMiddleware() {
 
   this.set('views', 'views');
   this.set('view engine', 'jade');
-};
-
-app.middguardRoutes = function middguardRoutes() {
-
-};
-
-app.middguardSockets = function middguardSockets() {
-
 };
 
 /**

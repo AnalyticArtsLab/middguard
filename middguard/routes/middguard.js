@@ -2,6 +2,12 @@ var modulesLoader = require('../loaders/modules_loader'),
     clientLibs = require('../config/client_libs'),
     appJs = require('../config/app_js');
 
+/**
+ * Expose the main, logged in route.
+ *
+ * @this middguard
+ */
+
 module.exports = function(req, res) {
   if (!req.session.user) return res.redirect('/auth');
 
