@@ -1,7 +1,7 @@
-var _ = require('lodash'),
-    Analyst = require('../models/analyst');
+var _ = require('lodash');
 
-exports.read = function (data, callback) {
+exports.read = function (socket, data, callback) {
+  var Analyst = socket.bookshelf.model('Analyst');
   var analystId = _.result(data, 'id');
 
   new Analyst({id: analystId}).fetch()
@@ -17,6 +17,8 @@ exports.read = function (data, callback) {
 };
 
 exports.readAll = function (data, callback) {
+  var Analyst = socket.bookshelf.model('Analyst');
+
   Analyst.fetchAll()
   .then(function (analysts) {
     callback(null, analysts.toJSON());

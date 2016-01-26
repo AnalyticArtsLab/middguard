@@ -8,7 +8,7 @@ var _ = require('lodash'),
     io = require('socket.io')();
 
 module.exports = function (socket) {
-  var Bookshelf = this.get('bookshelf');
+  var Bookshelf = socket.bookshelf;
 
   // Only set up sockets if we have a logged in user
   if (!socket.handshake.session.uid) return;
@@ -17,12 +17,12 @@ module.exports = function (socket) {
   socket.on('messages:create', _.curry(message.create)(socket))
   socket.on('messages:read', _.curry(message.readAll)(socket));
 
-  socket.on('modules:read', modules.readAll);
-  socket.on('models:read', models.readAll);
-  socket.on('analytics:read', analytics.readAll);
+  socket.on('modules:read', _.curry(modules.readAll)(socket));
+  socket.on('models:read', _.curry(models.readAll)(socket));
+  socket.on('analytics:read', _.curry(analytics.readAll)(socket));
 
-  socket.on('analyst:read', _.bind(analyst.read, socket));
-  socket.on('analysts:read', _.bind(analyst.readAll, socket));
+  socket.on('analyst:read', _.curry(analyst.read)(socket));
+  socket.on('analysts:read', _.curry(analyst.readAll)(socket));
 
   Bookshelf.collection('models').each(function (modelAttrs) {
     var modelName = modelAttrs.get('name');
@@ -32,9 +32,14 @@ module.exports = function (socket) {
     setupSocketEvents(socket, modelName, model);
   });
 
-  var Relationship = require('../models/relationship');
-  patchModelToEmit(socket, 'relationship', Relationship);
-  setupSocketEvents(socket, 'relationship', Relationship);
+  var Analyst = Bookshelf.model('Analyst');
+  patchModelToEmit(socket, 'analyst', Analyst);
+  setupSocketEvents(socket, 'analyst', Analyst);
+
+  // See #31
+  // var Relationship = require('../models/relationship');
+  // patchModelToEmit(socket, 'relationship', Relationship);
+  // setupSocketEvents(socket, 'relationship', Relationship);
 
   // Set up sockets to call analytics from client
   // Patched models will automatically emit create, update, and delete events

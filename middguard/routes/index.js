@@ -1,4 +1,5 @@
-var middguard = require('./middguard'),
+var _ = require('lodash'),
+    middguard = require('./middguard'),
     auth = require('./auth');
 
 /**
@@ -10,9 +11,6 @@ var middguard = require('./middguard'),
  */
 
 module.exports = function (app) {
-  middguard = middguard.bind(app);
-  auth = auth.map((fn) => fn.bind(app));
-
   app.get('/', middguard);
 
   app.get('/auth', auth.index);

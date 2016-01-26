@@ -1,7 +1,7 @@
-var modulesLoader = require('../loaders/modules_loader');
+// var modulesLoader = require('../loaders/modules_loader');
 
-exports.readAll = function (data, callback) {
-  modulesLoader(function (modules) {
-    callback(null, modules.names);
-  });
+exports.readAll = function (socket, data, callback) {
+  // modulesLoader(function (modules) {
+  //   callback(null, modules.names);
+  // });
 };

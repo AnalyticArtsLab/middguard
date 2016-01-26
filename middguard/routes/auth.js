@@ -3,12 +3,10 @@
  */
 
 var Promise = require('bluebird'),
-    bcrypt = Promise.promisifyAll(require('bcrypt')),
+    bcrypt = Promise.promisifyAll(require('bcrypt'));
 
 /**
  * Logged out auth route.
- *
- * @this middguard
  */
 
 exports.index = function (req, res) {
@@ -17,13 +15,10 @@ exports.index = function (req, res) {
 
 /**
  * Register a new user.
- *
- * @this middguard
  */
 
 exports.register = function (req, res) {
-  var Analyst = this.get('bookshelf').model('Analyst');
-  var io = this.get('io');
+  var Analyst = req.bookshelf.model('Analyst');
 
   if (!req.body.username || !req.body.password || !req.body.passwordConfirm) {
     res.render('auth', {
@@ -45,7 +40,6 @@ exports.register = function (req, res) {
         new Analyst({username: req.body.username, password: hash})
         .save()
         .then(function (analyst) {
-          io.sockets.emit('analysts:create', analyst);
           res.render('auth', {
             register: {message: 'Successfully registered!'}
           });
@@ -65,11 +59,11 @@ exports.register = function (req, res) {
 
 /**
  * Login an existing user.
- *
- * @this middguard
  */
 
 exports.login = function (req, res) {
+  var Analyst = req.bookshelf.model('Analyst');
+
   new Analyst({username: req.body.username}).fetch({require: true})
     .then(function (analyst) {
       return Promise.join(bcrypt.compareAsync(req.body.password, analyst.get('password')), analyst);
@@ -102,8 +96,6 @@ exports.login = function (req, res) {
 
 /**
  * Logout a logged in user.
- *
- * @this middguard
  */
 
 exports.logout = function (req, res) {

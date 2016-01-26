@@ -11,9 +11,10 @@ var http = require('http');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var express = require('express');
+var socketio = require('socket.io');
 var ios = require('socket.io-express-session');
-var KnexSessionStore = require('connect-session-knex')(session);
 var session = require('express-session');
+var KnexSessionStore = require('connect-session-knex')(session);
 
 /**
  * Application prototype methods to extend
@@ -33,7 +34,7 @@ app.middguardInit = function () {
   this.set('io', io);
   this.middguardSocketMiddleware();
 
-  io.on('connection', require('./socket').bind(this));
+  io.on('connection', require('./socket'));
 
   require('./routes')(this);
 };
@@ -45,18 +46,18 @@ app.middguardInit = function () {
  */
 
 app.middguardExpressMiddleware = function middguardExpressMiddleware() {
-  this.use('/static', express.static(path.join(__dirname, 'static')));
+  this.use('/static', express.static(path.join(__dirname, '..', 'static')));
 
   var knex = require('knex')(this.get('knex config'));
   var sessionStore = new KnexSessionStore({knex: knex});
   this.set('sessionStore', sessionStore);
 
-  var cookieParser = cookieParser(this.get('secret key'));
-  this.set('cookieParser', cookieParser);
+  // Set up ORM middlware
+  require('./config/bookshelf')(this);
 
+  this.use(cookieParser(this.get('secret key')));
   this.use(bodyParser.urlencoded({extended: true}));
   this.use(bodyParser.json());
-  this.use(cookieParser);
 
   this.set('session', session({
     store: sessionStore,
@@ -67,8 +68,7 @@ app.middguardExpressMiddleware = function middguardExpressMiddleware() {
   }));
   this.use(this.get('session'));
 
-
-  this.set('views', 'views');
+  this.set('views', path.join(__dirname, 'views'));
   this.set('view engine', 'jade');
 };
 
@@ -80,7 +80,7 @@ app.middguardSocketMiddleware = function middguardSocketMiddleware() {
 
   io.use((socket, next) => {
     socket.bookshelf = this.get('bookshelf');
-    return next();
+    next();
   });
 };
 

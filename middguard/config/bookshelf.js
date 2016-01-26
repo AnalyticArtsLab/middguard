@@ -23,5 +23,10 @@ module.exports = function (app) {
   Bookshelf.collection('analytics', new AnalyticsRegister());
   Bookshelf.collection('models', new ModelRegister());
 
+  app.use(function(req, res, next) {
+    req.bookshelf = Bookshelf;
+    next();
+  });
+
   app.set('bookshelf', Bookshelf);
 };
