@@ -2,7 +2,7 @@ module.exports = {
   'knex config': {
     client: 'sqlite3',
     connection: {
-      filename: 'simple.db'
+      filename: 'middguard_test.db'
     },
     pool: {
       min: 0,

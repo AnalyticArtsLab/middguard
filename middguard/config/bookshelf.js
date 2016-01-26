@@ -29,4 +29,7 @@ module.exports = function (app) {
   });
 
   app.set('bookshelf', Bookshelf);
+
+  require('../models/analyst')(app);
+  require('../models/message')(app);
 };
