@@ -11,6 +11,7 @@ var http = require('http');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var express = require('express');
+var ios = require('socket.io-express-session');
 var KnexSessionStore = require('connect-session-knex')(session);
 var session = require('express-session');
 
@@ -23,20 +24,16 @@ var app = exports = module.exports = {};
 
 
 app.middguardInit = function () {
-  this.middguardMiddleware();
+  this.middguardExpressMiddleware();
 
   var server = http.createServer(this);
   this.set('http server', server);
 
   var io = socketio(server);
-  app.set('io', io);
+  this.set('io', io);
+  this.middguardSocketMiddleware();
 
-  var sessionSockets = new SessionSockets(io,
-    this.get('sessionStore'),
-    this.get('cookieParser')
-  );
-
-  sessionSockets.on('connection', require('./socket'));
+  io.on('connection', require('./socket').bind(this));
 
   require('./routes')(this);
 };
@@ -47,7 +44,7 @@ app.middguardInit = function () {
  * @private
  */
 
-app.middguardMiddleware = function middguardMiddleware() {
+app.middguardExpressMiddleware = function middguardExpressMiddleware() {
   this.use('/static', express.static(path.join(__dirname, 'static')));
 
   var knex = require('knex')(this.get('knex config'));
@@ -60,16 +57,26 @@ app.middguardMiddleware = function middguardMiddleware() {
   this.use(bodyParser.urlencoded({extended: true}));
   this.use(bodyParser.json());
   this.use(cookieParser);
-  this.use(session({
+
+  this.set('session', session({
     store: sessionStore,
     secret: this.get('secret key'),
     resave: true,
     saveUninitialized: true,
     cookie: {maxAge: 7 * 24 * 60 * 60 * 1000}  // 1 week
   }));
+  this.use(this.get('session'));
+
 
   this.set('views', 'views');
   this.set('view engine', 'jade');
+};
+
+app.middguardSocketMiddleware = function middguardSocketMiddleware() {
+  var io = this.get('io');
+  var session = this.get('session');
+
+  io.use(ios(session));
 };
 
 /**

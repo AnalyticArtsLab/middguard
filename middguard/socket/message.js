@@ -3,6 +3,8 @@ var _ = require('lodash'),
     Message = require('../models/message');
 
 exports.create = function (data, callback, socket, session) {
+
+  
   if (_.result(data, 'analyst_id') !== session.user.id) {
     return callback(null, {'error': 'Request forbidden'})
   }

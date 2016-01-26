@@ -5,15 +5,13 @@ var _ = require('lodash'),
     message = require('./message'),
     models = require('./models'),
     modules = require('./modules'),
-    Bookshelf = require('../../').get('bookshelf'),
-    io = require('socket.io')()
-    fs = require('fs')
-    path = require('path')
-    csv_load = require('../loaders/csv_loader');
+    io = require('socket.io')();
 
-module.exports = function (err, socket, session) {
+module.exports = function (socket) {
+  var Bookshelf = this.get('bookshelf');
+
   // Only set up sockets if we have a logged in user
-  if (!session || !session.user) return;
+  if (!socket.handshake.session.uid) return;
 
   // Set up sockets middguard internal sockets
   socket.on('messages:create', socketContext(message.create, socket, session));
@@ -25,21 +23,6 @@ module.exports = function (err, socket, session) {
 
   socket.on('analyst:read', _.bind(analyst.read, socket));
   socket.on('analysts:read', _.bind(analyst.readAll, socket));
-
-  socket.on('filetransfer', function(data){
-    fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', data.filename), data.file, {encoding:'utf8'}, function(err){
-      if (err) console.log(Error(err));
-      var readStream = fs.createReadStream(path.join(__dirname, '..', 'loaders', 'data-load-files', 'load-config.json'), {encoding: 'utf8'});
-      readStream.on('data', function(moreData){
-        var configObj = JSON.parse(moreData);
-        configObj[data.filename] = {isNew: true}
-        fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', 'load-config.json'), JSON.stringify(configObj, null, '\t'), function(error){
-          if (error) console.log(Error(error));
-          csv_load(Bookshelf, data.modelname, data.filename);
-        });
-      });
-    });
-  });
 
   Bookshelf.collection('models').each(function (modelAttrs) {
     var modelName = modelAttrs.get('name');
