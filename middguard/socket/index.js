@@ -14,8 +14,8 @@ module.exports = function (socket) {
   if (!socket.handshake.session.uid) return;
 
   // Set up sockets middguard internal sockets
-  socket.on('messages:create', socketContext(message.create, socket, session));
-  socket.on('messages:read', _.bind(message.readAll, socket));
+  socket.on('messages:create', _.curry(message.create)(socket))
+  socket.on('messages:read', _.curry(message.readAll)(socket));
 
   socket.on('modules:read', modules.readAll);
   socket.on('models:read', models.readAll);

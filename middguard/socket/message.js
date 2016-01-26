@@ -2,9 +2,9 @@ var _ = require('lodash'),
     Analyst = require('../models/analyst'),
     Message = require('../models/message');
 
-exports.create = function (data, callback, socket, session) {
+exports.create = function (socket, data, callback) {
+  var session = socket.handshake.session;
 
-  
   if (_.result(data, 'analyst_id') !== session.user.id) {
     return callback(null, {'error': 'Request forbidden'})
   }
@@ -22,7 +22,7 @@ exports.create = function (data, callback, socket, session) {
     });
 };
 
-exports.readAll = function (data, callback) {
+exports.readAll = function (socket, data, callback) {
   Message.fetchAll({withRelated: ['analyst']})
     .then(function (messages) {
       callback(null, messages.toJSON());

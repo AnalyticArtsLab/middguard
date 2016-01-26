@@ -77,6 +77,11 @@ app.middguardSocketMiddleware = function middguardSocketMiddleware() {
   var session = this.get('session');
 
   io.use(ios(session));
+
+  io.use((socket, next) => {
+    socket.bookshelf = this.get('bookshelf');
+    return next();
+  });
 };
 
 /**
