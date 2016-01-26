@@ -5,7 +5,8 @@
   "license": "(c) 2014-2016 Middlebury College",
   "main": "index.js",
   "scripts": {
-    "lint": "jshint middguard/* index.js"
+    "lint": "jshint middguard/* index.js",
+    "test": "./node_modules/.bin/mocha"
   },
   "repository": {
     "type": "git",
