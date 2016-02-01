@@ -6,16 +6,17 @@ var analytics = require('../..').analytics;
 var csv = analytics();
 
 csv.configure = function () {
-  csv.inputs = {
+  this.inputs = {
     'mcdonalds': ['lat', 'lon', 'name', 'contact']
   }
 };
 
-csv.run = function() {
+csv.configure(() => {
+  csv.in('tweets', [])
+});
+
+csv.handle = function() {
   fs.createReadStream(path.join(__dirname, 'data', 'mcdonalds.csv')).pipe(saveCSV);
 };
 
 csv.save = function()
-
-exports.createTable = function(knex) {
-};

@@ -1,5 +1,16 @@
 var _ = require('lodash');
 
+module.exports = function() {
+  return new analytics();
+};
+
+function analytics() {
+  this.settings = {
+    inputs: {},
+    output: undefined
+  };
+};
+
 /**
  * Add an input to the analytics module.
  *
@@ -9,21 +20,59 @@ var _ = require('lodash');
  * a name with their corresponding connection (output
  * the previous module).
  *
- * @return `analytics.inputs`
+ * @return `analytics.settings.inputs`
  * @public
  */
 
-var input = function(collection, inputs) {
-  this.inputs[collection] = inputs;
+analytics.prototype.in = function(collection, inputs) {
+  if (!inputs) {
+    _.each(collection, (value, key) => {
+      this.settings.inputs[key] = value;
+    });
+  } else {
+    this.settings.inputs[collection] = inputs;
+  }
+
+  return this.get('inputs');
 };
 
-module.exports = function() {
-  var analytics = {
-    inputs: {},
-    outputs: {}
-  };
+/**
+ * Set the output collection for the analytics module.
+ *
+ * @return `analytics.settings.output`
+ * @public
+ */
 
-  _.extend(analytics, {input: input});
+analytics.prototype.out = function(collection) {
+  this.set('output', collection);
 
-  return analytics;
+  return this.get('output');
+};
+
+/**
+ * Set a setting on the analytics module.
+ *
+ * @public
+ */
+
+analytics.prototype.set = function(key, value) {
+  this.settings[key] = value;
+  return this;
+};
+
+/**
+ * Get a setting on the analytics module.
+ *
+ * @public
+ */
+analytics.prototype.get = function() {
+  return this.settings[key];
+};
+
+analytics.prototype.prepare = function() {
+  var middguard = this.get('middguard');
+
+  if (!middguard) {
+    raise new Error('Analytics require middguard to be set.');
+  }
 };
