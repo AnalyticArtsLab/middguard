@@ -18,8 +18,6 @@ module.exports = function (socket) {
   socket.on('messages:read', _.curry(message.readAll)(socket));
 
   socket.on('modules:read', _.curry(modules.readAll)(socket));
-  socket.on('models:read', _.curry(models.readAll)(socket));
-  socket.on('analytics:read', _.curry(analytics.readAll)(socket));
 
   socket.on('analyst:read', _.curry(analyst.read)(socket));
   socket.on('analysts:read', _.curry(analyst.readAll)(socket));
@@ -36,10 +34,13 @@ module.exports = function (socket) {
   patchModelToEmit(socket, 'analyst', Analyst);
   setupSocketEvents(socket, 'analyst', Analyst);
 
-  // See #31
-  // var Relationship = require('../models/relationship');
-  // patchModelToEmit(socket, 'relationship', Relationship);
-  // setupSocketEvents(socket, 'relationship', Relationship);
+  var Connection = Bookshelf.model('Connection');
+  patchModelToEmit(socket, 'connection', Connection);
+  setupSocketEvents(socket, 'connection', Connection);
+
+  var Node = Bookshelf.model('Node');
+  patchModelToEmit(socket, 'node', Node);
+  setupSocketEvents(socket, 'node', Node);
 
   // Set up sockets to call analytics from client
   // Patched models will automatically emit create, update, and delete events
@@ -141,11 +142,5 @@ function setupSocketEvents(socket, modelName, model) {
       .catch(function (error) {
         callback(error);
       });
-  });
-}
-
-function socketContext(fn, socket, session) {
-  return _.wrap(fn, function (func, data, callback) {
-    func(data, callback, socket, session);
   });
 }

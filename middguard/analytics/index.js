@@ -1,78 +1,46 @@
 var _ = require('lodash');
 
-module.exports = function() {
-  return new analytics();
-};
+var Analytics = function() {};
 
-function analytics() {
-  this.settings = {
-    inputs: {},
-    output: undefined
-  };
-};
+_.extend(Analytics.prototype, {
+  prepare: function(middguard, in, out) {
+    var Bookshelf = middguard.get('bookshelf');
+    var Connection = Bookshelf.model('Connections');
+  }
+});
 
-/**
- * Add an input to the analytics module.
- *
- * Inputs are grouped by the module they come from.
- * Each input group represents a different module.
- * Input group names and variables don't have to share
- * a name with their corresponding connection (output
- * the previous module).
- *
- * @return `analytics.settings.inputs`
- * @public
- */
+// Backbone.x.extend
+Analytics.extend = function(protoProps, staticProps) {
+  var parent = this;
+  var child;
 
-analytics.prototype.in = function(collection, inputs) {
-  if (!inputs) {
-    _.each(collection, (value, key) => {
-      this.settings.inputs[key] = value;
-    });
+  if (protoProps && _.has(protoProps, 'constructor')) {
+    child = protoProps.constructor;
   } else {
-    this.settings.inputs[collection] = inputs;
+    child = function() { return parent.apply(this, arguments); };
   }
 
-  return this.get('inputs');
-};
+  _.extend(child, parent, staticProps);
 
-/**
- * Set the output collection for the analytics module.
- *
- * @return `analytics.settings.output`
- * @public
- */
+  var Surrogate = function() { this.constructor = child; };
+  Surrogate.prototype = parent.prototype;
+  child.prototype = new Surrogate();
 
-analytics.prototype.out = function(collection) {
-  this.set('output', collection);
-
-  return this.get('output');
-};
-
-/**
- * Set a setting on the analytics module.
- *
- * @public
- */
-
-analytics.prototype.set = function(key, value) {
-  this.settings[key] = value;
-  return this;
-};
-
-/**
- * Get a setting on the analytics module.
- *
- * @public
- */
-analytics.prototype.get = function() {
-  return this.settings[key];
-};
-
-analytics.prototype.prepare = function() {
-  var middguard = this.get('middguard');
-
-  if (!middguard) {
-    raise new Error('Analytics require middguard to be set.');
+  if (protoProps) {
+    _.extend(child.prototype, protoProps);
   }
+
+  child.__super__ = parent.prototype;
+
+  return child;
 };
+
+// analytics.prototype.prepare = function() {
+//   var middguard = this.get('middguard');
+//
+//   if (!middguard) {
+//     raise new Error('Analytics require middguard to be set.');
+//   }
+// };
+
+module.exports = Analytics;

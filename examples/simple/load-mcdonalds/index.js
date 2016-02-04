@@ -1,18 +1,21 @@
 var fs = require('fs');
 var path = require('path');
 var csv = require('csv-parse');
-var analytics = require('../..').analytics;
 
-var csv = analytics();
+// MiddGuard the constructor, not the instance
+var middguard = require('../..');
 
-csv.configure = function () {
-  this.inputs = {
-    'mcdonalds': ['lat', 'lon', 'name', 'contact']
-  }
-};
+module.exports = middguard.Analytics.extend({
+  handle: function() {
 
-csv.configure(() => {
-  csv.in('tweets', [])
+  },
+
+
+}, {
+  inputs: {
+    'tweets': ['tweet', 'timestamp', '']
+  },
+  output: ['']
 });
 
 csv.handle = function() {

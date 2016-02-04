@@ -1,7 +1,13 @@
-// var modulesLoader = require('../loaders/modules_loader');
+/**
+ * Respond to the modules:read event from a connected client.
+ * Emits all registered analytics modules.
+ *
+ * @return undefined
+ * @private
+ */
 
 exports.readAll = function (socket, data, callback) {
-  // modulesLoader(function (modules) {
-  //   callback(null, modules.names);
-  // });
+  var register = socket.bookshelf.collection('analytics');
+
+  callback(null, register.toJSON());
 };

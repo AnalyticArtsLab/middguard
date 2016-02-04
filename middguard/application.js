@@ -85,6 +85,24 @@ app.middguardSocketMiddleware = function middguardSocketMiddleware() {
 };
 
 /**
+ * Register an analytics module with the `middguard` app.
+ *
+ * @return `middguard.Analytics`
+ * @public
+ */
+app.module = function module(name, ctor) {
+  var Bookshelf = this.get('bookshelf');
+  var AnalyticsModule = Bookshelf.model('AnalyticsModule');
+  var register = Bookshelf.collection('analytics');
+
+  register.add(new AnalyticsModule({
+    name: name,
+    constructor: ctor,
+    io: {inputs: ctor.inputs, outputs: ctor.outputs}
+  }));
+};
+
+/**
  * Listen for connections.
  *
  * A node `http.Server` is returned, with this
