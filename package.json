@@ -2,7 +2,8 @@
   "name": "middguard",
   "version": "0.0.1",
   "description": "Modular, multiperson analytics.",
-  "license": "(c) 2014-2016 Middlebury College",
+  "license": "UNLICENSED",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "lint": "jshint middguard/* index.js",
