@@ -8,7 +8,7 @@ module.exports = function (app) {
   Bookshelf.plugin('visibility');
 
   var AnalyticsModule = Bookshelf.Model.extend();
-  Bookshelf.model('AnalyticsModule', AnalyticsPackage);
+  Bookshelf.model('AnalyticsModule', AnalyticsModule);
 
   var AnalyticsRegister = Bookshelf.Collection.extend({
     model: AnalyticsModule
@@ -24,4 +24,7 @@ module.exports = function (app) {
 
   require('../models/analyst')(app);
   require('../models/message')(app);
+  require('../models/graph')(app);
+  require('../models/node')(app);
+  require('../models/connection')(app);
 };

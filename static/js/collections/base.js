@@ -1,11 +1,9 @@
 var middguard = middguard || {};
 
-(function () {
+(function() {
   'use strict';
 
-  var Analysts = Backbone.Collection.extend({
-    model: middguard.Analyst,
-    url: 'analysts',
+  middguard.BaseCollection = Backbone.Collection.extend({
     initialize: function() {
       _.bindAll(this, 'serverCreate');
       this.ioBind('create', this.serverCreate, this);
@@ -19,6 +17,4 @@ var middguard = middguard || {};
       }
     }
   });
-
-  middguard.Analysts = new Analysts();
 })();

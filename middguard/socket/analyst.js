@@ -16,7 +16,7 @@ exports.read = function (socket, data, callback) {
   });
 };
 
-exports.readAll = function (data, callback) {
+exports.readAll = function (socket, data, callback) {
   var Analyst = socket.bookshelf.model('Analyst');
 
   Analyst.fetchAll()

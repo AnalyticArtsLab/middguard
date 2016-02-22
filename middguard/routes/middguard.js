@@ -7,7 +7,17 @@
  */
 
 module.exports = function(req, res) {
-  if (!req.session.user) return res.redirect('/auth');
+  if (!req.session.user) {
+    return res.redirect('/auth');
+  }
+
+  res.render('index', {
+    js: [],
+    css: [],
+    appJs: require('../config/app_js'),
+    clientLibs: require('../config/client_libs'),
+    user: {id: req.session.user.id, username: req.session.user.username}
+  });
 
   // modulesLoader(function (modules) {
   //   res.render('index', {
@@ -18,6 +28,4 @@ module.exports = function(req, res) {
   //     user: {id: req.session.user.id, username: req.session.user.username}
   //   });
   // });
-
-  res.end('success');
 };

@@ -1,9 +1,7 @@
 var _ = require('lodash'),
     pluralize = require('pluralize'),
     analyst = require('./analyst'),
-    analytics = require('./analytics'),
     message = require('./message'),
-    models = require('./models'),
     modules = require('./modules'),
     io = require('socket.io')();
 
@@ -11,7 +9,7 @@ module.exports = function (socket) {
   var Bookshelf = socket.bookshelf;
 
   // Only set up sockets if we have a logged in user
-  if (!socket.handshake.session.uid) return;
+  if (!socket.handshake.session.user) return;
 
   // Set up sockets middguard internal sockets
   socket.on('messages:create', _.curry(message.create)(socket))
@@ -21,18 +19,22 @@ module.exports = function (socket) {
 
   socket.on('analyst:read', _.curry(analyst.read)(socket));
   socket.on('analysts:read', _.curry(analyst.readAll)(socket));
-
-  Bookshelf.collection('models').each(function (modelAttrs) {
-    var modelName = modelAttrs.get('name');
-    var model = Bookshelf.model(modelName);
-
-    patchModelToEmit(socket, modelName, model);
-    setupSocketEvents(socket, modelName, model);
-  });
+  //
+  // Bookshelf.collection('models').each(function (modelAttrs) {
+  //   var modelName = modelAttrs.get('name');
+  //   var model = Bookshelf.model(modelName);
+  //
+  //   patchModelToEmit(socket, modelName, model);
+  //   setupSocketEvents(socket, modelName, model);
+  // });
 
   var Analyst = Bookshelf.model('Analyst');
   patchModelToEmit(socket, 'analyst', Analyst);
   setupSocketEvents(socket, 'analyst', Analyst);
+
+  var Graph = Bookshelf.model('Graph');
+  patchModelToEmit(socket, 'graph', Graph);
+  setupSocketEvents(socket, 'graph', Graph);
 
   var Connection = Bookshelf.model('Connection');
   patchModelToEmit(socket, 'connection', Connection);
@@ -94,6 +96,7 @@ function setupSocketEvents(socket, modelName, model) {
     // created event and confuse the client.
     // Create is a special case since the model on the creating client doesn't
     // have an id yet.
+    console.log('saving', data);
     new model().save(data, {clientCreate: true})
       .then(function (newModel) {
         callback(null, newModel.toJSON());

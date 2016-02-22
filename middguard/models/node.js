@@ -11,6 +11,10 @@ module.exports = function(app) {
   var Node = Bookshelf.Model.extend({
     tableName: 'node',
 
+    initialize: function() {
+      this.on('saving', this.createTableName);
+    },
+
     connections: function() {
       return this.hasMany('Connection');
     },
@@ -27,6 +31,15 @@ module.exports = function(app) {
       };
 
       return statuses[this.get('status')];
+    },
+
+    createTableName: function() {
+      return this.collection()
+      .where({module: this.get('module')})
+      .count()
+      .then(count => {
+        return this.set('table', count + 1);
+      });
     }
   });
 

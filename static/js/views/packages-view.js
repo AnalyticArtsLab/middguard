@@ -28,8 +28,6 @@ var middguard = middguard || {};
       middguard.PackagedModules.fetch({reset: true});
       middguard.PackagedModels.fetch({reset: true});
       middguard.PackagedAnalytics.fetch({reset: true});
-
-      middguard.Relationships.fetch();
     },
     render: function () {
       this.$el.html(this.template());
