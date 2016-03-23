@@ -8,7 +8,8 @@ var app = middguard({
   'secret key': process.env.SECRET_KEY || 'major 🔑'
 });
 
-// app.module('load-mcdonalds', require('./load-mcdonalds'));
+app.module('read-tweets', require.resolve('./read-tweets'));
+app.module('count-hashtags', require.resolve('./count-hashtags'));
 
 var port = process.env.PORT || 3000;
 app.listen(port, function () {

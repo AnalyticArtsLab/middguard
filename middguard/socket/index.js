@@ -3,6 +3,7 @@ var _ = require('lodash'),
     analyst = require('./analyst'),
     message = require('./message'),
     modules = require('./modules'),
+    node = require('./node'),
     io = require('socket.io')();
 
 module.exports = function (socket) {
@@ -12,21 +13,17 @@ module.exports = function (socket) {
   if (!socket.handshake.session.user) return;
 
   // Set up sockets middguard internal sockets
-  socket.on('messages:create', _.curry(message.create)(socket))
-  socket.on('messages:read', _.curry(message.readAll)(socket));
+  socket.on('messages:create', (data, cb) => message.create(socket, data, cb));
+  socket.on('messages:read', (data, cb) => message.readAll(socket, data, cb));
 
-  socket.on('modules:read', _.curry(modules.readAll)(socket));
+  socket.on('modules:read', (data, cb) => modules.readAll(socket, data, cb));
 
-  socket.on('analyst:read', _.curry(analyst.read)(socket));
-  socket.on('analysts:read', _.curry(analyst.readAll)(socket));
-  //
-  // Bookshelf.collection('models').each(function (modelAttrs) {
-  //   var modelName = modelAttrs.get('name');
-  //   var model = Bookshelf.model(modelName);
-  //
-  //   patchModelToEmit(socket, modelName, model);
-  //   setupSocketEvents(socket, modelName, model);
-  // });
+  socket.on('analyst:read', (data, cb) => analyst.read(socket, data, cb));
+  socket.on('analysts:read', (data, cb) => analyst.readAll(socket, data, cb));
+
+  socket.on('node:connect', (data, cb) => node.connect(socket, data, cb));
+  socket.on('node:create', (data, cb) => node.create(socket, data, cb));
+  socket.on('nodes:read', (data, cb) => node.readAll(socket, data, cb));
 
   var Analyst = Bookshelf.model('Analyst');
   patchModelToEmit(socket, 'analyst', Analyst);
@@ -39,10 +36,6 @@ module.exports = function (socket) {
   var Connection = Bookshelf.model('Connection');
   patchModelToEmit(socket, 'connection', Connection);
   setupSocketEvents(socket, 'connection', Connection);
-
-  var Node = Bookshelf.model('Node');
-  patchModelToEmit(socket, 'node', Node);
-  setupSocketEvents(socket, 'node', Node);
 
   // Set up sockets to call analytics from client
   // Patched models will automatically emit create, update, and delete events
@@ -96,7 +89,6 @@ function setupSocketEvents(socket, modelName, model) {
     // created event and confuse the client.
     // Create is a special case since the model on the creating client doesn't
     // have an id yet.
-    console.log('saving', data);
     new model().save(data, {clientCreate: true})
       .then(function (newModel) {
         callback(null, newModel.toJSON());
@@ -140,7 +132,7 @@ function setupSocketEvents(socket, modelName, model) {
         callback(null, fetchedModel.toJSON());
       })
       .catch(model.NotFoundError, function () {
-        callback(null, {'error': 'Model ' + modelName + ' not found.'});
+        callback({'error': `Model ${modelName} not found.`});
       })
       .catch(function (error) {
         callback(error);

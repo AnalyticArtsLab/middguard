@@ -5,12 +5,7 @@ var middguard = middguard || {};
 
   var Nodes = middguard.BaseCollection.extend({
     model: middguard.Node,
-    url: 'node',
-
-    connectTo: function(other) {
-      var outputs = this.get('outputs');
-      var inputs = other.
-    }
+    url: 'nodes'
   });
 
   middguard.Nodes = new Nodes();

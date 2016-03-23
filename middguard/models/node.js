@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Register the `Node` model in the Bookshelf registry.
  *
@@ -12,7 +14,8 @@ module.exports = function(app) {
     tableName: 'node',
 
     initialize: function() {
-      this.on('saving', this.createTableName);
+      // console.log(this);
+      // this.on('saving', this.createTableName);
     },
 
     connections: function() {
@@ -40,6 +43,21 @@ module.exports = function(app) {
       .then(count => {
         return this.set('table', count + 1);
       });
+    },
+
+    /**
+     * Set an input group on the node's connections.
+     * The text column "connections" remains in its stringified JSON state.
+     *
+     * @param {String} inputGroup Input group to set.
+     * @param {Object} connections Connections to set for `inputGroup`.
+     * @return this
+     */
+    setInputGroup: function(inputGroup, connections) {
+      let groups = JSON.parse(this.get('connections')) || {};
+      groups[inputGroup] = connections;
+
+      return this.set('connections', JSON.stringify(groups));
     }
   });
 

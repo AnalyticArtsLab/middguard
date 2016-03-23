@@ -23,11 +23,6 @@ exports.up = function(knex, Promise) {
     table.string('module');
     table.string('table');
     table.integer('status');
-  })
-  .createTable('connection', function (table) {
-    table.increments('id').primary();
-    table.integer('in').references('node.id');
-    table.integer('out').references('node.id');
     table.string('connections');
   });
 };
