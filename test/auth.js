@@ -2,6 +2,7 @@ const request = require('supertest');
 const io = require('socket.io-client');
 
 const fs = require('fs');
+const assert = require('assert');
 
 const middguard = require('..');
 const settings = require('./settings');
@@ -22,6 +23,12 @@ describe('middguard', function() {
     fs.unlink(settings['knex config'].connection.filename, done);
   });
 
+  afterEach(function(done) {
+    knex('analyst')
+    .del()
+    .then(() => done());
+  });
+
   it('should redirect to auth when logged out', function(done) {
     request(app)
     .get('/')
@@ -37,11 +44,36 @@ describe('middguard', function() {
     .expect(200, done);
   });
 
-  it('should redirect a logged in user to the investigation', function(done) {
+  it('should not login an unregistered user', function(done) {
     request(app)
     .post('/auth/login')
+    .send({username: 'idontexist'})
+    .send({password: 'test'})
+    .expect(200)
+    .end(function(err, res) {
+      if (err) return done(err);
+
+      const includedText = '<div class="error">User not found!</div>';
+      assert.ok(res.text.indexOf(includedText) > -1);
+      done();
+    });
+  });
+
+  it('should redirect a logged in user to the investigation', function(done) {
+    request(app)
+    .post('/auth/register')
     .send({username: 'danasilver'})
     .send({password: 'key up'})
-    .expect(302, done);
+    .send({passwordConfirm: 'key up'})
+    .expect(200)
+    .end(function(err) {
+      if (err) return done(err);
+
+      request(app)
+      .post('/auth/login')
+      .send({username: 'danasilver'})
+      .send({password: 'key up'})
+      .expect(302, done);
+    });
   });
 });
