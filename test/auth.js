@@ -1,14 +1,17 @@
-var middguard = require('..');
-var settings = require('./settings');
-var request = require('supertest');
-var knex = require('knex')(settings['knex config']);
-var fs = require('fs');
+const request = require('supertest');
+const io = require('socket.io-client');
+
+const fs = require('fs');
+
+const middguard = require('..');
+const settings = require('./settings');
+const knex = require('knex')(settings['knex config']);
 
 var app;
 
 describe('middguard', function() {
   before(function(done) {
-    knex.migrate.latest({databse: settings['knex config']})
+    knex.migrate.latest({directory: `${__dirname}/../middguard/migrations`})
     .spread(function(batchNo, log) {
       app = middguard(require('./settings'));
       done();
@@ -32,5 +35,13 @@ describe('middguard', function() {
     .send({password: 'key up'})
     .send({passwordConfirm: 'key up'})
     .expect(200, done);
+  });
+
+  it('should redirect a logged in user to the investigation', function(done) {
+    request(app)
+    .post('/auth/login')
+    .send({username: 'danasilver'})
+    .send({password: 'key up'})
+    .expect(302, done);
   });
 });
