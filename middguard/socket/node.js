@@ -65,7 +65,10 @@ exports.connect = function(socket, data, callback) {
     inputNode.setInputGroup(data.inputGroup, connections);
     return inputNode.save();
   })
-  .then(callback);
+  .then(node => {
+    socket.emit('node:update', node.toJSON());
+  })
+  .catch(callback);
 };
 
 /**

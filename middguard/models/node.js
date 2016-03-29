@@ -14,12 +14,7 @@ module.exports = function(app) {
     tableName: 'node',
 
     initialize: function() {
-      // console.log(this);
-      // this.on('saving', this.createTableName);
-    },
-
-    connections: function() {
-      return this.hasMany('Connection');
+      this.on('creating', this.createTableName);
     },
 
     graph: function() {
@@ -37,11 +32,11 @@ module.exports = function(app) {
     },
 
     createTableName: function() {
-      return this.collection()
-      .where({module: this.get('module')})
+      return Node
+      .where('module', this.get('module'))
       .count()
       .then(count => {
-        return this.set('table', count + 1);
+        return this.set('table', `${this.get('module')}_${count + 1}`);
       });
     },
 
