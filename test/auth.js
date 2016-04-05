@@ -1,5 +1,4 @@
 const request = require('supertest');
-const io = require('socket.io-client');
 
 const fs = require('fs');
 const assert = require('assert');
