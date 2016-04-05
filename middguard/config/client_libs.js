@@ -10,6 +10,7 @@ module.exports = {
     'backbone/backbone.js',
     'backbone.iobind/dist/backbone.iosync.js',
     'backbone.iobind/dist/backbone.iobind.js',
+    'backbone-namespaced-view/index.js',
     'bootstrap/dist/js/bootstrap.js'
   ],
   css: [

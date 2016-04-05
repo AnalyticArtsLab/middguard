@@ -24,6 +24,18 @@ exports.readAll = function(socket, data, callback) {
   .catch(callback);
 };
 
+exports.update = function(socket, data, callback) {
+  var Node = socket.bookshelf.model('Node');
+
+  new Node({id: data.id})
+  .save(_.omit(data, 'id'), {patch: true})
+  .then(function(node) {
+    callback(null, node.toJSON());
+    socket.broadcast.emit('node:update', node.toJSON());
+  })
+  .catch(callback);
+};
+
 /* Connect data.inputNode at data.inputGroup to data.outputNode.
  */
 exports.connect = function(socket, data, callback) {

@@ -24,6 +24,7 @@ module.exports = function (socket) {
   socket.on('node:connect', (data, cb) => node.connect(socket, data, cb));
   socket.on('nodes:create', (data, cb) => node.create(socket, data, cb));
   socket.on('nodes:read', (data, cb) => node.readAll(socket, data, cb));
+  socket.on('nodes:update', (data, cb) => node.update(socket, data, cb));
 
   var Graph = Bookshelf.model('Graph');
   patchModelToEmit(socket, 'graph', Graph);

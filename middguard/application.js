@@ -95,9 +95,14 @@ app.module = function module(name, requirePath) {
   var AnalyticsModule = Bookshelf.model('AnalyticsModule');
   var register = Bookshelf.collection('analytics');
 
+  var attributes = require(requirePath);
+
   register.add(new AnalyticsModule({
     name: name,
-    requirePath: requirePath
+    requirePath: requirePath,
+    displayName: attributes.displayName,
+    inputs: attributes.inputs,
+    outputs: attributes.outputs
   }));
 };
 

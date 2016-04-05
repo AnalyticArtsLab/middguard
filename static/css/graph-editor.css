@@ -1,0 +1,30 @@
+.middguard-graph-editor {
+  height: 100%;
+  width: 500px;
+  border-right: 2px solid #e5e5e5;
+}
+
+.middguard-graph-editor .header {
+  border-bottom: 2px solid #e5e5e5;
+  padding: 10px;
+}
+
+.middguard-graph-editor .modules-list {
+  list-style: none;
+  padding: 0;
+}
+
+.middguard-graph-editor .modules-list li {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.middguard-graph-editor .graph {
+  width: 500px;
+}
+
+.middguard-graph-editor .node circle {
+  stroke: steelblue;
+  stroke-width: 2px;
+  fill: #fff;
+}
