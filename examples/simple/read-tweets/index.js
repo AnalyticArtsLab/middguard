@@ -8,3 +8,5 @@ exports.outputs = [
   'tweet',
   'timestamp'
 ];
+
+exports.displayName = "Read Tweets";

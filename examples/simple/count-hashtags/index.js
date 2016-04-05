@@ -9,3 +9,5 @@ exports.outputs = [
   'hashtag',
   'count'
 ];
+
+exports.displayName = 'Count Hashtags';
