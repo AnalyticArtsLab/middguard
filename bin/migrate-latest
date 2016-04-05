@@ -13,7 +13,7 @@ program
   .parse(process.argv);
 
 var internalMigrationsConfig = {
-  directory: path.join(__dirname, '../middguard/migrate/migrations')
+  directory: path.join(__dirname, '../middguard/migrations')
 };
 
 function initKnex(program) {
