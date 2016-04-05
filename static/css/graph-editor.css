@@ -20,11 +20,19 @@
 }
 
 .middguard-graph-editor .graph {
-  width: 500px;
+  overflow: hidden;
 }
 
-.middguard-graph-editor .node circle {
+.middguard-graph-editor .node .outline {
   stroke: steelblue;
   stroke-width: 2px;
   fill: #fff;
+}
+
+.connector.input {
+  fill: rgb(35, 171, 36);
+}
+
+.connector.output {
+  fill: rgb(195, 63, 63);
 }

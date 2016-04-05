@@ -25,9 +25,16 @@ var middguard = middguard || {};
       this.$el.html(this.template(this.graph.toJSON()));
       d3.select(this.el).append('svg')
           .attr('class', 'graph')
-          .attr('height', $(window).height() - this.$('.header').height());
+          .attr('width', 500);
+
+      this.resizeEditor();
 
       return this;
+    },
+
+    resizeEditor: function() {
+      d3.select(this.el).select('svg')
+          .attr('height', $(window).height() - this.$('.header').outerHeight());
     },
 
     addModules: function() {
@@ -37,6 +44,8 @@ var middguard = middguard || {};
         var view = new ModuleListItemView({model: model, graph: this.graph});
         this.$('.modules-list').append(view.render().el);
       }.bind(this));
+
+      this.resizeEditor();
     },
 
     addNode: function(node) {
@@ -44,7 +53,7 @@ var middguard = middguard || {};
         return;
       }
 
-      var view = new NodeView({model: node});
+      var view = new NodeView({model: node, editorElement: this.el});
       this.$('.graph').append(view.render().el);
     },
 
@@ -87,7 +96,13 @@ var middguard = middguard || {};
 
     className: 'node',
 
-    initialize: function() {
+    initialize: function(options) {
+      this.editor = options.editorElement;
+      this.model = options.model;
+      this.module = middguard.PackagedModules.findWhere({
+        name: this.model.get('module')
+      });
+
       this.d3el = d3.select(this.el)
           .datum(this.model.position());
 
@@ -104,11 +119,13 @@ var middguard = middguard || {};
       var y = this.model.position().y;
 
       this.d3el
+          .datum(this.model.position())
           .attr('transform', 'translate(' + x + ',' + y + ')')
           .call(this.drag);
 
       var r = this.model.get('radius');
       this.d3el.append('circle')
+          .attr('class', 'outline')
           .attr('r', r)
           .attr('cx', r)
           .attr('cy', r);
@@ -117,7 +134,21 @@ var middguard = middguard || {};
           .attr('x', r)
           .attr('y', r)
           .style('text-anchor', 'middle')
-          .text(this.model.get('module'));
+          .text(this.module.get('displayName'));
+
+      if (this.module.get('inputs').length)
+        this.d3el.append('circle')
+            .attr('class', 'connector input')
+            .attr('r', 5)
+            .attr('cx', r)
+            .attr('cy', 10);
+
+      if (this.module.get('outputs').length)
+        this.d3el.append('circle')
+            .attr('class', 'connector output')
+            .attr('r', 5)
+            .attr('cx', r)
+            .attr('cy', 2 * r - 10);
 
       return this;
     },
@@ -125,6 +156,16 @@ var middguard = middguard || {};
     dragged: function(d) {
       var x = d3.event.x;
       var y = d3.event.y;
+      var r = this.model.get('radius');
+
+      var svg = d3.select(this.editor).select('svg');
+      var bounds = {x: svg.attr('width'), y: svg.attr('height')};
+
+      // Prevent element from being dragged out bounds
+      if (x < 0) x = 0;
+      if (y < 0) y = 0;
+      if (y + r * 2 > bounds.y) y = bounds.y - r * 2;
+      if (x + r * 2 > bounds.x) x = bounds.x - r * 2;
 
       this.model.position(x, y);
       d3.select(this.el)
