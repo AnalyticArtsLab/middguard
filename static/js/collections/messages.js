@@ -35,7 +35,7 @@ var middguard = middguard || {};
 				nativeHasOwnProperty = Object.prototype.hasOwnProperty,
 					minTS, maxTS,
 						TSList = [];
-					
+
       this.each(function (message) {
 				//run through once to find the minimum timestamp, maximum timestamp, and range
         var timestamp = new Date(message.get('timestamp'));
@@ -59,13 +59,13 @@ var middguard = middguard || {};
 				//initialize all buckets to zero
 				stats[new Date(minTS.getTime()+(interval*i))] = 0;
 			}
-			
+
 			TSList.forEach(function(curTS){
 				//put each timestamp in its correct bucket
 				var bucket = Math.min(4, Math.floor((curTS.getTime()-minTS.getTime())/interval));
 				stats[new Date(minTS.getTime()+(interval*bucket))] += 1;
 			});
-			
+
       return d3.entries(stats);
     }
   });

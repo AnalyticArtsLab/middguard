@@ -22,31 +22,23 @@ module.exports = function (socket) {
   socket.on('analysts:read', (data, cb) => analyst.readAll(socket, data, cb));
 
   socket.on('node:connect', (data, cb) => node.connect(socket, data, cb));
-  socket.on('node:create', (data, cb) => node.create(socket, data, cb));
+  socket.on('nodes:create', (data, cb) => node.create(socket, data, cb));
   socket.on('nodes:read', (data, cb) => node.readAll(socket, data, cb));
-
-  var Analyst = Bookshelf.model('Analyst');
-  patchModelToEmit(socket, 'analyst', Analyst);
-  setupSocketEvents(socket, 'analyst', Analyst);
 
   var Graph = Bookshelf.model('Graph');
   patchModelToEmit(socket, 'graph', Graph);
   setupSocketEvents(socket, 'graph', Graph);
 
-  var Connection = Bookshelf.model('Connection');
-  patchModelToEmit(socket, 'connection', Connection);
-  setupSocketEvents(socket, 'connection', Connection);
-
   // Set up sockets to call analytics from client
   // Patched models will automatically emit create, update, and delete events
-  Bookshelf.collection('analytics').each(function (analyticsAttrs) {
-    var name = analyticsAttrs.get('name');
-    var requirePath = analyticsAttrs.get('requirePath');
-
-    socket.on('analytics:' + name, function (data, callback) {
-      require(requirePath)(Bookshelf, data);
-    });
-  });
+  // Bookshelf.collection('analytics').each(function (analyticsAttrs) {
+  //   var name = analyticsAttrs.get('name');
+  //   var requirePath = analyticsAttrs.get('requirePath');
+  //
+  //   socket.on('analytics:' + name, function (data, callback) {
+  //     require(requirePath)(Bookshelf, data);
+  //   });
+  // });
 };
 
 function patchModelToEmit(socket, modelName, model) {
@@ -64,7 +56,7 @@ function patchModelToEmit(socket, modelName, model) {
         // The create listener will take care of this.
         if (!options.clientCreate) {
           io.emit(pluralize(modelName) + ':create', model.toJSON());
-        }else{
+        } else {
           socket.broadcast.emit(pluralize(modelName) + ':create', model.toJSON());
         }
       });
@@ -84,7 +76,7 @@ function patchModelToEmit(socket, modelName, model) {
 
 function setupSocketEvents(socket, modelName, model) {
   // Set up create, read, update, delete sockets for each model
-  socket.on(modelName + ':create', function (data, callback) {
+  socket.on(pluralize(modelName) + ':create', function (data, callback) {
     // Pass clientCreate to save so the model won't emit anything on the
     // created event and confuse the client.
     // Create is a special case since the model on the creating client doesn't
@@ -92,7 +84,6 @@ function setupSocketEvents(socket, modelName, model) {
     new model().save(data, {clientCreate: true})
       .then(function (newModel) {
         callback(null, newModel.toJSON());
-        socket.broadcast.emit(modelName + ':create', newModel.toJSON());
       })
       .catch(function (error) {
         throw new Error(error);

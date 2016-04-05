@@ -10,8 +10,9 @@ module.exports = {
     'backbone/backbone.js',
     'backbone.iobind/dist/backbone.iosync.js',
     'backbone.iobind/dist/backbone.iobind.js',
-    'jQuery-contextMenu/src/jquery.contextMenu.js',
-    'jQuery-contextMenu/src/jquery.ui.position.js',
-    'jquery-ui/jquery-ui.js'
+    'bootstrap/dist/js/bootstrap.js'
+  ],
+  css: [
+    'bootstrap/dist/css/bootstrap.css'
   ]
 };

@@ -5,7 +5,7 @@ var middguard = middguard || {};
 
   var Graphs = middguard.BaseCollection.extend({
     model: middguard.Graph,
-    url: 'graph'
+    url: 'graphs'
   });
 
   middguard.Graphs = new Graphs();

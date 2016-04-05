@@ -1,0 +1,95 @@
+#middguard-header {
+  float: left;
+  width: 300px;
+  height: 100%;
+  position: fixed;
+  border-right: 1px solid #999;
+  background-color: #e9eaed;
+  overflow: scroll;
+  z-index: 10000;
+}
+
+#middguard-header h1,
+#middguard-header h2,
+#middguard-header h3 {
+  padding: 0 20px;
+}
+
+#middguard-header .title {
+  text-align: center;
+}
+
+#middguard-header .nav li {
+  width: 98px;
+  text-align: center;
+}
+
+#middguard-header .nav li a {
+  border-radius: 0;
+}
+
+#middguard-header .toggle-panel {
+  padding: 10px;
+  height: calc(100% - 109px);
+}
+
+#middguard-header .logout input {
+  width: 100%;
+}
+
+#middguard-header #observations {
+  height: 100%;
+}
+
+#middguard-header .log-messages {
+  height: calc(100% - 28px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #e9eaed;
+}
+
+#middguard-header .log-new-message {
+  width: 100%;
+  height: 28px;
+  outline: none;
+  border: none;
+  border-top: 1px solid #999;
+  padding: 7px 5px;
+  resize: none;
+  overflow: hidden;
+  box-shadow: 0 1px #e6e6e6 inset;
+  font-size: 13px;
+}
+
+.middguard-obs-message {
+  width: calc(100% - 6px);
+  background-color: #fff;
+  padding: 3px 5px;
+  margin: 3px;
+  border: 1px solid #e6e6e6;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.middguard-obs-message.sent-by-self {
+  background-color: #dbedfe;
+  border-color: #acd6fd;
+}
+
+.middguard-obs-message-meta {
+  padding: 3px 0;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.middguard-obs-message.sent-by-self .middguard-obs-message-meta {
+  border-bottom-color: #acd6fd;
+}
+
+.middguard-obs-message-meta span {
+  float: right;
+  cursor: pointer;
+}
+
+.middguard-obs-message-content {
+  padding: 3px 0;
+}

@@ -3,12 +3,17 @@ html(lang='en-us')
   head
     meta(charset='utf-8')
     title MiddGuard
+    each link in clientLibs.css
+      link(rel='stylesheet', href=clientLibs.prefix + '/' + link)
     link(rel='stylesheet', href='static/css/base.css')
-    link(rel='stylesheet', href='static/bower_components/jQuery-contextMenu/src/jquery.contextMenu.css')
-    link(rel='stylesheet', href='static/bower_components/jquery-ui/themes/smoothness/jquery-ui.css')
+    link(rel='stylesheet', href='static/css/sidebar.css')
+    link(rel='stylesheet', href='static/css/graph-editor.css')
     each link in css
       link(rel='stylesheet', href=link)
   body
+    include ./sidebar.jade
+    include ./graphs-panel-template
+    include ./graph-editor-template
     script.
       var middguard = middguard || {};
       middguard.user = {id: #{user.id}, username: '#{user.username}'};
@@ -18,3 +23,5 @@ html(lang='en-us')
       script(src=appJs.prefix + '/' + script)
     each script in js
       script(src=script)
+    div#middguard-header
+    div.middguard-views

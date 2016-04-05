@@ -3,33 +3,38 @@ var middguard = middguard || {};
 (function () {
   'use strict';
 
-  middguard.ObsView = Backbone.View.extend({
-    id: 'middguard-obs',
+  middguard.ObservationsView = Backbone.View.extend({
+    id: 'observations',
+
     template: _.template(
-      '<div id="middguard-obs-log"></div>' +
-      '<textarea id="middguard-obs-input"></textarea>'
+      '<div class="log-messages"></div>' +
+      '<textarea class="log-new-message" placeholder="Record an observation..."></textarea>'
     ),
+
     events: {
-      'keydown #middguard-obs-input': 'sendMessage',
+      'keydown .log-new-message': 'sendMessage',
       'click': 'focusInput'
     },
-    initialize: function () {
-      this.collapsed = false;
 
+    initialize: function () {
       _.bindAll(this, 'addOne', 'addAll');
+
       this.listenTo(middguard.Messages, 'add', this.addOne);
       this.listenTo(middguard.Messages, 'reset', this.addAll);
+
       middguard.Analysts.fetch();
       middguard.Messages.fetch({reset: true});
-      this.$el.css('display', 'none');
     },
+
     render: function () {
       this.$el.html(this.template());
-      this.$obslog = this.$('#middguard-obs-log');
-      this.$collapse = this.$('#middguard-obs-collapse');
-      this.$input = this.$('#middguard-obs-input');
+
+      this.$log = this.$('.log-messages');
+      this.$input = this.$('.log-new-message');
+
       return this;
     },
+
     messageContents: function () {
       return {
         content: this.$input.val().trim(),
@@ -38,24 +43,29 @@ var middguard = middguard || {};
         state: JSON.stringify(middguard.state.toJSON())
       }
     },
+
     addOne: function (message) {
       var view = new middguard.ObsMessageView({model: message});
-      this.$obslog.append(view.render().el);
+      this.$log.append(view.render().el);
     },
+
     addAll: function () {
       middguard.Messages.each(this.addOne);
     },
+
     sendMessage: function (event) {
       if (event.which === 13 && !event.shiftKey) {
         event.preventDefault();
+
         var message = middguard.Messages.create(this.messageContents());
         this.$input.val('');
+
 				//scroll to bottom when a message is entered
-				var messageHeight = document.getElementsByClassName('middguard-obs-message')[0].clientHeight;
-				document.getElementById('middguard-obs-log').scrollTop = document.getElementsByClassName('middguard-obs-message').length*messageHeight;
+				this.$log.scrollTop(this.$log[0].scrollHeight);
         return false;
       }
     },
+
     focusInput: function () {
       this.$input.focus();
     }
@@ -65,8 +75,10 @@ var middguard = middguard || {};
     tagName: 'div',
     className: 'middguard-obs-message',
     template: _.template(
-      '<div class="middguard-obs-message-meta"><%= analyst %>' +
-      '<span class="timeOrRestore"><%= time %></span></div>' +
+      '<div class="middguard-obs-message-meta">' +
+        '<%= analyst %>' +
+        '<span class="timeOrRestore"><%= time %></span>' +
+      '</div>' +
       '<div class="middguard-obs-message-content"><%= content %></div>'
     ),
     events: {
