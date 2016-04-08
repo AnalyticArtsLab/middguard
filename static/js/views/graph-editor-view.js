@@ -153,13 +153,14 @@ var middguard = middguard || {};
           .attr('transform', 'translate(' + handle.x + ',' + handle.y + ')')
           .attr('d', d3.svg.symbol().type('cross').size(150));
 
+      var inputs = this.module.get('inputs');
       this.d3el.selectAll('.input')
-          .data(this.module.get('inputs'))
+          .data(inputs)
         .enter().append('circle')
           .attr('class', 'connector input')
           .attr('r', 5)
-          .attr('cx', (d, i) => { return this.inputPosition(i, r).x; })
-          .attr('cy', (d, i) => { return this.inputPosition(i, r).y; })
+          .attr('cx', (d, i) => this.inputPosition(i, r, inputs.length).x)
+          .attr('cy', (d, i) => this.inputPosition(i, r, inputs.length).y)
 
       if (this.module.get('outputs').length)
         this.d3el.append('circle')
@@ -230,16 +231,32 @@ var middguard = middguard || {};
       };
     },
 
-    /* i: input index
-     * r: node radius
+    /* Calculate each input circle's position.
+     * Circles are arranged in rows of three from the top down.
+     * Assume 5 pixel circle radius and 15 pixels spacing between
+     * circle centerpoints. Circles are centered around the node's centerline.
+     *
+     * Example: 5 inputs (x is an input circle)
+     *     x <--15px-->  x  <--15px--> x
+     *          (15px between rows)
+     *           x <-- 15px --> x
+     *
+     * @param i: input index
+     * @param r: the input parent node's radius
+     * @param n: total number of inputs for the node
+     *
+     * @return the center position for the input circle
      */
-    inputPosition: function(i, r) {
+    inputPosition: function(i, r, n) {
       var rowIndexX = i % 3,
-          rowIndexY = Math.floor(i / 3);
+          rowIndexY = Math.floor(i / 3),
+          rowLength = i >= n - n % 3 ? n % 3 : 3,
+          baseX = r - (rowLength - 1) * 7.5,
+          baseY = 10;
 
       return {
-        x: (r - 15) + 15 * rowIndexX,
-        y: 10 + 15 * rowIndexY
+        x: baseX + 15 * rowIndexX,
+        y: baseY + 15 * rowIndexY
       };
     }
   });
