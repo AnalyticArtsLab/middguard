@@ -2,7 +2,7 @@
 
 exports.up = function(knex, Promise) {
   return knex.schema.table('node', function(table) {
-    table.integer('radius').defaultTo(100);
+    table.integer('radius').defaultTo(75);
 
     // These are the top left coordinates of the node,
     // not the center coordinates.

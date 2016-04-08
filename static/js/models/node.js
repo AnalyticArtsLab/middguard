@@ -3,7 +3,7 @@ var middguard = middguard || {};
 (function() {
   middguard.Node = Backbone.Model.extend({
     defaults: {
-      radius: 100,
+      radius: 75,
       position_x: 0,
       position_y: 0
     },
