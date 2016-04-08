@@ -96,6 +96,11 @@ var middguard = middguard || {};
 
     className: 'node',
 
+    events: {
+      'mouseover .input': 'showInputTooltip',
+      'mouseout .input': 'hideInputTooltip'
+    },
+
     initialize: function(options) {
       this.editor = options.editorElement;
       this.model = options.model;
@@ -148,12 +153,13 @@ var middguard = middguard || {};
           .attr('transform', 'translate(' + handle.x + ',' + handle.y + ')')
           .attr('d', d3.svg.symbol().type('cross').size(150));
 
-      if (this.module.get('inputs').length)
-        this.d3el.append('circle')
-            .attr('class', 'connector input')
-            .attr('r', 5)
-            .attr('cx', r)
-            .attr('cy', 10);
+      this.d3el.selectAll('.input')
+          .data(this.module.get('inputs'))
+        .enter().append('circle')
+          .attr('class', 'connector input')
+          .attr('r', 5)
+          .attr('cx', (d, i) => { return this.inputPosition(i, r).x; })
+          .attr('cy', (d, i) => { return this.inputPosition(i, r).y; })
 
       if (this.module.get('outputs').length)
         this.d3el.append('circle')
@@ -191,11 +197,49 @@ var middguard = middguard || {};
       this.model.save();
     },
 
+    showInputTooltip: function(event) {
+      var tooltip = d3.select('.input-tooltip');
+
+      if (!tooltip[0][0])
+        tooltip = d3.select('body').append('div')
+            .attr('class', 'input-tooltip');
+
+      tooltip.html(d3.select(event.currentTarget).datum().name);
+
+      var bounds = event.currentTarget.getBoundingClientRect(),
+          inputRadius = 5,
+          tooltipWidth = parseFloat(tooltip.style('width')) / 2,
+          tooltipHeight = parseFloat(tooltip.style('height')) + 5;
+
+      tooltip
+        .style('left', bounds.left - tooltipWidth + inputRadius + 'px')
+        .style('top', bounds.top - tooltipHeight + 'px')
+        .style('visibility', 'visible');
+    },
+
+    hideInputTooltip: function() {
+      d3.select('.input-tooltip')
+          .style('visibility', 'hidden');
+    },
+
     dragHandlePosition: function() {
       var r = this.model.get('radius');
       return {
         x: r + -r * Math.sqrt(2) / 2 + 15,
         y: r - r * Math.sqrt(2) / 2 + 15
+      };
+    },
+
+    /* i: input index
+     * r: node radius
+     */
+    inputPosition: function(i, r) {
+      var rowIndexX = i % 3,
+          rowIndexY = Math.floor(i / 3);
+
+      return {
+        x: (r - 15) + 15 * rowIndexX,
+        y: 10 + 15 * rowIndexY
       };
     }
   });
