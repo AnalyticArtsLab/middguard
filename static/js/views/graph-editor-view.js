@@ -115,6 +115,7 @@ var middguard = middguard || {};
     },
 
     render: function() {
+      var handle = this.dragHandlePosition();
       var x = this.model.position().x;
       var y = this.model.position().y;
 
@@ -136,6 +137,17 @@ var middguard = middguard || {};
           .style('text-anchor', 'middle')
           .text(this.module.get('displayName'));
 
+      this.d3el.append('circle')
+          .attr('class', 'drag-handle')
+          .attr('cx', handle.x)
+          .attr('cy', handle.y)
+          .attr('r', 20);
+
+      this.d3el.append('path')
+          .attr('class', 'drag-handle')
+          .attr('transform', 'translate(' + handle.x + ',' + handle.y + ')')
+          .attr('d', d3.svg.symbol().type('cross').size(150));
+
       if (this.module.get('inputs').length)
         this.d3el.append('circle')
             .attr('class', 'connector input')
@@ -154,6 +166,9 @@ var middguard = middguard || {};
     },
 
     dragged: function(d) {
+      if (!d3.select(d3.event.sourceEvent.target).classed('drag-handle'))
+        return;
+
       var x = d3.event.x;
       var y = d3.event.y;
       var r = this.model.get('radius');
@@ -174,6 +189,14 @@ var middguard = middguard || {};
 
     dragended: function() {
       this.model.save();
+    },
+
+    dragHandlePosition: function() {
+      var r = this.model.get('radius');
+      return {
+        x: r + -r * Math.sqrt(2) / 2 + 15,
+        y: r - r * Math.sqrt(2) / 2 + 15
+      };
     }
   });
 })();

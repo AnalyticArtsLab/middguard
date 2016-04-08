@@ -29,6 +29,21 @@
   fill: #fff;
 }
 
+.middguard-graph-editor .node circle.drag-handle {
+  fill: transparent;
+}
+
+.middguard-graph-editor .node .drag-handle {
+  fill: none;
+}
+
+.middguard-graph-editor .node:hover path.drag-handle {
+  fill: transparent;
+  stroke: rgb(194, 194, 194);
+  stroke-width: 2px;
+  cursor: pointer;
+}
+
 .connector.input {
   fill: rgb(35, 171, 36);
 }
