@@ -91,6 +91,20 @@ var middguard = middguard || {};
     }
   });
 
+  var ConnectorView = Backbone.NSView.extend({
+    tagName: 'svg:line',
+
+    initialize: function(options) {
+      this.outputNode = options.outputNode;
+      this.inputNode = options.inputNode;
+      this.inputGroup = options.inputGroup;
+    },
+
+    render: function() {
+
+    }
+  });
+
   var NodeView = Backbone.NSView.extend({
     tagName: 'svg:g',
 
@@ -98,7 +112,9 @@ var middguard = middguard || {};
 
     events: {
       'mouseover .input': 'showInputTooltip',
-      'mouseout .input': 'hideInputTooltip'
+      'mouseout .input': 'hideInputTooltip',
+      'click .input': 'toggleInputSelected',
+      'click .output': 'toggleOutputSelected'
     },
 
     initialize: function(options) {
@@ -116,11 +132,12 @@ var middguard = middguard || {};
           .on('drag', this.dragged.bind(this))
           .on('dragend', this.dragended.bind(this));
 
-      this.listenTo(this.model, 'update', this.render);
+      this.listenTo(this.model, 'change', this.render);
     },
 
+    template: _.template($('#graph-node-template').html()),
+
     render: function() {
-      var handle = this.dragHandlePosition();
       var x = this.model.position().x;
       var y = this.model.position().y;
 
@@ -129,45 +146,25 @@ var middguard = middguard || {};
           .attr('transform', 'translate(' + x + ',' + y + ')')
           .call(this.drag);
 
-      var r = this.model.get('radius');
-      this.d3el.append('circle')
-          .attr('class', 'outline')
-          .attr('r', r)
-          .attr('cx', r)
-          .attr('cy', r);
+      this.$el.html(this.template({
+        r: this.model.get('radius'),
+        handle: this.dragHandlePosition(),
+        dragHandlePath: d3.svg.symbol().type('cross').size(150)(),
+        displayName: this.module.get('displayName'),
+        inputs: this.module.get('inputs'),
+        output: this.module.get('outputs').length,
+        inputPosition: this.inputPosition
+      }));
 
-      this.d3el.append('text')
-          .attr('x', r)
-          .attr('y', r)
-          .style('text-anchor', 'middle')
-          .text(this.module.get('displayName'));
+      var selectedInput = this.model.get('selectedInput'),
+          selectedOutput = this.model.get('selectedOutput');
+      if (selectedInput)
+        this.d3el.select('[data-name="' + selectedInput.name + '"]')
+            .classed('selected', true);
 
-      this.d3el.append('circle')
-          .attr('class', 'drag-handle')
-          .attr('cx', handle.x)
-          .attr('cy', handle.y)
-          .attr('r', 20);
-
-      this.d3el.append('path')
-          .attr('class', 'drag-handle')
-          .attr('transform', 'translate(' + handle.x + ',' + handle.y + ')')
-          .attr('d', d3.svg.symbol().type('cross').size(150));
-
-      var inputs = this.module.get('inputs');
-      this.d3el.selectAll('.input')
-          .data(inputs)
-        .enter().append('circle')
-          .attr('class', 'connector input')
-          .attr('r', 5)
-          .attr('cx', (d, i) => this.inputPosition(i, r, inputs.length).x)
-          .attr('cy', (d, i) => this.inputPosition(i, r, inputs.length).y)
-
-      if (this.module.get('outputs').length)
-        this.d3el.append('circle')
-            .attr('class', 'connector output')
-            .attr('r', 5)
-            .attr('cx', r)
-            .attr('cy', 2 * r - 10);
+      if (selectedOutput)
+        this.d3el.select('.output')
+            .classed('selected', true);
 
       return this;
     },
@@ -205,7 +202,10 @@ var middguard = middguard || {};
         tooltip = d3.select('body').append('div')
             .attr('class', 'input-tooltip');
 
-      tooltip.html(d3.select(event.currentTarget).datum().name);
+      var input = _.find(this.module.get('inputs'), function(input) {
+        return input.name === $(event.currentTarget).data('name');
+      });
+      tooltip.html(input.name);
 
       var bounds = event.currentTarget.getBoundingClientRect(),
           inputRadius = 5,
@@ -221,6 +221,38 @@ var middguard = middguard || {};
     hideInputTooltip: function() {
       d3.select('.input-tooltip')
           .style('visibility', 'hidden');
+    },
+
+    toggleInputSelected: function(event) {
+      var previouslySelected = middguard.Nodes.find(function(node) {
+        return node.get('selectedInput');
+      });
+
+      // Deselect the previously selected input.
+      previouslySelected && previouslySelected.set('selectedInput', null);
+
+      var selectedGroup = _.find(this.module.get('inputs'), function(input) {
+        return input.name === $(event.target).data('name');
+      });
+
+      // If the clicked node was already selected, return after toggling it off.
+      if (previouslySelected &&
+          this.model.get('id') === previouslySelected.get('id') &&
+          selectedGroup.name === previouslySelected.get('name')) {
+        return;
+      }
+
+      this.model.set('selectedInput', selectedGroup);
+    },
+
+    toggleOutputSelected: function(event) {
+      var previouslySelected = middguard.Nodes.find(function(node) {
+        return node.get('selectedOutput');
+      })
+
+      previouslySelected && previouslySelected.set('selectedOutput', null);
+
+      this.model.set('selectedOutput', true);
     },
 
     dragHandlePosition: function() {

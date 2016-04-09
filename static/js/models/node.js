@@ -2,10 +2,17 @@ var middguard = middguard || {};
 
 (function() {
   middguard.Node = Backbone.Model.extend({
+    blacklistAttributes: [
+      'selectedInput',
+      'selectedOutput'
+    ],
+
     defaults: {
       radius: 75,
       position_x: 0,
-      position_y: 0
+      position_y: 0,
+      selectedInput: null,
+      selectedOutput: null
     },
 
     connectToOutput: function(other, inputGroup) {
@@ -23,6 +30,10 @@ var middguard = middguard || {};
         this.set('position_x', x);
         this.set('position_y', y);
       }
+    },
+
+    toJSON: function(options) {
+      return _.omit(this.attributes, this.blacklistAttributes);
     }
   });
 })();

@@ -60,6 +60,11 @@
   fill: rgb(195, 63, 63);
 }
 
+.connector.selected {
+  stroke: #000;
+  stroke-width: 2px;
+}
+
 .input-tooltip {
   position: absolute;
   padding: 10px;
