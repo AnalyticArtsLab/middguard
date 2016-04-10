@@ -15,6 +15,7 @@ var middguard = middguard || {};
 
       this.listenTo(middguard.PackagedModules, 'reset', this.addModules);
       this.listenTo(middguard.Nodes, 'reset', this.addAllNodes);
+      this.listenTo(middguard.Nodes, 'reset', this.addAllConnectorGroups);
       this.listenTo(middguard.Nodes, 'add', this.addNode);
 
       middguard.PackagedModules.fetch({reset: true});
@@ -59,6 +60,19 @@ var middguard = middguard || {};
 
     addAllNodes: function(node) {
       middguard.Nodes.each(this.addNode, this);
+    },
+
+    addConnectorGroup: function(node) {
+      if (node.get('graph_id') !== this.graph.get('id')) {
+        return;
+      }
+
+      var view = new ConnectorGroupView({model: node});
+      this.$('.graph').append(view.render().el);
+    },
+
+    addAllConnectorGroups: function() {
+      middguard.Nodes.each(this.addConnectorGroup, this);
     }
   });
 
@@ -91,17 +105,90 @@ var middguard = middguard || {};
     }
   });
 
+  /* Nodes' connections are stored on the input node.
+   * All the connecting lines from an a node's connections
+   * to the corresponding output node.
+   */
+  var ConnectorGroupView = Backbone.NSView.extend({
+    tagName: 'svg:g',
+
+    initialize: function() {
+      this.connections = [];
+
+      if (this.model.get('connections'))
+        this.addAllConnectingLines();
+
+      // `this.model` is the "input" node
+      this.listenTo(this.model, 'change', this.render);
+    },
+
+    render: function() {
+      this.connections.forEach(function(connection) { connection.render(); });
+
+      return this;
+    },
+
+    addAllConnectingLines: function() {
+      _.chain(JSON.parse(this.model.get('connections')))
+          .keys()
+          .each(this.addConnectingLine, this);
+    },
+
+    addConnectingLine: function(inputGroup) {
+      var view = new ConnectorView({
+        model: this.model,
+        inputGroup: inputGroup
+      });
+      this.$el.append(view.render().el);
+      this.connections.push(view);
+    }
+  });
+
   var ConnectorView = Backbone.NSView.extend({
     tagName: 'svg:line',
 
     initialize: function(options) {
-      this.outputNode = options.outputNode;
-      this.inputNode = options.inputNode;
+      this.model = options.model;
       this.inputGroup = options.inputGroup;
+      this.outputNode = middguard.Nodes.findWhere({
+        id: JSON.parse(this.model.get('connections'))[this.inputGroup].output_node
+      });
+      this.module = middguard.PackagedModules.findWhere({
+        name: this.model.get('module')
+      });
     },
 
     render: function() {
+      this.$el.attr('x1', this.outputPosition().x);
+      this.$el.attr('y1', this.outputPosition().y);
+      this.$el.attr('x2', this.inputPosition().x);
+      this.$el.attr('y2', this.inputPosition().y);
+      this.$el.css('stroke', '#000');
 
+      return this;
+    },
+
+    inputPosition: function() {
+      var i = _.findIndex(this.module.get('inputs'), input => {
+            return input.name === this.inputGroup;
+          }),
+          r = this.model.get('radius'),
+          n = this.module.get('inputs').length,
+          offset = NodeView.prototype.inputPosition(i, r, n);
+
+      return {
+        x: this.model.position().x + offset.x,
+        y: this.model.position().y + offset.y
+      };
+    },
+
+    outputPosition: function() {
+      var r = this.outputNode.get('radius');
+
+      return {
+        x: this.outputNode.position().x + r,
+        y: this.outputNode.position().y + 2 * r - 10
+      };
     }
   });
 
@@ -243,6 +330,7 @@ var middguard = middguard || {};
       }
 
       this.model.set('selectedInput', selectedGroup);
+      this.connectNodes();
     },
 
     toggleOutputSelected: function(event) {
@@ -253,6 +341,26 @@ var middguard = middguard || {};
       previouslySelected && previouslySelected.set('selectedOutput', null);
 
       this.model.set('selectedOutput', true);
+      this.connectNodes();
+    },
+
+    connectNodes: function() {
+      var input = middguard.Nodes.find(function(node) {
+        return node.get('selectedInput');
+      });
+
+      var output = middguard.Nodes.find(function(node) {
+        return node.get('selectedOutput');
+      });
+
+      if (!input || !output)
+        return;
+
+      var group = input.get('selectedInput').name;
+
+      input.connectToOutput(output, group);
+      input.set('selectedInput', null);
+      output.set('selectedOutput', null);
     },
 
     dragHandlePosition: function() {
