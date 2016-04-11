@@ -259,6 +259,7 @@ var middguard = middguard || {};
 
       this.drag = d3.behavior.drag()
           .origin(function(d) { return d; })
+          .on('dragstart', this.dragstarted.bind(this))
           .on('drag', this.dragged.bind(this))
           .on('dragend', this.dragended.bind(this));
 
@@ -299,6 +300,10 @@ var middguard = middguard || {};
       return this;
     },
 
+    dragstarted: function(d) {
+      this.dragStartPosition = _.clone(d);
+    },
+
     dragged: function(d) {
       if (!d3.select(d3.event.sourceEvent.target).classed('drag-handle'))
         return;
@@ -322,7 +327,16 @@ var middguard = middguard || {};
     },
 
     dragended: function() {
-      this.model.save();
+      if (this.dragMoved())
+        this.model.save();
+    },
+
+    dragMoved: function() {
+      var origin = this.dragStartPosition,
+          current = this.model.position();
+
+      return origin.x !== current.x ||
+             origin.y !== current.y;
     },
 
     showInputTooltip: function(event) {
