@@ -79,6 +79,7 @@ exports.connect = function(socket, data, callback) {
   })
   .then(node => {
     socket.emit('nodes:update', node.toJSON());
+    socket.broadcast.emit('nodes:update', node.toJSON());
   })
   .catch(callback);
 };
