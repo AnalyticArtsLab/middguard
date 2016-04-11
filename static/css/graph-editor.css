@@ -65,6 +65,11 @@
   stroke-width: 2px;
 }
 
+.middguard-graph-editor .connecting-line {
+  stroke: #000;
+  stroke-width: 2px;
+}
+
 .input-tooltip {
   position: absolute;
   padding: 10px;

@@ -8,7 +8,7 @@ exports.create = function(socket, data, callback) {
   .save(data, {clientCreate: true})
   .then(node => {
     callback(null, node.toJSON());
-    socket.broadcast.emit('node:create', node.toJSON());
+    socket.broadcast.emit('nodes:create', node.toJSON());
   })
   .catch(callback);
 };
@@ -31,7 +31,7 @@ exports.update = function(socket, data, callback) {
   .save(_.omit(data, 'id'), {patch: true})
   .then(function(node) {
     callback(null, node.toJSON());
-    socket.broadcast.emit('node:update', node.toJSON());
+    socket.broadcast.emit('nodes:update', node.toJSON());
   })
   .catch(callback);
 };
@@ -78,7 +78,7 @@ exports.connect = function(socket, data, callback) {
     return inputNode.save();
   })
   .then(node => {
-    socket.emit('node:update', node.toJSON());
+    socket.emit('nodes:update', node.toJSON());
   })
   .catch(callback);
 };

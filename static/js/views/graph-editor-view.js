@@ -123,7 +123,8 @@ var middguard = middguard || {};
     },
 
     render: function() {
-      this.connections.forEach(function(connection) { connection.render(); });
+      this.connections.forEach(connection => connection.render());
+      this.unrenderedConnections().forEach(this.addConnectingLine, this);
 
       return this;
     },
@@ -141,11 +142,23 @@ var middguard = middguard || {};
       });
       this.$el.append(view.render().el);
       this.connections.push(view);
+    },
+
+    renderedConnections: function() {
+      return this.connections.map(connection => connection.inputGroup);
+    },
+
+    unrenderedConnections: function() {
+      return _.chain(JSON.parse(this.model.get('connections')))
+          .keys()
+          .difference(this.renderedConnections());
     }
   });
 
   var ConnectorView = Backbone.NSView.extend({
     tagName: 'svg:line',
+
+    className: 'connecting-line',
 
     initialize: function(options) {
       this.model = options.model;
@@ -156,6 +169,15 @@ var middguard = middguard || {};
       this.module = middguard.PackagedModules.findWhere({
         name: this.model.get('module')
       });
+
+      // Only rerender this particular line when the output node moves.
+      // We rerender all the lines (parent view) when the input node moves.
+      this.listenTo(this.outputNode, 'change', this.render);
+
+      // Check if the connection has changed. In this context, "changed"
+      // means that the connection's input group either no longer has a
+      // connection, or the input group is connected to a different output.
+      this.listenTo(this.model, 'change', this.connectionChanged);
     },
 
     render: function() {
@@ -163,7 +185,6 @@ var middguard = middguard || {};
       this.$el.attr('y1', this.outputPosition().y);
       this.$el.attr('x2', this.inputPosition().x);
       this.$el.attr('y2', this.inputPosition().y);
-      this.$el.css('stroke', '#000');
 
       return this;
     },
@@ -189,6 +210,28 @@ var middguard = middguard || {};
         x: this.outputNode.position().x + r,
         y: this.outputNode.position().y + 2 * r - 10
       };
+    },
+
+    connectionChanged: function() {
+      var connections = this.model.get('connections'),
+          connection = JSON.parse(connections)[this.inputGroup];
+
+      // No longer a connection for this input group
+      if (!connection) {
+        this.remove();
+      }
+
+      // A connection exists for this input group, but connected to a
+      // different output node
+      if (connection.output_node !== this.outputNode.get('id')) {
+        // Stop listening to changes in the old output node
+        this.stopListening(this.outputNode);
+
+        // Find and bind to the new output node
+        this.outputNode = middguard.Nodes.get(connection.output_node);
+        this.listenTo(this.outputNode, 'change', this.render);
+        this.render();
+      }
     }
   });
 
