@@ -17,6 +17,7 @@ var middguard = middguard || {};
       this.listenTo(middguard.Nodes, 'reset', this.addAllNodes);
       this.listenTo(middguard.Nodes, 'reset', this.addAllConnectorGroups);
       this.listenTo(middguard.Nodes, 'add', this.addNode);
+      this.listenTo(middguard.Nodes, 'add', this.addConnectorGroup)
 
       middguard.PackagedModules.fetch({reset: true});
       middguard.Nodes.fetch({reset: true});
