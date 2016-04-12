@@ -122,7 +122,8 @@ exports.run = function(socket, data, callback) {
   new Node({id: data.id})
   .fetch()
   .tap(node => node.ensureTable())
-  .then(function(node) {
+  .then(node => Promise.join(node, node.outputNodes()))
+  .spread(function(node, outputs) {
     var module = modules.findWhere({name: node.get('module')});
 
     require(module.get('requirePath')).handle('test', function() {

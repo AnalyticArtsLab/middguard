@@ -1,5 +1,8 @@
 'use strict';
 
+var _ = require('lodash');
+var Promise = require('bluebird');
+
 /**
  * Register the `Node` model in the Bookshelf registry.
  *
@@ -40,8 +43,20 @@ module.exports = function(app) {
       });
     },
 
+    /**
+     * Get a mapping from input group names to output nodes.
+     */
     outputNodes: function() {
+      var connections = JSON.parse(this.get('connections'));
 
+      return Promise.map(_.keys(connections), function(inputGroup) {
+        var outputId = connections[inputGroup].output_node;
+
+        return Promise.props({
+          inputGroup: inputGroup,
+          outputNode: new Node({id: outputId}).fetch()
+        });
+      });
     },
 
     /**
@@ -50,7 +65,6 @@ module.exports = function(app) {
     ensureTable: function() {
       return Bookshelf.knex.schema.hasTable(this.get('table'))
       .then(exists => {
-        console.log('exists? ', exists);
         if (!exists) {
           return this.module().createTable(this.get('table'), Bookshelf.knex);
         }
