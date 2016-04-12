@@ -124,9 +124,29 @@ exports.run = function(socket, data, callback) {
   .tap(node => node.ensureTable())
   .then(node => Promise.join(node, node.outputNodes()))
   .spread(function(node, outputs) {
-    var module = modules.findWhere({name: node.get('module')});
+    var module = modules.findWhere({name: node.get('module')}),
+        connections = JSON.parse(node.get('connections'));
 
-    require(module.get('requirePath')).handle('test', function() {
+
+    var context = _.reduce(_.keys(connections), function(context, inputGroup) {
+      var groupConnections = connections[inputGroup].connections;
+
+      // Reduce the array of input output pairs to a single associative array
+      // mapping input to output.
+      var columns = _.reduce(groupConnections, function(connections, pair) {
+        connections[pair.input] = pair.output;
+        return connections;
+      }, {});
+
+      context[inputGroup] = {};
+      context[inputGroup].knex = socket.bookshelf.knex(outputs[inputGroup]);
+      context[inputGroup].cols = columns;
+      context[inputGroup].tableName = outputs[inputGroup].get('table');
+
+      return context;
+    }, {});
+
+    require(module.get('requirePath')).handle(context, function() {
       console.log('Done');
     });
   })

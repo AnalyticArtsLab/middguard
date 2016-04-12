@@ -45,18 +45,22 @@ module.exports = function(app) {
 
     /**
      * Get a mapping from input group names to output nodes.
+     *
+     * @return a promise for an object mapping input group name
+     *         to a fetched output node
      */
     outputNodes: function() {
       var connections = JSON.parse(this.get('connections'));
 
-      return Promise.map(_.keys(connections), function(inputGroup) {
+      return Promise.reduce(_.keys(connections), function(outputs, inputGroup) {
         var outputId = connections[inputGroup].output_node;
 
-        return Promise.props({
-          inputGroup: inputGroup,
-          outputNode: new Node({id: outputId}).fetch()
+        return new Node({id: outputId}).fetch()
+        .then(node => {
+          outputs[inputGroup] = node;
+          return outputs;
         });
-      });
+      }, {});
     },
 
     /**
