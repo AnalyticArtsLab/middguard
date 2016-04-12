@@ -125,10 +125,10 @@ exports.run = function(socket, data, callback) {
   .then(node => Promise.join(node, node.outputNodes()))
   .spread(function(node, outputs) {
     var module = modules.findWhere({name: node.get('module')}),
-        connections = JSON.parse(node.get('connections'));
+        connections = JSON.parse(node.get('connections')),
+        context = {};
 
-
-    var context = _.reduce(_.keys(connections), function(context, inputGroup) {
+    context.inputs = _.reduce(_.keys(connections), function(inputs, inputGroup) {
       var groupConnections = connections[inputGroup].connections;
 
       // Reduce the array of input output pairs to a single associative array
@@ -138,13 +138,17 @@ exports.run = function(socket, data, callback) {
         return connections;
       }, {});
 
-      context[inputGroup] = {};
-      context[inputGroup].knex = socket.bookshelf.knex(outputs[inputGroup]);
-      context[inputGroup].cols = columns;
-      context[inputGroup].tableName = outputs[inputGroup].get('table');
+      inputs[inputGroup] = {};
+      inputs[inputGroup].knex = socket.bookshelf.knex(outputs[inputGroup]);
+      inputs[inputGroup].cols = columns;
+      inputs[inputGroup].tableName = outputs[inputGroup].get('table');
 
-      return context;
+      return inputs;
     }, {});
+
+    context.table = {};
+    context.table.knex = socket.bookshelf.knex(node.get('table'));
+    context.table.name = node.get('table');
 
     require(module.get('requirePath')).handle(context, function() {
       console.log('Done');
