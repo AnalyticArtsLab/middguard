@@ -156,7 +156,7 @@ var middguard = middguard || {};
   });
 
   var ConnectorView = Backbone.NSView.extend({
-    tagName: 'svg:line',
+    tagName: 'svg:path',
 
     className: 'connecting-line',
 
@@ -170,6 +170,8 @@ var middguard = middguard || {};
         name: this.model.get('module')
       });
 
+      this.diagonal = d3.svg.diagonal();
+
       // Only rerender this particular line when the output node moves.
       // We rerender all the lines (parent view) when the input node moves.
       this.listenTo(this.outputNode, 'change', this.render);
@@ -181,10 +183,11 @@ var middguard = middguard || {};
     },
 
     render: function() {
-      this.$el.attr('x1', this.outputPosition().x);
-      this.$el.attr('y1', this.outputPosition().y);
-      this.$el.attr('x2', this.inputPosition().x);
-      this.$el.attr('y2', this.inputPosition().y);
+      this.diagonal
+          .source(this.outputPosition())
+          .target(this.inputPosition());
+
+      this.$el.attr('d', this.diagonal());
 
       return this;
     },
@@ -244,7 +247,8 @@ var middguard = middguard || {};
       'mouseover .input': 'showInputTooltip',
       'mouseout .input': 'hideInputTooltip',
       'click .input': 'toggleInputSelected',
-      'click .output': 'toggleOutputSelected'
+      'click .output': 'toggleOutputSelected',
+      'click .status': 'runNode'
     },
 
     initialize: function(options) {
@@ -279,8 +283,10 @@ var middguard = middguard || {};
 
       this.$el.html(this.template({
         r: this.model.get('radius'),
-        handle: this.dragHandlePosition(),
+        handlePosition: this.dragHandlePosition(),
+        statusPosition: this.statusIndicatorPosition(),
         dragHandlePath: d3.svg.symbol().type('cross').size(150)(),
+        status: this.model.get('status'),
         displayName: this.module.get('displayName'),
         inputs: this.module.get('inputs'),
         output: this.module.get('outputs').length,
@@ -420,10 +426,22 @@ var middguard = middguard || {};
       output.set('selectedOutput', null);
     },
 
+    runNode: function() {
+      this.model.run();
+    },
+
     dragHandlePosition: function() {
       var r = this.model.get('radius');
       return {
         x: r + -r * Math.sqrt(2) / 2 + 15,
+        y: r - r * Math.sqrt(2) / 2 + 15
+      };
+    },
+
+    statusIndicatorPosition: function() {
+      var r = this.model.get('radius');
+      return {
+        x: r + r * Math.sqrt(2) / 2 - 15,
         y: r - r * Math.sqrt(2) / 2 + 15
       };
     },

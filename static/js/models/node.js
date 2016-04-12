@@ -8,6 +8,7 @@ var middguard = middguard || {};
     ],
 
     defaults: {
+      status: 0,
       radius: 75,
       position_x: 0,
       position_y: 0,
@@ -20,6 +21,12 @@ var middguard = middguard || {};
         outputNode: other.get('id'),
         inputNode: this.get('id'),
         inputGroup: inputGroup
+      });
+    },
+
+    run: function() {
+      middguard.socket.emit('node:run', {
+        id: this.get('id')
       });
     },
 

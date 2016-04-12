@@ -22,7 +22,7 @@ exports.up = function(knex, Promise) {
     table.integer('graph_id').references('graph.id');
     table.string('module');
     table.string('table');
-    table.integer('status');
+    table.integer('status').defaultTo(0);
     table.string('connections');
   });
 };

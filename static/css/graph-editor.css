@@ -68,6 +68,20 @@
 .middguard-graph-editor .connecting-line {
   stroke: #000;
   stroke-width: 2px;
+  fill: none;
+  pointer-events: none;
+}
+
+.middguard-graph-editor .status.status-0 {
+  fill: rgb(226, 104, 87);
+}
+
+.middguard-graph-editor .status.status-1 {
+  fill: rgb(230, 222, 13);
+}
+
+.middguard-graph-editor .status.status-2 {
+  fill: rgb(81, 210, 141);
 }
 
 .input-tooltip {

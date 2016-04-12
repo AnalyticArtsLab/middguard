@@ -40,6 +40,31 @@ module.exports = function(app) {
       });
     },
 
+    outputNodes: function() {
+
+    },
+
+    /**
+     * Create this node's table if it doesn't already.
+     */
+    ensureTable: function() {
+      return Bookshelf.knex.schema.hasTable(this.get('table'))
+      .then(exists => {
+        console.log('exists? ', exists);
+        if (!exists) {
+          return this.module().createTable(this.get('table'), Bookshelf.knex);
+        }
+      });
+    },
+
+    module: function() {
+      var modules = Bookshelf.collection('analytics'),
+          moduleName = this.get('module'),
+          module = modules.findWhere({name: moduleName});
+
+      return require(module.get('requirePath'));
+    },
+
     /**
      * Set an input group on the node's connections.
      * The text column "connections" remains in its stringified JSON state.

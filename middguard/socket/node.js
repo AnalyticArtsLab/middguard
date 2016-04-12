@@ -114,3 +114,20 @@ function connectionsByName(inputs, outputs) {
   return outputs.filter(output => _.indexOf(inputs, output) > -1)
                 .map(output => ({output: output, input: output}));
 }
+
+exports.run = function(socket, data, callback) {
+  var Node = socket.bookshelf.model('Node');
+  var modules = socket.bookshelf.collection('analytics');
+
+  new Node({id: data.id})
+  .fetch()
+  .tap(node => node.ensureTable())
+  .then(function(node) {
+    var module = modules.findWhere({name: node.get('module')});
+
+    require(module.get('requirePath')).handle('test', function() {
+      console.log('Done');
+    });
+  })
+  .catch(callback);
+};
