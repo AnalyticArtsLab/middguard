@@ -23,7 +23,7 @@ exports.up = function(knex, Promise) {
     table.string('module');
     table.string('table');
     table.integer('status').defaultTo(0);
-    table.string('connections');
+    table.string('connections').defaultTo('{}');
   });
 };
 

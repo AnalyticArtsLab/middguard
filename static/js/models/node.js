@@ -13,7 +13,8 @@ var middguard = middguard || {};
       position_x: 0,
       position_y: 0,
       selectedInput: null,
-      selectedOutput: null
+      selectedOutput: null,
+      connections: '{}'
     },
 
     connectToOutput: function(other, inputGroup) {
