@@ -123,6 +123,11 @@ exports.run = function(socket, data, callback) {
   .fetch()
   .tap(node => node.ensureTable())
   .then(node => node.save({status: 1}))
+  .then(function(node) {
+    socket.emit('nodes:update', node.toJSON());
+    socket.broadcast.emit('nodes:update', node.toJSON());
+    return node;
+  })
   .then(node => Promise.join(node, node.outputNodes()))
   .spread(function(node, outputs) {
     var module = modules.findWhere({name: node.get('module')}),

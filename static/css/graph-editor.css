@@ -88,6 +88,23 @@
   fill: rgb(81, 210, 141);
 }
 
+.middguard-graph-editor .run {
+  fill: none;
+  cursor: pointer;
+}
+
+.middguard-graph-editor .node:hover .run {
+  fill: rgb(194, 194, 194);
+}
+
+.middguard-graph-editor .node:hover .run:hover {
+  fill: rgb(182, 182, 182);
+}
+
+.middguard-graph-editor .node:hover .run:active {
+  fill: rgb(167, 167, 167);
+}
+
 .input-tooltip {
   position: absolute;
   padding: 10px;

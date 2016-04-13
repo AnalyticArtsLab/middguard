@@ -249,7 +249,7 @@ var middguard = middguard || {};
       'mouseout .input': 'hideInputTooltip',
       'click .input': 'toggleInputSelected',
       'click .output': 'toggleOutputSelected',
-      'click .status': 'runNode'
+      'click .run': 'runNode'
     },
 
     initialize: function(options) {
@@ -286,6 +286,8 @@ var middguard = middguard || {};
         r: this.model.get('radius'),
         handlePosition: this.dragHandlePosition(),
         dragHandlePath: d3.svg.symbol().type('cross').size(150)(),
+        runPosition: this.runPosition(),
+        runPath: d3.svg.symbol().type('triangle-up').size(150)(),
         status: this.model.get('status'),
         statusText: this.model.statusText(),
         displayName: this.module.get('displayName'),
@@ -435,6 +437,14 @@ var middguard = middguard || {};
       var r = this.model.get('radius');
       return {
         x: r + -r * Math.sqrt(2) / 2 + 15,
+        y: r - r * Math.sqrt(2) / 2 + 15
+      };
+    },
+
+    runPosition: function() {
+      var r = this.model.get('radius');
+      return {
+        x: r + r * Math.sqrt(2) / 2 - 15,
         y: r - r * Math.sqrt(2) / 2 + 15
       };
     },
