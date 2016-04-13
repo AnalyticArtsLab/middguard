@@ -11,6 +11,7 @@ var app = middguard({
 app.module('read-tweets', require.resolve('./read-tweets'));
 app.module('count-hashtags', require.resolve('./count-hashtags'));
 app.module('read-hashtags', require.resolve('./read-hashtags'));
+app.module('hashtags-table', require.resolve('./hashtags-table'));
 
 var port = process.env.PORT || 3000;
 app.listen(port, function () {

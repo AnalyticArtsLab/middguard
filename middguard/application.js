@@ -15,6 +15,7 @@ var socketio = require('socket.io');
 var ios = require('socket.io-express-session');
 var session = require('express-session');
 var KnexSessionStore = require('connect-session-knex')(session);
+var _ = require('lodash');
 
 /**
  * Application prototype methods to extend
@@ -96,6 +97,10 @@ app.module = function module(name, requirePath) {
   var register = Bookshelf.collection('analytics');
 
   var attributes = require(requirePath);
+
+  if (_.has(attributes, 'visualization')) {
+    this.use(`/modules/${name}`, express.static(attributes.static));
+  }
 
   register.add(new AnalyticsModule({
     name: name,
