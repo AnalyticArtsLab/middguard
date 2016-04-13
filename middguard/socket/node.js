@@ -122,6 +122,7 @@ exports.run = function(socket, data, callback) {
   new Node({id: data.id})
   .fetch()
   .tap(node => node.ensureTable())
+  .then(node => node.save({status: 1}))
   .then(node => Promise.join(node, node.outputNodes()))
   .spread(function(node, outputs) {
     var module = modules.findWhere({name: node.get('module')}),
@@ -139,7 +140,7 @@ exports.run = function(socket, data, callback) {
       }, {});
 
       inputs[inputGroup] = {};
-      inputs[inputGroup].knex = socket.bookshelf.knex(outputs[inputGroup]);
+      inputs[inputGroup].knex = socket.bookshelf.knex(outputs[inputGroup].get('table'));
       inputs[inputGroup].cols = columns;
       inputs[inputGroup].tableName = outputs[inputGroup].get('table');
 
@@ -150,9 +151,15 @@ exports.run = function(socket, data, callback) {
     context.table.knex = socket.bookshelf.knex(node.get('table'));
     context.table.name = node.get('table');
 
-    require(module.get('requirePath')).handle(context, function() {
-      console.log('Done');
-    });
+    var handle = require(module.get('requirePath')).handle;
+    return Promise.join(node, handle(context));
+  })
+  .spread(function(node, result) {
+    return node.save({status: 2});
+  })
+  .then(function(node) {
+    socket.emit('nodes:update', node.toJSON());
+    socket.broadcast.emit('nodes:emit', node.toJSON());
   })
   .catch(callback);
 };
