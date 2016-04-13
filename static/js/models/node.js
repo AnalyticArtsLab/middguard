@@ -17,6 +17,12 @@ var middguard = middguard || {};
       connections: '{}'
     },
 
+    statusMap: {
+      0: 'Not run',
+      1: 'In progress',
+      2: 'Completed'
+    },
+
     connectToOutput: function(other, inputGroup) {
       middguard.socket.emit('node:connect', {
         outputNode: other.get('id'),
@@ -42,6 +48,10 @@ var middguard = middguard || {};
 
     toJSON: function(options) {
       return _.omit(this.attributes, this.blacklistAttributes);
+    },
+
+    statusText: function() {
+      return this.statusMap[this.get('status')];
     }
   });
 })();

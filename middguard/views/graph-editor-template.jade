@@ -11,14 +11,16 @@ script(type="text/template", id="graph-node-template").
   <text x="<%= r %>" y="<%= r %>" style="text-anchor: middle;">
     <%= displayName %>
   </text>
+  <text class="status status-<%= status %>" style="text-anchor: middle;"
+    x="<%= r %>" y="<%= r + 20 %>">
+    <%= statusText %>
+  </text>
   <circle class="drag-handle"
     cx="<%= handlePosition.x %>" cy="<%= handlePosition.y %>" r="20"></circle>
   <path
     class="drag-handle"
     transform="translate(<%= handlePosition.x %>,<%= handlePosition.y %>)"
     d="<%= dragHandlePath %>"></path>
-  <circle class="status status-<%= status %>"
-    cx="<%= statusPosition.x %>" cy="<%= statusPosition.y %>" r="7"></circle>
   <% inputs.forEach(function(input, i) { %>
     <circle class="connector input" data-name="<%= input.name %>"
       cx="<% print(inputPosition(i, r, inputs.length).x) %>"

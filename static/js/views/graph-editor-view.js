@@ -285,9 +285,9 @@ var middguard = middguard || {};
       this.$el.html(this.template({
         r: this.model.get('radius'),
         handlePosition: this.dragHandlePosition(),
-        statusPosition: this.statusIndicatorPosition(),
         dragHandlePath: d3.svg.symbol().type('cross').size(150)(),
         status: this.model.get('status'),
+        statusText: this.model.statusText(),
         displayName: this.module.get('displayName'),
         inputs: this.module.get('inputs'),
         output: this.module.get('outputs').length,
@@ -435,14 +435,6 @@ var middguard = middguard || {};
       var r = this.model.get('radius');
       return {
         x: r + -r * Math.sqrt(2) / 2 + 15,
-        y: r - r * Math.sqrt(2) / 2 + 15
-      };
-    },
-
-    statusIndicatorPosition: function() {
-      var r = this.model.get('radius');
-      return {
-        x: r + r * Math.sqrt(2) / 2 - 15,
         y: r - r * Math.sqrt(2) / 2 + 15
       };
     },

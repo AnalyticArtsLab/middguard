@@ -72,6 +72,10 @@
   pointer-events: none;
 }
 
+.middguard-graph-editor .status {
+  font-size: 12px;
+}
+
 .middguard-graph-editor .status.status-0 {
   fill: rgb(226, 104, 87);
 }
