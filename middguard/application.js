@@ -107,7 +107,9 @@ app.module = function module(name, requirePath) {
     requirePath: requirePath,
     displayName: attributes.displayName,
     inputs: attributes.inputs,
-    outputs: attributes.outputs
+    outputs: attributes.outputs,
+    visualization: attributes.visualization,
+    main: attributes.visualization ? attributes.mainView : null
   }));
 };
 

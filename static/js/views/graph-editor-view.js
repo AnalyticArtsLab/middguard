@@ -430,7 +430,11 @@ var middguard = middguard || {};
     },
 
     runNode: function() {
-      this.model.run();
+      // if (this.get('visualization')) {
+      //   middguard.activateView(this.model.get('main'));
+      // } else {
+        this.model.run();
+      // }
     },
 
     dragHandlePosition: function() {

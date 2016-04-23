@@ -2,6 +2,7 @@ module.exports = {
   prefix: 'static/js',
   js: [
     'setup.js',
+    'visualization-manager.js',
 
     'models/analyst.js',
     'models/message.js',
