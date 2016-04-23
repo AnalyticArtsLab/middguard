@@ -9,8 +9,7 @@ exports.create = function(socket, data, callback) {
   .then(node => {
     callback(null, node.toJSON());
     socket.broadcast.emit('nodes:create', node.toJSON());
-  })
-  .catch(callback);
+  });
 };
 
 exports.readAll = function(socket, data, callback) {
