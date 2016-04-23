@@ -17,10 +17,12 @@ html(lang='en-us')
     script.
       var middguard = middguard || {};
       middguard.user = {id: #{user.id}, username: '#{user.username}'};
-    each script in clientLibs.js
-      script(src=clientLibs.prefix + '/' + script)
-    each script in appJs.js
-      script(src=appJs.prefix + '/' + script)
+    
+    script(src='app-bundle.js')
+    //- each script in clientLibs.js
+    //-   script(src=clientLibs.prefix + '/' + script)
+    //- each script in appJs.js
+    //-   script(src=appJs.prefix + '/' + script)
     each script in js
       script(src='modules/' + script)
     div#middguard-header

@@ -1,9 +1,10 @@
-var middguard = middguard || {};
+import Backbone from 'backbone';
+import socket from '../app';
 
-(function () {
-  middguard.Analyst = Backbone.Model.extend({
-    defaults: {
-      username: ''
-    }
-  });
-})();
+export default Backbone.Model.extend({
+  socket: socket,
+
+  defaults: {
+    username: ''
+  }
+});

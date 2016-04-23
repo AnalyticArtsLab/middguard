@@ -1,10 +1,11 @@
-var middguard = middguard || {};
+import Backbone from 'backbone';
+import socket from '../app';
 
-(function () {
-  middguard.PackagedModule = Backbone.Model.extend({
-    defaults: {
-      'name': '',
-      'main': ''
-    }
-  });
-})();
+export default Backbone.Model.extend({
+  socket: socket,
+  
+  defaults: {
+    'name': '',
+    'main': ''
+  }
+});

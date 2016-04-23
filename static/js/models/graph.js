@@ -1,5 +1,6 @@
-var middguard = middguard || {};
+import Backbone from 'backbone';
+import socket from '../app';
 
-(function() {
-  middguard.Graph = Backbone.Model.extend();
-})();
+export default Backbone.Model.extend({
+  socket: socket
+});

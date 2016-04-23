@@ -1,7 +1,8 @@
-var middguard = middguard || {};
+import io from 'socket.io-client';
 
-$(function () {
-  'use strict';
+import AppView from './views/app-view';
+import Graphs from './collections/graphs';
 
-  middguard.app = new middguard.AppView();
-});
+export var socket = io()
+
+new AppView();

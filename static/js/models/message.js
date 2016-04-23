@@ -1,12 +1,13 @@
-var middguard = middguard || {};
+import Backbone from 'backbone';
+import socket from '../app';
 
-(function () {
-  middguard.Message = Backbone.Model.extend({
-    defaults: {
-      analyst_id: '',
-      state: '',
-      content: '',
-      seen: false
-    }
-  });
-})();
+export default Backbone.Model.extend({
+  socket: socket,
+
+  defaults: {
+    analyst_id: '',
+    state: '',
+    content: '',
+    seen: false
+  }
+});

@@ -8,7 +8,9 @@
 var path = require('path');
 var http = require('http');
 
+var babelify = require('babelify');
 var bodyParser = require('body-parser');
+var browserify = require('browserify-middleware');
 var cookieParser = require('cookie-parser');
 var express = require('express');
 var socketio = require('socket.io');
@@ -16,6 +18,10 @@ var ios = require('socket.io-express-session');
 var session = require('express-session');
 var KnexSessionStore = require('connect-session-knex')(session);
 var _ = require('lodash');
+
+browserify.settings({
+  transform: [babelify.configure({presets: ['es2015']})]
+});
 
 /**
  * Application prototype methods to extend
@@ -47,7 +53,11 @@ app.middguardInit = function () {
  */
 
 app.middguardExpressMiddleware = function middguardExpressMiddleware() {
-  this.use('/static', express.static(path.join(__dirname, '..', 'static')));
+  var staticRoot = path.join(__dirname, '..', 'static');
+
+  this.use('/app-bundle.js', browserify(path.join(staticRoot, 'js', 'app.js')));
+
+  this.use('/static', express.static(staticRoot));
 
   var knex = require('knex')(this.get('knex config'));
   var sessionStore = new KnexSessionStore({knex: knex});

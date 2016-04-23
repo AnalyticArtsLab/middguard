@@ -1,57 +1,59 @@
-var middguard = middguard || {};
+import _ from 'underscore';
+import Backbone from 'backbone';
+import {socket} from '../app';
 
-(function() {
-  middguard.Node = Backbone.Model.extend({
-    blacklistAttributes: [
-      'selectedInput',
-      'selectedOutput'
-    ],
+export default Backbone.Model.extend({
+  socket: socket
 
-    defaults: {
-      status: 0,
-      radius: 75,
-      position_x: 0,
-      position_y: 0,
-      selectedInput: null,
-      selectedOutput: null,
-      connections: '{}'
-    },
+  blacklistAttributes: [
+    'selectedInput',
+    'selectedOutput'
+  ],
 
-    statusMap: {
-      0: 'Not run',
-      1: 'In progress',
-      2: 'Completed'
-    },
+  defaults: {
+    status: 0,
+    radius: 75,
+    position_x: 0,
+    position_y: 0,
+    selectedInput: null,
+    selectedOutput: null,
+    connections: '{}'
+  },
 
-    connectToOutput: function(other, inputGroup) {
-      middguard.socket.emit('node:connect', {
-        outputNode: other.get('id'),
-        inputNode: this.get('id'),
-        inputGroup: inputGroup
-      });
-    },
+  statusMap: {
+    0: 'Not run',
+    1: 'In progress',
+    2: 'Completed'
+  },
 
-    run: function() {
-      middguard.socket.emit('node:run', {
-        id: this.get('id')
-      });
-    },
+  connectToOutput (other, inputGroup) {
+    socket.emit('node:connect', {
+      outputNode: other.get('id'),
+      inputNode: this.get('id'),
+      inputGroup: inputGroup
+    });
+  },
 
-    position: function(x, y) {
-      if (!arguments.length) {
-        return {x: this.get('position_x'), y: this.get('position_y')};
-      } else {
-        this.set('position_x', x);
-        this.set('position_y', y);
-      }
-    },
+  run () {
+    socket.emit('node:run', {
+      id: this.get('id')
+    });
+  },
 
-    toJSON: function(options) {
-      return _.omit(this.attributes, this.blacklistAttributes);
-    },
-
-    statusText: function() {
-      return this.statusMap[this.get('status')];
+  position (x, y) {
+    if (!arguments.length) {
+      return {x: this.get('position_x'), y: this.get('position_y')};
+    } else {
+      this.set('position_x', x);
+      this.set('position_y', y);
     }
-  });
-})();
+  },
+
+  toJSON (options) {
+    return _.omit(this.attributes, this.blacklistAttributes);
+  },
+
+  statusText () {
+    return this.statusMap[this.get('status')];
+  }
+});
