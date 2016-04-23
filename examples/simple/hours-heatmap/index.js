@@ -1,12 +1,12 @@
 var path = require('path');
 
 exports.inputs = [
-  {name: 'hashtags', inputs: ['hashtag', 'count']}
+  {name: 'hours', inputs: ['day', 'hour', 'count1', 'count2', 'difference']}
 ];
 
 exports.outputs = [];
 
-exports.displayName = "Hashtags Table";
+exports.displayName = "Hours Heatmap";
 
 exports.visualization = true;
 
@@ -20,4 +20,4 @@ exports.css = [
   "hashtags-table.css"
 ];
 
-exports.mainView = 'HashtagsTableView';
+exports.mainView = 'HoursHeatmapView';
