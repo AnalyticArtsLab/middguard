@@ -1,20 +1,25 @@
 .middguard-graph-editor {
   height: 100%;
-  width: 650px;
   border-right: 2px solid #e5e5e5;
 }
 
 .middguard-graph-editor .header {
   border-bottom: 2px solid #e5e5e5;
-  padding: 0 10px;
-  height: 50px;
+  padding: 10px;
+}
+
+.middguard-graph-editor .header h4 {
+  margin: 0;
 }
 
 .middguard-graph-editor .sidebar {
-  height: calc(100% - 50px);
-  width: 150px;
+  height: calc(100% - 41px);
   float: left;
   border-right: 2px solid #e5e5e5;
+}
+
+.middguard-graph-editor .sidebar h4 {
+  margin: 10px;
 }
 
 .middguard-graph-editor .modules-list {
@@ -23,8 +28,13 @@
 }
 
 .middguard-graph-editor .modules-list li {
+  display: block;
   margin: 10px;
+}
+
+.middguard-graph-editor .editor {
   float: left;
+  border-right: 2px solid #e5e5e5;
 }
 
 .middguard-graph-editor .graph {
@@ -103,6 +113,45 @@
 
 .middguard-graph-editor .node:hover .run:active {
   fill: rgb(167, 167, 167);
+}
+
+.middguard-graph-editor .detail {
+  float: left;
+  width: 400px;
+  height: calc(100% - 41px);
+  padding: 10px;
+}
+
+.middguard-graph-editor .detail h4 {
+  margin: 0;
+}
+
+.middguard-graph-editor .detail .connection-list {
+  width: 50%;
+  float: left;
+}
+
+.middguard-graph-editor .detail .connection-list li {
+  padding: 8px 12px;
+  background-color: #e9eaed;
+  border: 1px solid #e5e5e5;
+  border-radius: 5px;
+}
+
+.middguard-graph-editor .detail .connection-list.outputs li {
+  text-align: right;
+}
+
+.middguard-graph-editor .detail .connection-list.outputs li {
+  margin: 5px 5px 5px 0;
+}
+
+.middguard-graph-editor .detail .connection-list.inputs h5 {
+  margin-left: 5px;
+}
+
+.middguard-graph-editor .detail .connection-list.inputs li {
+  margin: 5px 0 5px 5px;
 }
 
 .input-tooltip {

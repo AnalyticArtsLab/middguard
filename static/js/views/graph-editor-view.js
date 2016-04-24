@@ -12,6 +12,7 @@ var middguard = middguard || {};
 
     initialize: function(options) {
       this.graph = options.graph;
+      this.detailView = null;
 
       this.listenTo(middguard.PackagedModules, 'reset', this.addModules);
       this.listenTo(middguard.Nodes, 'reset', this.addAllNodes);
@@ -19,13 +20,13 @@ var middguard = middguard || {};
       this.listenTo(middguard.Nodes, 'add', this.addNode);
       this.listenTo(middguard.Nodes, 'add', this.addConnectorGroup)
 
-      middguard.PackagedModules.fetch({reset: true});
-      middguard.Nodes.fetch({reset: true});
+      middguard.PackagedModules.fetch({reset: true, data: {}});
+      middguard.Nodes.fetch({reset: true, data: {}});
     },
 
     render: function() {
       this.$el.html(this.template(this.graph.toJSON()));
-      d3.select(this.el).append('svg')
+      d3.select(this.el).select('.editor').append('svg')
           .attr('class', 'graph')
           .attr('width', 500);
 
@@ -35,7 +36,7 @@ var middguard = middguard || {};
     },
 
     resizeEditor: function() {
-      d3.select(this.el).select('svg')
+      d3.select(this.el).select('.editor svg')
           .attr('height', $(window).height() - this.$('.header').outerHeight());
     },
 
@@ -55,7 +56,7 @@ var middguard = middguard || {};
         return;
       }
 
-      var view = new NodeView({model: node, editorElement: this.el});
+      var view = new NodeView({model: node, editor: this});
       this.$('.graph').append(view.render().el);
     },
 
@@ -74,6 +75,15 @@ var middguard = middguard || {};
 
     addAllConnectorGroups: function() {
       middguard.Nodes.each(this.addConnectorGroup, this);
+    },
+
+    setDetailView: function(view) {
+      if (this.detailView) {
+        this.detailView.remove();
+      }
+
+      this.$('.detail').html(view.render().el);
+      this.detailView = view;
     }
   });
 
@@ -249,11 +259,12 @@ var middguard = middguard || {};
       'mouseout .input': 'hideInputTooltip',
       'click .input': 'toggleInputSelected',
       'click .output': 'toggleOutputSelected',
-      'click .run': 'runNode'
+      'click .run': 'runNode',
+      'click': 'toggleDetail'
     },
 
     initialize: function(options) {
-      this.editor = options.editorElement;
+      this.editor = options.editor;
       this.model = options.model;
       this.module = middguard.PackagedModules.findWhere({
         name: this.model.get('module')
@@ -321,7 +332,7 @@ var middguard = middguard || {};
       var y = d3.event.y;
       var r = this.model.get('radius');
 
-      var svg = d3.select(this.editor).select('svg');
+      var svg = d3.select(this.editor.el).select('svg');
       var bounds = {x: svg.attr('width'), y: svg.attr('height')};
 
       // Prevent element from being dragged out bounds
@@ -437,6 +448,12 @@ var middguard = middguard || {};
       // }
     },
 
+    toggleDetail: function() {
+      var view = new NodeDetailView({model: this.model});
+
+      this.editor.setDetailView(view);
+    },
+
     dragHandlePosition: function() {
       var r = this.model.get('radius');
       return {
@@ -480,6 +497,58 @@ var middguard = middguard || {};
         x: baseX + 15 * rowIndexX,
         y: baseY + 15 * rowIndexY
       };
+    }
+  });
+
+  var NodeDetailView = Backbone.View.extend({
+    initialize: function() {
+      this.connections = JSON.parse(this.model.get('connections'));
+      this.module = middguard.PackagedModules.findWhere({
+        name: this.model.get('module')
+      });
+    },
+
+    template: _.template(
+      `<h4><%- name %></h4>
+      <div class="connection-groups"><div>`),
+
+    connectionGroupTemplate: _.template($('#connection-group-template').html()),
+
+    render: function() {
+      this.$el.html(this.template({
+        name: this.module.get('displayName')
+      }));
+
+      this.addAllConnectionGroups();
+
+      return this;
+    },
+
+    addAllConnectionGroups: function() {
+      _.each(this.connections, (value, key) => {
+        var inputs = value.connections.map(connection => connection.input),
+            outputs = value.connections.map(connection => connection.output),
+            outputNode = middguard.Nodes.get(value.output_node),
+            outputModule = middguard.PackagedModules.findWhere({
+              name: outputNode.get('module')
+            });
+
+        this.$('.connection-groups').prepend(this.connectionGroupTemplate({
+          inputGroupName: key,
+          inputs: inputs,
+          outputModuleName: outputModule.get('displayName'),
+          outputs: outputs
+        }));
+      });
+    },
+
+    unconnectedOutputs: function(inputGroup) {
+      var connections = this.connections,
+          outputNode = connections[inputGroup].outputNode,
+          outputModule = middguard.PackagedModules.get(outputNode),
+          connected = connections[inputGroup].connections.map(c => c.output);
+
+      return _.difference(outputModule, connected)
     }
   });
 })();

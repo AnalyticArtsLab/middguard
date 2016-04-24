@@ -3,7 +3,11 @@ script(type="text/template", id="graph-editor-template").
     <h4><%= name %></h4>
   </div>
   <div class="sidebar">
+    <h4>Modules</h4>
     <ul class="modules-list"></ul>
+  </div>
+  <div class="editor"></div>
+  <div class="detail">
   </div>
 
 script(type="text/template", id="graph-node-template").
@@ -33,3 +37,23 @@ script(type="text/template", id="graph-node-template").
   <% if (output) { %>
     <circle class="connector output" r="5" cx="<%= r %>" cy="<%= 2 * r - 10 %>">
   <% } %>
+
+script(type="text/template", id="connection-group-template").
+  <div class="connection-list-group clearfix">
+    <div class="connection-list outputs">
+      <h5><%- outputModuleName %></h5>
+      <ul class="list-unstyled">
+      <% outputs.forEach(function(output) { %>
+        <li><%- output %></li>
+      <% }); %>
+      </ul>
+    </div>
+    <div class="connection-list inputs">
+      <h5><%- inputGroupName %></h5>
+      <ul class="list-unstyled">
+      <% inputs.forEach(function(input) { %>
+        <li><%- input %></li>
+      <% }); %>
+      </ul>
+    </div>
+  </div>
