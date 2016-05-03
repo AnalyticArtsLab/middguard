@@ -164,6 +164,23 @@
   border-color: rgb(250, 122, 122);
 }
 
+.middguard-graph-editor .detail .connection-list li.connection.selected {
+  border-width: 2px;
+}
+
+.middguard-graph-editor .detail .connection-list li.connection.selected.input {
+  border-color: rgb(77, 153, 73);
+}
+
+.middguard-graph-editor .detail .connection-list li.connection.selected.output {
+  border-color: rgb(207, 57, 57);
+}
+
+
+.middguard-graph-editor .detail .connection-list li.connection.selected.unconnected {
+  border-color: #b1b1b1;
+}
+
 .input-tooltip {
   position: absolute;
   padding: 10px;

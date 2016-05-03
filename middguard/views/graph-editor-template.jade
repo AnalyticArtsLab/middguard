@@ -39,7 +39,8 @@ script(type="text/template", id="graph-node-template").
   <% } %>
 
 script(type="text/template", id="connection-group-template").
-  <div class="connection-list-group clearfix">
+  <div class="connection-list-group clearfix"
+    data-inputgroup="<%- inputGroupName %>">
     <div class="connection-list outputs">
       <h5><%- outputModuleName %></h5>
       <ul class="list-unstyled">

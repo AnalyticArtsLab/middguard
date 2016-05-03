@@ -504,6 +504,12 @@ var middguard = middguard || {};
     initialize: function() {
       this.connections = JSON.parse(this.model.get('connections'));
       this.module = this.model.module();
+
+      this.selectedInputGroup = null;
+      this.selectedOutput = null;
+      this.selectedInput = null;
+
+      this.listenTo(this.model, 'change', this.render);
     },
 
     template: _.template(
@@ -511,6 +517,10 @@ var middguard = middguard || {};
       <div class="connection-groups"><div>`),
 
     connectionGroupTemplate: _.template($('#connection-group-template').html()),
+
+    events: {
+      'click .connection': 'selectConnector',
+    },
 
     render: function() {
       this.$el.html(this.template({
@@ -540,6 +550,77 @@ var middguard = middguard || {};
           unconnectedOutputs: this.model.unconnectedOutputs(key)
         }));
       });
+    },
+
+    deselectOutput: function() {
+      this.selectedOutput = null;
+      this.$('.connection.output').removeClass('selected');
+    },
+
+    deselectInput: function() {
+      this.selectedInput = null;
+      this.$('.connection.input').removeClass('selected');
+    },
+
+    selectConnector: function(event) {
+      var $clicked = $(event.target),
+          group = $clicked.closest('.connection-list-group').data('inputgroup'),
+          name = $clicked.text(),
+          isInput = $clicked.hasClass('input'),
+          isOutput = $clicked.hasClass('output'),
+          sameGroup = this.selectedInputGroup === group;
+
+      console.log(this.selectedInputGroup, group, sameGroup);
+
+      if (isInput) {
+        if (sameGroup) this.deselectInput();
+        else this.deselectOutput();
+
+        this.selectedInput = name;
+      }
+
+      if (isOutput) {
+        if (sameGroup) this.deselectOutput();
+        else this.deselectInput();
+
+        this.selectedOutput = name;
+      }
+
+      this.selectedInputGroup = group;
+      $clicked.addClass('selected');
+      this.connectSelection();
+    },
+
+    connectSelection: function() {
+      if (!this.selectedInputGroup ||
+          !this.selectedInput ||
+          !this.selectedOutput) {
+        return;
+      }
+
+      var connections = this.connections[this.selectedInputGroup].connections;
+
+      var exists = _.find(connections, {input: this.selectedInput}) ||
+                   _.find(connections, {output: this.selectedOutput});
+
+      if (exists) {
+        exists.input = this.selectedInput;
+        exists.output = this.selectedOutput;
+      } else {
+        connections.push({
+          input: this.selectedInput,
+          output: this.selectedOutput
+        });
+      }
+
+      this.connections[this.selectedInputGroup].connections = connections;
+
+      this.deselectInput();
+      this.deselectOutput();
+      this.selectedInputGroup = null;
+
+      this.model.set('connections', JSON.stringify(this.connections));
+      this.model.save();
     }
   });
 })();
