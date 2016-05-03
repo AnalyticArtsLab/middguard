@@ -62,6 +62,10 @@
   cursor: pointer;
 }
 
+.middguard-graph-editor .node.selected circle {
+  stroke-width: 4px;
+}
+
 .connector.input {
   fill: rgb(35, 171, 36);
 }

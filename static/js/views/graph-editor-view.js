@@ -451,6 +451,9 @@ var middguard = middguard || {};
     toggleDetail: function() {
       var view = new NodeDetailView({model: this.model});
 
+      this.editor.$('.node').removeClass('selected');
+      this.$el.addClass('selected');
+
       this.editor.setDetailView(view);
     },
 
@@ -569,8 +572,6 @@ var middguard = middguard || {};
           isInput = $clicked.hasClass('input'),
           isOutput = $clicked.hasClass('output'),
           sameGroup = this.selectedInputGroup === group;
-
-      console.log(this.selectedInputGroup, group, sameGroup);
 
       if (isInput) {
         if (sameGroup) this.deselectInput();
