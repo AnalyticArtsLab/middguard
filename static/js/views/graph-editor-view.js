@@ -503,9 +503,7 @@ var middguard = middguard || {};
   var NodeDetailView = Backbone.View.extend({
     initialize: function() {
       this.connections = JSON.parse(this.model.get('connections'));
-      this.module = middguard.PackagedModules.findWhere({
-        name: this.model.get('module')
-      });
+      this.module = this.model.module();
     },
 
     template: _.template(
@@ -536,19 +534,12 @@ var middguard = middguard || {};
         this.$('.connection-groups').prepend(this.connectionGroupTemplate({
           inputGroupName: key,
           inputs: inputs,
+          unconnectedInputs: this.model.unconnectedInputs(key),
           outputModuleName: outputModule.get('displayName'),
-          outputs: outputs
+          outputs: outputs,
+          unconnectedOutputs: this.model.unconnectedOutputs(key)
         }));
       });
-    },
-
-    unconnectedOutputs: function(inputGroup) {
-      var connections = this.connections,
-          outputNode = connections[inputGroup].outputNode,
-          outputModule = middguard.PackagedModules.get(outputNode),
-          connected = connections[inputGroup].connections.map(c => c.output);
-
-      return _.difference(outputModule, connected)
     }
   });
 })();

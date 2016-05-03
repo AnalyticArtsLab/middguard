@@ -44,7 +44,10 @@ script(type="text/template", id="connection-group-template").
       <h5><%- outputModuleName %></h5>
       <ul class="list-unstyled">
       <% outputs.forEach(function(output) { %>
-        <li><%- output %></li>
+        <li class="connection connected output"><%- output %></li>
+      <% }); %>
+      <% unconnectedOutputs.forEach(function(output) { %>
+        <li class="connection unconnected output"><%- output %></li>
       <% }); %>
       </ul>
     </div>
@@ -52,7 +55,10 @@ script(type="text/template", id="connection-group-template").
       <h5><%- inputGroupName %></h5>
       <ul class="list-unstyled">
       <% inputs.forEach(function(input) { %>
-        <li><%- input %></li>
+        <li class="connection connected input"><%- input %></li>
+      <% }); %>
+      <% unconnectedInputs.forEach(function(input) { %>
+        <li class="connection unconnected input"><%- input %></li>
       <% }); %>
       </ul>
     </div>

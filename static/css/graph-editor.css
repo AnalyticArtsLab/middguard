@@ -154,6 +154,16 @@
   margin: 5px 0 5px 5px;
 }
 
+.middguard-graph-editor .detail .connection-list li.connected.input {
+  background-color: rgb(126, 196, 123);
+  border-color: rgb(99, 198, 95);
+}
+
+.middguard-graph-editor .detail .connection-list li.connected.output {
+  background-color: rgb(255, 150, 150);
+  border-color: rgb(250, 122, 122);
+}
+
 .input-tooltip {
   position: absolute;
   padding: 10px;

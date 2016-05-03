@@ -52,6 +52,41 @@ var middguard = middguard || {};
 
     statusText: function() {
       return this.statusMap[this.get('status')];
+    },
+
+    module: function() {
+      return middguard.PackagedModules.findWhere({
+        name: this.get('module')
+      });
+    },
+
+    unconnectedInputs: function(inputGroup) {
+      var connections = JSON.parse(this.get('connections'))[inputGroup],
+          allInputs = _.find(this.module().get('inputs'),
+                             {name: inputGroup}).inputs;
+
+      if (!connections) {
+        return allInputs;
+      }
+
+      var connectedInputs = connections.connections.map(c => c.input);
+      return _.difference(allInputs, connectedInputs);
+    },
+
+    unconnectedOutputs: function(inputGroup) {
+      var connections = JSON.parse(this.get('connections'))[inputGroup];
+
+      if (!connections.output_node) {
+        return [];
+      }
+
+      var connectedOutputs = connections.connections.map(c => c.output);
+      var outputNode = middguard.Nodes.get(connections.output_node);
+      var allOutputs = middguard.PackagedModules
+          .find({name: outputNode.get('module')})
+          .get('outputs');
+
+      return _.difference(allOutputs, connectedOutputs);
     }
   });
 })();
