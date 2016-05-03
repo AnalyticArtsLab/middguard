@@ -20,9 +20,7 @@ body {
 
 .middguard-views {
   height: 100%;
-  left: 300px;
-  margin: 0px;
-  position: absolute;
+  margin: 0 0 0 300px;
   white-space: nowrap;
   z-index: 1;
 }
@@ -100,9 +98,6 @@ body {
 
 .middguard-module {
   display: inline-block;
-  float: left;
-  position: relative;
-  left: 0px;
   height: 100%;
   overflow-y: scroll;
   overflow-x: auto;
