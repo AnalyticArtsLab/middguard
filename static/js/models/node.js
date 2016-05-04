@@ -87,6 +87,10 @@ var middguard = middguard || {};
           .get('outputs');
 
       return _.difference(allOutputs, connectedOutputs);
+    },
+
+    isVisualization: function() {
+      return this.module().get('visualization');
     }
   });
 })();

@@ -1,7 +1,7 @@
 var middguard = middguard || {};
 
 (function() {
-  var HashtagsTableView = middguard.View.extend({
+  var HoursHeatmapView = middguard.View.extend({
     id: 'hashtags-table',
 
     className: 'list-unstyled',
@@ -16,15 +16,20 @@ var middguard = middguard || {};
       '<tr><td><%= hashtag %></td><td><%= count %></td></tr>'
     ),
 
-    initialize: function(options) {
-      this.fetch(this.model)
+    initialize: function() {
+      this.context = this.createContext();
+
+      this.listenTo(this.context.inputs.hours.collection, 'reset', this.render);
+
+      this.context.inputs.hours.collection.fetch({reset: true, data: {}});
     },
 
     render: function() {
+      console.log(this.context.inputs.hours.collection)
 
+      return this;
     }
   });
 
-  middguard.HashtagsTableView = HashtagsTableView;
-  middguard.addModule('HashtagsTableView', HashtagsTableView);
+  middguard.addModule('HoursHeatmapView', HoursHeatmapView);
 })();

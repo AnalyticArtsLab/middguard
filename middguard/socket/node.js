@@ -7,6 +7,7 @@ exports.create = function(socket, data, callback) {
   new Node()
   .save(data, {clientCreate: true})
   .then(node => {
+    node.createReadSocket(socket);
     callback(null, node.toJSON());
     socket.broadcast.emit('nodes:create', node.toJSON());
   });

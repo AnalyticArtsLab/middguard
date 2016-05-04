@@ -31,6 +31,9 @@ module.exports = function (socket) {
   patchModelToEmit(socket, 'graph', Graph);
   setupSocketEvents(socket, 'graph', Graph);
 
+  Bookshelf.model('Node').fetchAll()
+  .then(nodes => nodes.each(node => node.createReadSocket(socket)));
+
   // Set up sockets to call analytics from client
   // Patched models will automatically emit create, update, and delete events
   // Bookshelf.collection('analytics').each(function (analyticsAttrs) {

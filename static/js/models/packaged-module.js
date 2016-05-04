@@ -4,7 +4,8 @@ var middguard = middguard || {};
   middguard.PackagedModule = Backbone.Model.extend({
     defaults: {
       'name': '',
-      'main': ''
+      'main': '',
+      visualization: false
     }
   });
 })();

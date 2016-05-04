@@ -62,7 +62,11 @@
   cursor: pointer;
 }
 
-.middguard-graph-editor .node.selected circle {
+.middguard-graph-editor .node.visualization circle.outline {
+  stroke: orange;
+}
+
+.middguard-graph-editor .node.selected circle.outline {
   stroke-width: 4px;
 }
 

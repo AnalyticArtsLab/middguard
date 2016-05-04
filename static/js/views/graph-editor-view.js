@@ -17,8 +17,9 @@ var middguard = middguard || {};
       this.listenTo(middguard.PackagedModules, 'reset', this.addModules);
       this.listenTo(middguard.Nodes, 'reset', this.addAllNodes);
       this.listenTo(middguard.Nodes, 'reset', this.addAllConnectorGroups);
+      this.listenTo(middguard.Nodes, 'reset', this.ensureEntityCollections);
       this.listenTo(middguard.Nodes, 'add', this.addNode);
-      this.listenTo(middguard.Nodes, 'add', this.addConnectorGroup)
+      this.listenTo(middguard.Nodes, 'add', this.addConnectorGroup);
 
       middguard.PackagedModules.fetch({reset: true, data: {}});
       middguard.Nodes.fetch({reset: true, data: {}});
@@ -33,6 +34,22 @@ var middguard = middguard || {};
       this.resizeEditor();
 
       return this;
+    },
+
+    ensureEntityCollections: function() {
+      middguard.Nodes.each(this.ensureEntityCollection, this);
+    },
+
+    ensureEntityCollection: function(node) {
+      var tableName = node.get('table');
+
+      if (!tableName || middguard.entities[tableName]) return;
+
+      var collection = new middguard.EntityCollection([], {
+        url: tableName
+      });
+
+      middguard.entities[tableName] = collection;
     },
 
     resizeEditor: function() {
@@ -317,6 +334,10 @@ var middguard = middguard || {};
         this.d3el.select('.output')
             .classed('selected', true);
 
+      if (this.model.isVisualization())
+        this.d3el.classed('visualization', true);
+
+
       return this;
     },
 
@@ -441,11 +462,11 @@ var middguard = middguard || {};
     },
 
     runNode: function() {
-      // if (this.get('visualization')) {
-      //   middguard.activateView(this.model.get('main'));
-      // } else {
+      if (this.model.isVisualization()) {
+        middguard.toggleView(this.model.get('id'));
+      } else {
         this.model.run();
-      // }
+      }
     },
 
     toggleDetail: function() {

@@ -1,7 +1,7 @@
 var path = require('path');
 
 exports.inputs = [
-  {name: 'hours', inputs: ['day', 'hour', 'count1', 'count2', 'difference']}
+  {name: 'hours', inputs: ['day', 'hour', 'count1', 'count2']}
 ];
 
 exports.outputs = [];
