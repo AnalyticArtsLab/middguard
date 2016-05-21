@@ -1,11 +1,13 @@
 var _ = require('lodash');
 var Promise = require('bluebird');
+var moment = require('moment');
 
 exports.inputs = [
   {name: 'tweets', inputs: ['handle', 'tweet', 'timestamp']}
 ];
 
 exports.outputs = [
+  'handle',
   'day',
   'hour',
   'count'
@@ -15,38 +17,34 @@ exports.displayName = 'Time by Day/Hour';
 
 exports.createTable = function(tableName, knex) {
   return knex.schema.createTable(tableName, function(table) {
-    table.string('hashtag');
+    table.string('handle');
+    table.integer('day');
+    table.integer('hour');
     table.integer('count');
   });
 };
 
 exports.handle = function(context) {
   var tweets = context.inputs.tweets,
-      hashtagCol = context.inputs.tweets.cols.hashtags,
-      hashtags = {},
-      hashtagsArray = [];
+      timestampCol = context.inputs.tweets.cols.timestamp,
+      week = [];
 
-  return tweets.knex.select(hashtagCol)
+  _.range(24).forEach(function(hour) {
+    _.range(7).forEach(function(day) {
+      week.push({day: day, hour: hour, count: 0});
+    });
+  });
+
+  return tweets.knex.select('*')
   .then(function(tweets) {
     tweets.forEach(function(tweet) {
-      tweet.hashtags.split(',').forEach(function(hashtag) {
-        if (_.has(hashtags, hashtag)) {
-          hashtags[hashtag]++;
-        } else {
-          hashtags[hashtag] = 1;
-        }
-      });
+      var m = moment(tweet[timestampCol]),
+          day = +m.format('d'),
+          hour = +m.format('H');
+
+      _.find(week, {day: day, hour: hour}).count++;
     });
 
-    _.each(hashtags, function(count, hashtag) {
-      hashtagsArray.push({
-        hashtag: hashtag,
-        count: count
-      });
-    });
-
-    return Promise.each(_.chunk(hashtagsArray, 200), function(chunk) {
-      return context.table.knex.insert(chunk);
-    });
+    return context.table.knex.insert(week);
   });
 };

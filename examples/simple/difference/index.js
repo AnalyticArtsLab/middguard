@@ -18,38 +18,35 @@ exports.displayName = 'Difference by Hour';
 
 exports.createTable = function(tableName, knex) {
   return knex.schema.createTable(tableName, function(table) {
-    table.string('hashtag');
-    table.integer('count');
+    table.integer('day');
+    table.integer('hour');
+    table.integer('count1');
+    table.integer('count2');
+    table.integer('difference');
   });
 };
 
 exports.handle = function(context) {
-  var tweets = context.inputs.tweets,
-      hashtagCol = context.inputs.tweets.cols.hashtags,
-      hashtags = {},
-      hashtagsArray = [];
+  var tweets1 = context.inputs.tweets1,
+      tweets2 = context.inputs.tweets2,
+      week = [];
 
-  return tweets.knex.select(hashtagCol)
-  .then(function(tweets) {
-    tweets.forEach(function(tweet) {
-      tweet.hashtags.split(',').forEach(function(hashtag) {
-        if (_.has(hashtags, hashtag)) {
-          hashtags[hashtag]++;
-        } else {
-          hashtags[hashtag] = 1;
-        }
+  return Promise.join(tweets1.knex.select('*'), tweets2.knex.select('*'),
+  function(tweets1, tweets2) {
+    _.range(24).forEach(function(hour) {
+      _.range(7).forEach(function(day) {
+        var count1 = _.find(tweets1, {hour: hour, day: day}).count;
+        var count2 = _.find(tweets2, {hour: hour, day: day}).count;
+        week.push({
+          day: day,
+          hour: hour,
+          count1: count1,
+          count2: count2,
+          difference: Math.abs(count1 - count2)
+        });
       });
     });
 
-    _.each(hashtags, function(count, hashtag) {
-      hashtagsArray.push({
-        hashtag: hashtag,
-        count: count
-      });
-    });
-
-    return Promise.each(_.chunk(hashtagsArray, 200), function(chunk) {
-      return context.table.knex.insert(chunk);
-    });
+    return context.table.knex.insert(week);
   });
 };

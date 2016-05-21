@@ -1,0 +1,48 @@
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis path {
+  fill: none;
+  stroke: none;
+}
+
+span.count1, span.count2 {
+  font-size: 16px;
+}
+
+span.count1 {
+  color: orange;
+  padding-right: 10px;
+}
+
+span.count2 {
+  color: steelblue;
+}
+
+.heatmap-tooltip {
+  position: absolute;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.7);
+  visibility: hidden;
+  z-index: 1;
+}
+
+.heatmap-tooltip:after {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  width: 0;
+  border-top: 5px solid rgba(0, 0, 0, 0.7);
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  content: " ";
+}

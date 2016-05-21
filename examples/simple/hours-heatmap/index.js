@@ -13,11 +13,11 @@ exports.visualization = true;
 exports.static = path.join(__dirname, 'static');
 
 exports.js = [
-  "hashtags-table-view.js"
+  "hours-heatmap-view.js"
 ];
 
 exports.css = [
-  "hashtags-table.css"
+  "hours-heatmap.css"
 ];
 
 exports.mainView = 'HoursHeatmapView';
