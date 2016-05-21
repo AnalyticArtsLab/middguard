@@ -16,7 +16,7 @@ var middguard = middguard || {};
       this.listenTo(middguard.Graphs, 'add', this.addOneGraph);
       this.listenTo(middguard.Graphs, 'reset', this.addAllGraphs);
 
-      middguard.Graphs.fetch({reset: true});
+      middguard.Graphs.fetch({reset: true, data: {}});
     },
 
     render: function() {
@@ -41,7 +41,8 @@ var middguard = middguard || {};
       e.preventDefault();
       var name = this.$('#new-graph-name').val().trim();
 
-      middguard.Graphs.create({name: name});
+      middguard.Graphs.create({name: name}, {wait: true});
+      this.$('#new-graph-name').val('');
     }
   });
 

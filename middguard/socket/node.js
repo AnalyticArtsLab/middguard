@@ -164,7 +164,7 @@ exports.run = function(socket, data, callback) {
   })
   .then(function(node) {
     socket.emit('nodes:update', node.toJSON());
-    socket.broadcast.emit('nodes:emit', node.toJSON());
+    socket.broadcast.emit('nodes:update', node.toJSON());
   })
   .catch(callback);
 };
