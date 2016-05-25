@@ -3,6 +3,7 @@ module.exports = {
   js: [
     'setup.js',
     'visualization-manager.js',
+    'entities.js',
 
     'models/analyst.js',
     'models/message.js',

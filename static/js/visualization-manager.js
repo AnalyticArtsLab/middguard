@@ -114,6 +114,44 @@ var middguard = middguard || {};
     }
   };
 
+  // Internal hash of module views
+  middguard.__modules = {};
+
+  // Internal hash of submodule views
+  middguard.__submodules = {};
+
+  /* middguard.addModule
+   * Makes MiddGuard aware of a top level view.
+   * Top level views are listed under "Modules" in the sidebar.
+   */
+  middguard.addModule = function (name, view) {
+    _addView(name, view, true /* top level */);
+  };
+
+  /* middguard.addSubview
+   * Makes MiddGuard aware of a subview (a view instantiated from another view)
+   * Subviews are not listed in the sidebar, but have models they fetch tracked
+   * and removed when the view is removed.
+   */
+  middguard.addSubview = function (name, view) {
+    _addView(name, view, false /* not top level */);
+  };
+
+  var _addView = function (name, view, topLevel) {
+    if (!Object.prototype.hasOwnProperty.call(middguard.__modules, name)) {
+      view.prototype.middguard_view_name = name;
+      view.prototype.middguard_entities = [];
+
+      if (topLevel) {
+        middguard.__modules[name] = {ctor: view, live: null};
+      } else {
+        middguard.__submodules[name] = {ctor: view, live: null};
+      }
+    } else {
+      throw new Error('Module ' + name + ' already loaded');
+    }
+  };
+
   /* Remove elements from an array.
    * arr is the array to remove from (param 0).
    * Elements to remove are arguments 1 .. n.
