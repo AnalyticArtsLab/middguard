@@ -6,11 +6,11 @@ var middguard = middguard || {};
   var Analysts = Backbone.Collection.extend({
     model: middguard.Analyst,
     url: 'analysts',
-    initialize: function () {
+    initialize: function() {
       _.bindAll(this, 'serverCreate');
       this.ioBind('create', this.serverCreate, this);
     },
-    serverCreate: function (data) {
+    serverCreate: function(data) {
       var exists = this.get(data.id);
       if (!exists) {
         this.add(data);

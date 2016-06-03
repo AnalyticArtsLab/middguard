@@ -8,5 +8,5 @@ bower_components/
 nosync
 packages/demo/modules/bar-chart-messages2
 
-# Data is usually too big to store in git
-data/
+# Data used to test the legacy MiddGuard framework, before modularization
+legacy-data/

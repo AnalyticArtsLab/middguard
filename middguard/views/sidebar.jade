@@ -1,0 +1,20 @@
+script(type="text/template", id="sidebar-template").
+  <h1 class="title">MiddGuard</h1>
+  <ul class="nav nav-pills">
+    <li role="presentation" id="toggle-user">
+      <a href="#" class="toggle">#{user.username}</a>
+    </li>
+    <li role="presentation" id="toggle-graphs">
+      <a href="#" class="toggle">Graphs</a>
+    </li>
+    <li role="presentation" id="toggle-messages">
+      <a href="#" class="toggle">Messages</a>
+    </li>
+  </ul>
+  <div class="toggle-panel" id="panel-user">
+  <form class="logout" action="/logout" method="post">
+    <input class="btn btn-default" type="submit" value="Logout">
+  </form>
+  </div>
+  <div class="toggle-panel" id="panel-graphs"></div>
+  <div class="toggle-panel" id="panel-messages"></div>

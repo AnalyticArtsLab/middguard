@@ -7,47 +7,28 @@ var middguard = middguard || {};
     id: 'middguard-packages',
     template: _.template(
       '<div id="middguard-packages-list">' +
-        '<h3>Modules</h3><div id="middguard-packages-modules"></div>' +
-        '<h3>Models</h3><div id="middguard-packages-models"></div>' +
-        '<h3>Analytics</h3><div id="middguard-packages-analytics"></div>' +
+        '<h3>Graphs</h3><div id="middguard-graphs"></div>' +
+        '<h3>Modules</h3><div id="middguard-modules"></div>' +
       '</div>'
     ),
     initialize: function () {
-      _.bindAll(this,
-        'addAllModules',
-        'addAllModels',
-        'addAllAnalytics',
-        'addAll');
+      this.listenTo(middguard.Graphs, 'reset', this.addAllGraphs);
 
-      this.listenTo(middguard.PackagedModules, 'reset', this.addAllModules);
-      this.listenTo(middguard.PackagedModels, 'reset', this.addAllModels);
-      this.listenTo(middguard.PackagedAnalytics, 'reset', this.addAllAnalytics);
-
-      this.listenTo(middguard.PackagedModels, 'reset', this.createCollections);
-
-      middguard.PackagedModules.fetch({reset: true});
-      middguard.PackagedModels.fetch({reset: true});
-      middguard.PackagedAnalytics.fetch({reset: true});
-
-      middguard.Relationships.fetch();
+      middguard.Graphs.fetch({reset: true});
     },
     render: function () {
       this.$el.html(this.template());
-      this.$modules = this.$('#middguard-packages-modules');
-      this.$models = this.$('#middguard-packages-models');
-      this.$analytics = this.$('#middguard-packages-analytics');
-      var sWidth = screen.width;
+      this.$modules = this.$('#middguard-modules');
+      this.$graphs = this.$('#middguard-graphs');
+
       $('body').append('<div id="modules-container"/>');
       return this;
     },
     addAllModules: function () {
-      this.addAll(middguard.PackagedModules, 'module', this.$modules);
+      this.addAll(middguard.Modules, 'module', this.$modules);
     },
-    addAllModels: function () {
-      this.addAll(middguard.PackagedModels, 'model', this.$models);
-    },
-    addAllAnalytics: function () {
-      this.addAll(middguard.PackagedAnalytics, 'analytics', this.$analytics);
+    addAllGraphs: function () {
+      this.addAll(middguard.Graphs, 'graph', this.$analytics);
     },
     addAll: function (collection, type, container) {
       collection.each(_.bind(function (model) {

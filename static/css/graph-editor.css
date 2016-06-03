@@ -1,0 +1,215 @@
+.middguard-graph-editor {
+  height: 100%;
+  border-right: 2px solid #e5e5e5;
+}
+
+.middguard-graph-editor .header {
+  border-bottom: 2px solid #e5e5e5;
+  padding: 10px;
+}
+
+.middguard-graph-editor .header h4 {
+  margin: 0;
+}
+
+.middguard-graph-editor .sidebar {
+  height: calc(100% - 41px);
+  float: left;
+  border-right: 2px solid #e5e5e5;
+}
+
+.middguard-graph-editor .sidebar h4 {
+  margin: 10px;
+}
+
+.middguard-graph-editor .modules-list {
+  list-style: none;
+  padding: 0;
+}
+
+.middguard-graph-editor .modules-list li {
+  display: block;
+  margin: 10px;
+}
+
+.middguard-graph-editor .editor {
+  float: left;
+  border-right: 2px solid #e5e5e5;
+}
+
+.middguard-graph-editor .graph {
+  overflow: hidden;
+}
+
+.middguard-graph-editor .node .outline {
+  stroke: steelblue;
+  stroke-width: 2px;
+  fill: #fff;
+}
+
+.middguard-graph-editor .node circle.drag-handle {
+  fill: transparent;
+}
+
+.middguard-graph-editor .node .drag-handle {
+  fill: none;
+}
+
+.middguard-graph-editor .node:hover path.drag-handle {
+  fill: transparent;
+  stroke: rgb(194, 194, 194);
+  stroke-width: 2px;
+  cursor: pointer;
+}
+
+.middguard-graph-editor .node.visualization circle.outline {
+  stroke: orange;
+}
+
+.middguard-graph-editor .node.selected circle.outline {
+  stroke-width: 4px;
+}
+
+.connector.input {
+  fill: rgb(35, 171, 36);
+}
+
+.connector.output {
+  fill: rgb(195, 63, 63);
+}
+
+.connector.selected {
+  stroke: #000;
+  stroke-width: 2px;
+}
+
+.middguard-graph-editor .connecting-line {
+  stroke: #000;
+  stroke-width: 2px;
+  fill: none;
+  pointer-events: none;
+}
+
+.middguard-graph-editor .status {
+  font-size: 12px;
+}
+
+.middguard-graph-editor .status.status-0 {
+  fill: rgb(226, 104, 87);
+}
+
+.middguard-graph-editor .status.status-1 {
+  fill: rgb(230, 222, 13);
+}
+
+.middguard-graph-editor .status.status-2 {
+  fill: rgb(81, 210, 141);
+}
+
+.middguard-graph-editor .run {
+  fill: none;
+  cursor: pointer;
+}
+
+.middguard-graph-editor .node:hover .run {
+  fill: rgb(194, 194, 194);
+}
+
+.middguard-graph-editor .node:hover .run:hover {
+  fill: rgb(182, 182, 182);
+}
+
+.middguard-graph-editor .node:hover .run:active {
+  fill: rgb(167, 167, 167);
+}
+
+.middguard-graph-editor .detail {
+  float: left;
+  width: 400px;
+  height: calc(100% - 41px);
+  padding: 10px;
+}
+
+.middguard-graph-editor .detail h4 {
+  margin: 0;
+}
+
+.middguard-graph-editor .detail .connection-list {
+  width: 50%;
+  float: left;
+}
+
+.middguard-graph-editor .detail .connection-list li {
+  padding: 8px 12px;
+  background-color: #e9eaed;
+  border: 1px solid #e5e5e5;
+  border-radius: 5px;
+}
+
+.middguard-graph-editor .detail .connection-list.outputs li {
+  text-align: right;
+}
+
+.middguard-graph-editor .detail .connection-list.outputs li {
+  margin: 5px 5px 5px 0;
+}
+
+.middguard-graph-editor .detail .connection-list.inputs h5 {
+  margin-left: 5px;
+}
+
+.middguard-graph-editor .detail .connection-list.inputs li {
+  margin: 5px 0 5px 5px;
+}
+
+.middguard-graph-editor .detail .connection-list li.connected.input {
+  background-color: rgb(126, 196, 123);
+  border-color: rgb(99, 198, 95);
+}
+
+.middguard-graph-editor .detail .connection-list li.connected.output {
+  background-color: rgb(255, 150, 150);
+  border-color: rgb(250, 122, 122);
+}
+
+.middguard-graph-editor .detail .connection-list li.connection.selected {
+  border-width: 2px;
+}
+
+.middguard-graph-editor .detail .connection-list li.connection.selected.input {
+  border-color: rgb(77, 153, 73);
+}
+
+.middguard-graph-editor .detail .connection-list li.connection.selected.output {
+  border-color: rgb(207, 57, 57);
+}
+
+
+.middguard-graph-editor .detail .connection-list li.connection.selected.unconnected {
+  border-color: #b1b1b1;
+}
+
+.input-tooltip {
+  position: absolute;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.7);
+  visibility: hidden;
+  z-index: 1;
+}
+
+.input-tooltip:after {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  width: 0;
+  border-top: 5px solid rgba(0, 0, 0, 0.7);
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  content: " ";
+}

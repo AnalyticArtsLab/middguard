@@ -14,14 +14,15 @@
     "bower_components"
   ],
   "dependencies": {
-    "backbone": "~1.1.2",
-    "backbone.iobind": "~0.4.7",
-    "jquery": "~2.1.1",
-    "socket.io-client": "~1.0.6",
-    "d3": "~3.4.11",
+    "backbone": "1.3.x",
+    "jquery": "2.2.x",
+    "socket.io-client": "1.4.x",
+    "d3": "3.5.x",
     "moment": "~2.8.1",
     "pluralize": "~0.0.11",
-    "jQuery-contextMenu":"1.6.7",
-    "jquery-ui": "1.11.4"
+    "jQuery-contextMenu": "1.6.7",
+    "jquery-ui": "1.11.4",
+    "bootstrap": "~3.3.6",
+    "backbone-namespaced-view": "^1.0.0"
   }
 }

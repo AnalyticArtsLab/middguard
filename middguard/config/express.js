@@ -2,48 +2,34 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     connectCookieParser = require('cookie-parser'),
     session = require('express-session'),
-    // SQLiteStore = require('connect-sqlite3')(session),
     KnexSessionStore = require('connect-session-knex')(session),
-    path = require('path'),
-    settings = require('./settings'),
-    env = require('./settings').env,
-    knexConfig = require('./knex')[env],
-    knex = require('knex')(knexConfig);
-
-var root = settings.root;
-var modulesPath = 'packages/' + settings.app + '/modules';
+    path = require('path');
 
 module.exports = function (app) {
-  app.set('showStackError', true);
+  var knex = require('knex')(app.get('knex config'));
 
-  app.use('/static', express.static(path.join(root, '/static')));
-  app.use('/modules', express.static(path.join(root, modulesPath)));
-  /*
-  if (settings.dbType == 'sqlite'){
-    var sessionStore = new SQLiteStore({
-      db: settings.db.substr(0, 9),
-      dir: settings.root
-    });
-  } else {
-    //if dbType == 'pg'
-    */
+  app.set('showStackError', app.get('env') !== 'production');
+
+  app.use('/static', express.static(path.join(__dirname, '..', 'static')));
+  // app.use('/modules', express.static(path.join(root, modulesPath)));
 
   var sessionStore = new KnexSessionStore({ knex: knex });
   app.set('sessionStore', sessionStore);
 
-  var cookieParser = connectCookieParser(settings.SECRET);
+  var cookieParser = connectCookieParser(app.get('secret key'));
   app.set('cookieParser', cookieParser);
 
-  app.use(bodyParser());
+  app.use(bodyParser.urlencoded({extended: true}));
+  app.use(bodyParser.json());
   app.use(cookieParser);
   app.use(session({
     store: sessionStore,
-    secret: settings.SECRET_KEY,
+    secret: app.get('secret key'),
     resave: true,
     saveUninitialized: true,
     cookie: {maxAge: 7 * 24 * 60 * 60 * 1000 } // 1 week
   }));
 
-  app.set('views', path.join(root, 'middguard/views'));
+  app.set('views', path.join('..', 'views'));
   app.set('view engine', 'jade');
 };

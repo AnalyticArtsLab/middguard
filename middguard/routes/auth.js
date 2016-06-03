@@ -1,13 +1,25 @@
+/**
+ * Module dependencies.
+ */
+
 var Promise = require('bluebird'),
-    bcrypt = Promise.promisifyAll(require('bcrypt')),
-    Analyst = require('../models/analyst'),
-    io = require('../../app').get('io');
+    bcrypt = Promise.promisifyAll(require('bcrypt'));
+
+/**
+ * Logged out auth route.
+ */
 
 exports.index = function (req, res) {
   res.render('auth');
 };
 
+/**
+ * Register a new user.
+ */
+
 exports.register = function (req, res) {
+  var Analyst = req.bookshelf.model('Analyst');
+
   if (!req.body.username || !req.body.password || !req.body.passwordConfirm) {
     res.render('auth', {
       register: {
@@ -28,7 +40,6 @@ exports.register = function (req, res) {
         new Analyst({username: req.body.username, password: hash})
         .save()
         .then(function (analyst) {
-          io.sockets.emit('analysts:create', analyst);
           res.render('auth', {
             register: {message: 'Successfully registered!'}
           });
@@ -46,7 +57,13 @@ exports.register = function (req, res) {
   }
 };
 
+/**
+ * Login an existing user.
+ */
+
 exports.login = function (req, res) {
+  var Analyst = req.bookshelf.model('Analyst');
+
   new Analyst({username: req.body.username}).fetch({require: true})
     .then(function (analyst) {
       return Promise.join(bcrypt.compareAsync(req.body.password, analyst.get('password')), analyst);
@@ -74,8 +91,12 @@ exports.login = function (req, res) {
     })
     .catch(function (error) {
       console.log(error);
-    })
+    });
 };
+
+/**
+ * Logout a logged in user.
+ */
 
 exports.logout = function (req, res) {
   req.session.destroy(function (err) {

@@ -1,17 +1,19 @@
 module.exports = {
-  prefix: 'static/bower_components',
+  prefix: 'static',
   js: [
-    'jquery/dist/jquery.js',
-    'underscore/underscore.js',
-    'moment/moment.js',
-    'd3/d3.js',
-    'pluralize/pluralize.js',
-    'socket.io-client/socket.io.js',
-    'backbone/backbone.js',
-    'backbone.iobind/dist/backbone.iosync.js',
-    'backbone.iobind/dist/backbone.iobind.js',
-    'jQuery-contextMenu/src/jquery.contextMenu.js',
-    'jQuery-contextMenu/src/jquery.ui.position.js',
-    'jquery-ui/jquery-ui.js'
+    'bower_components/jquery/dist/jquery.js',
+    'bower_components/underscore/underscore.js',
+    'bower_components/moment/moment.js',
+    'bower_components/d3/d3.js',
+    'bower_components/pluralize/pluralize.js',
+    'bower_components/ocket.io-client/socket.io.js',
+    'bower_components/backbone/backbone.js',
+    'vendor/backbone.iobind/dist/backbone.iosync.js',
+    'vendor/backbone.iobind/dist/backbone.iobind.js',
+    'bower_components/backbone-namespaced-view/index.js',
+    'bower_components/bootstrap/dist/js/bootstrap.js'
+  ],
+  css: [
+    'bower_components/bootstrap/dist/css/bootstrap.css'
   ]
 };

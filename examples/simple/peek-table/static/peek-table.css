@@ -1,0 +1,11 @@
+#hashtags-table {
+  padding: 10px;
+}
+
+#hashtags-table tr:nth-child(even) {
+  background-color: #e5e5e5;
+}
+
+#hashtags-table tr {
+  padding: 4px;
+}

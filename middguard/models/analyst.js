@@ -1,12 +1,20 @@
-require('./message');
-var Bookshelf = require('../../app').get('bookshelf');
+/**
+ * Register the `Analyst` model in the Bookshelf registry.
+ *
+ * @return {Bookshelf.Model}
+ * @private
+ */
 
-var Analyst = Bookshelf.Model.extend({
-  tableName: 'analyst',
-  hidden: ['password'],
-  messages: function () {
-    return this.hasMany('Message');
-  }
-});
+module.exports = function (app) {
+  var Bookshelf = app.get('bookshelf');
 
-module.exports = Bookshelf.model('Analyst', Analyst);
+  var Analyst = Bookshelf.Model.extend({
+    tableName: 'analyst',
+    hidden: ['password'],
+    messages: function () {
+      return this.hasMany('Message');
+    }
+  });
+
+  return Bookshelf.model('Analyst', Analyst);
+};

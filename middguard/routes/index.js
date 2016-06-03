@@ -1,5 +1,14 @@
-var middguard = require('./middguard'),
-  auth = require('./auth');
+var _ = require('lodash'),
+    middguard = require('./middguard'),
+    auth = require('./auth');
+
+/**
+ * Register the default MiddGuard routes in the context of the app.
+ * Routes can reference `this`, the instance of MiddGuard, to access
+ * the already instantiated connection to the database, etc.
+ *
+ * @private
+ */
 
 module.exports = function (app) {
   app.get('/', middguard);

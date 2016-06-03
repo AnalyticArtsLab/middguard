@@ -1,31 +1,50 @@
 #!/usr/bin/env node
 
-var program = require('commander'),
-    chalk = require('chalk'),
-    settings = require('../middguard/config/settings'),
-    knexConfig = require('../middguard/config/knex')[settings.env],
-    knex = require('knex')(knexConfig);
+var program = require('commander');
+var chalk = require('chalk');
+var knex = require('knex');
+var path = require('path');
 
 program
   .version('0.0.1')
-  .option('--model <model>', 'Run all migrations for model <model>')
-  .option('--middguard', 'Run all migrations for MiddGuard')
-  .option('--package <app>', 'Run all model migrations for package <package>')
+  .option('--debug', 'Run with debugging.', false)
+  .option('--knexfile [path]', 'Specify the knexfile path.', 'knexfile.js')
+  .option('--env [name]', 'environment, default: process.env.NODE_ENV || development')
   .parse(process.argv);
 
-var migrationsConfigs = require('./utils/migrations_config')(program);
+var internalMigrationsConfig = {
+  directory: path.join(__dirname, '../middguard/migrations')
+};
 
-migrationsConfigs.forEach(function(migrationsConfig) {
-  knex.migrate.latest(migrationsConfig).spread(function (batchNo, log) {
-    if (log.length === 0) {
-      console.log(chalk.cyan('Already up to date'));
-      process.exit(0);
-    }
-    console.log(chalk.green('Batch ' + batchNo + ' run: ' + log.length +
-      ' migrations \n' + chalk.cyan(log.join('\n'))));
+function initKnex(program) {
+  var config = require(path.resolve(program.knexfile));
+
+  var env = program.env || process.env.NODE_ENV;
+  var defaultEnv = 'development';
+
+  if (!env && typeof config[defaultEnv] === 'object') {
+    env = defaultEnv;
+  }
+
+  if (env) {
+    console.log('Using environment:', chalk.magenta(env));
+    config = config[env];
+  }
+
+  if (program.debug) {
+    config.debug = program.debug;
+  }
+
+  return knex(config);
+};
+
+initKnex(program).migrate.latest(internalMigrationsConfig)
+.spread(function(batchNo, log) {
+  if (log.length === 0) {
+    console.log(chalk.cyan('Already up to date.'));
     process.exit(0);
-  }).catch(function () {
-    throw new Error('Error migrating to latest');
-    process.exit(1);
-  });
+  }
+  console.log(chalk.green(`Batch ${batchNo} run: ${log.length} migrations`));
+  console.log(chalk.cyan(log.join('\n')));
+  process.exit(0);
 });

@@ -5,7 +5,7 @@ html, body {
   height: 100%;
 }
 
-*{
+* {
   box-sizing: border-box;
 }
 
@@ -14,11 +14,13 @@ body {
   height:100%;
 }
 
-#modules-container{
+.hidden {
+  display: none;
+}
+
+.middguard-views {
   height: 100%;
-  left: 300px;
-  margin: 0px;
-  position: absolute;
+  margin: 0 0 0 300px;
   white-space: nowrap;
   z-index: 1;
 }
@@ -50,7 +52,7 @@ body {
   border-width: 5px;
   border-style: solid;
   border-color: white;
-  
+
 }
 #obs-control-div{
   height: calc(100% - 133px);
@@ -65,76 +67,6 @@ body {
   background-color: #333;
 }
 
-#middguard-obs-log {
-  height: calc(100% - 28px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  background-color: #e9eaed;
-}
-
-#middguard-obs-input {
-  width: 100%;
-  height: 28px;
-  outline: none;
-  border: none;
-  border-top: 1px solid #999;
-  padding: 7px 5px;
-  resize: none;
-  overflow: hidden;
-  box-shadow: 0 1px #e6e6e6 inset;
-  font-size: 13px;
-}
-
-.middguard-obs-message {
-  width: calc(100% - 6px);
-  background-color: #fff;
-  padding: 3px 5px;
-  margin: 3px;
-  border: 1px solid #e6e6e6;
-  border-radius: 3px;
-  font-size: 13px;
-}
-
-.middguard-obs-message.sent-by-self {
-  background-color: #dbedfe;
-  border-color: #acd6fd;
-}
-
-.middguard-obs-message-meta {
-  padding: 3px 0;
-  border-bottom: 1px solid #e6e6e6;
-}
-
-.middguard-obs-message.sent-by-self .middguard-obs-message-meta {
-  border-bottom-color: #acd6fd;
-}
-
-.middguard-obs-message-meta span {
-  float: right;
-  cursor: pointer;
-}
-
-.middguard-obs-message-content {
-  padding: 3px 0;
-}
-
-#middguard-header {
-  float: left;
-  width: 300px;
-  height: 100%;
-  position: fixed;
-  border-right: 1px solid #999;
-  background-color: #e9eaed;
-  overflow: scroll;
-  z-index: 10000;
-}
-#middguard-header h1,
-#middguard-header h2,
-#middguard-header h3,
-#middguard-header #middguard-user {
-  padding: 0 20px;
-}
-
 #middguard-packages {
   float: left;
   width: 300px;
@@ -143,20 +75,6 @@ body {
   background-color: #e9eaed;
   overflow: scroll;
   z-index: 1;
-}
-
-.logout {
-  display: inline-block;
-  margin-left: 20px;
-}
-
-.logout input {
-  font-size: inherit;
-  outline: none;
-  border: none;
-  text-decoration: underline;
-  background-color: #e9eaed;
-  cursor: pointer;
 }
 
 #middguard-packages h1,
@@ -180,9 +98,6 @@ body {
 
 .middguard-module {
   display: inline-block;
-  float: left;
-  position: relative;
-  left: 0px;
   height: 100%;
   overflow-y: scroll;
   overflow-x: auto;

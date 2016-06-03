@@ -1,68 +1,49 @@
 var _ = require('lodash'),
     pluralize = require('pluralize'),
     analyst = require('./analyst'),
-    analytics = require('./analytics'),
     message = require('./message'),
-    models = require('./models'),
     modules = require('./modules'),
-    Bookshelf = require('../../app').get('bookshelf'),
-    io = require('socket.io')()
-    fs = require('fs')
-    path = require('path')
-    csv_load = require('../loaders/csv_loader');
+    node = require('./node'),
+    io = require('socket.io')();
 
-module.exports = function (err, socket, session) {
+module.exports = function (socket) {
+  var Bookshelf = socket.bookshelf;
+
   // Only set up sockets if we have a logged in user
-  if (!session || !session.user) return;
+  if (!socket.handshake.session.user) return;
 
   // Set up sockets middguard internal sockets
-  socket.on('messages:create', socketContext(message.create, socket, session));
-  socket.on('messages:read', _.bind(message.readAll, socket));
+  socket.on('messages:create', (data, cb) => message.create(socket, data, cb));
+  socket.on('messages:read', (data, cb) => message.readAll(socket, data, cb));
 
-  socket.on('modules:read', modules.readAll);
-  socket.on('models:read', models.readAll);
-  socket.on('analytics:read', analytics.readAll);
+  socket.on('modules:read', (data, cb) => modules.readAll(socket, data, cb));
 
-  socket.on('analyst:read', _.bind(analyst.read, socket));
-  socket.on('analysts:read', _.bind(analyst.readAll, socket));
+  socket.on('analyst:read', (data, cb) => analyst.read(socket, data, cb));
+  socket.on('analysts:read', (data, cb) => analyst.readAll(socket, data, cb));
 
-  socket.on('filetransfer', function(data){
-    fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', data.filename), data.file, {encoding:'utf8'}, function(err){
-      if (err) console.log(Error(err));
-      var readStream = fs.createReadStream(path.join(__dirname, '..', 'loaders', 'data-load-files', 'load-config.json'), {encoding: 'utf8'});
-      readStream.on('data', function(moreData){
-        var configObj = JSON.parse(moreData);
-        configObj[data.filename] = {isNew: true}
-        fs.writeFile(path.join(__dirname, '..', 'loaders', 'data-load-files', 'load-config.json'), JSON.stringify(configObj, null, '\t'), function(error){
-          if (error) console.log(Error(error));
-          csv_load(Bookshelf, data.modelname, data.filename);
-        });
-      });
-    });
-  });
+  socket.on('node:connect', (data, cb) => node.connect(socket, data, cb));
+  socket.on('node:run', (data, cb) => node.run(socket, data, cb));
+  socket.on('nodes:create', (data, cb) => node.create(socket, data, cb));
+  socket.on('nodes:read', (data, cb) => node.readAll(socket, data, cb));
+  socket.on('nodes:update', (data, cb) => node.update(socket, data, cb));
 
-  Bookshelf.collection('models').each(function (modelAttrs) {
-    var modelName = modelAttrs.get('name');
-    var model = Bookshelf.model(modelName);
+  var Graph = Bookshelf.model('Graph');
+  patchModelToEmit(socket, 'graph', Graph);
+  setupSocketEvents(socket, 'graph', Graph);
 
-    patchModelToEmit(socket, modelName, model);
-    setupSocketEvents(socket, modelName, model);
-  });
-
-  var Relationship = require('../models/relationship');
-  patchModelToEmit(socket, 'relationship', Relationship);
-  setupSocketEvents(socket, 'relationship', Relationship);
+  Bookshelf.model('Node').fetchAll()
+  .then(nodes => nodes.each(node => node.createReadSocket(socket)));
 
   // Set up sockets to call analytics from client
   // Patched models will automatically emit create, update, and delete events
-  Bookshelf.collection('analytics').each(function (analyticsAttrs) {
-    var name = analyticsAttrs.get('name');
-    var requirePath = analyticsAttrs.get('requirePath');
-
-    socket.on('analytics:' + name, function (data, callback) {
-      require(requirePath)(Bookshelf, data);
-    });
-  });
+  // Bookshelf.collection('analytics').each(function (analyticsAttrs) {
+  //   var name = analyticsAttrs.get('name');
+  //   var requirePath = analyticsAttrs.get('requirePath');
+  //
+  //   socket.on('analytics:' + name, function (data, callback) {
+  //     require(requirePath)(Bookshelf, data);
+  //   });
+  // });
 };
 
 function patchModelToEmit(socket, modelName, model) {
@@ -80,7 +61,7 @@ function patchModelToEmit(socket, modelName, model) {
         // The create listener will take care of this.
         if (!options.clientCreate) {
           io.emit(pluralize(modelName) + ':create', model.toJSON());
-        }else{
+        } else {
           socket.broadcast.emit(pluralize(modelName) + ':create', model.toJSON());
         }
       });
@@ -100,7 +81,7 @@ function patchModelToEmit(socket, modelName, model) {
 
 function setupSocketEvents(socket, modelName, model) {
   // Set up create, read, update, delete sockets for each model
-  socket.on(modelName + ':create', function (data, callback) {
+  socket.on(pluralize(modelName) + ':create', function (data, callback) {
     // Pass clientCreate to save so the model won't emit anything on the
     // created event and confuse the client.
     // Create is a special case since the model on the creating client doesn't
@@ -108,7 +89,6 @@ function setupSocketEvents(socket, modelName, model) {
     new model().save(data, {clientCreate: true})
       .then(function (newModel) {
         callback(null, newModel.toJSON());
-        socket.broadcast.emit(modelName + ':create', newModel.toJSON());
       })
       .catch(function (error) {
         throw new Error(error);
@@ -148,16 +128,10 @@ function setupSocketEvents(socket, modelName, model) {
         callback(null, fetchedModel.toJSON());
       })
       .catch(model.NotFoundError, function () {
-        callback(null, {'error': 'Model ' + modelName + ' not found.'});
+        callback({'error': `Model ${modelName} not found.`});
       })
       .catch(function (error) {
         callback(error);
       });
-  });
-}
-
-function socketContext(fn, socket, session) {
-  return _.wrap(fn, function (func, data, callback) {
-    func(data, callback, socket, session);
   });
 }

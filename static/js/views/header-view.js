@@ -4,36 +4,48 @@ var middguard = middguard || {};
   'use strict';
 
   middguard.HeaderView = Backbone.View.extend({
-    id: 'middguard-header',
-    template: _.template(
-      '<h1 id="middguard-subHeader">MiddGuard</h1>' +
-      '<div id="middguard-user"><% print(middguard.user.username) %>' +
-        '<form class="logout" action="/logout" method="post">' +
-          '<input type="submit" value="Logout">' +
-        '</form></div>' +
-      '<div id="view-options">' +
-      '<input class="viewOption" type="submit" value="Control Panel" id="mod_button"/>' +
-        '<input class="viewOption" type="submit" value="Observations" id="obs_button"/>' +
-      '</div>'
-    ),
+    el: '#middguard-header',
+
+    template: _.template($('#sidebar-template').html()),
+
     events: {
-      'click #obs_button' : 'obsShow',
-      'click #mod_button': 'obsHide'
+      'click #toggle-graphs' : 'showGraphsPanel',
+      'click #toggle-messages': 'showMessagesPanel',
+      'click #toggle-user': 'showUserPanel'
     },
-    initialize: function () {
-      return true;
+
+    initialize: function (options) {
+      options = options || {};
+      this.activePanel = options.activePanel || 'graphs';
     },
+
     render: function () {
       this.$el.html(this.template());
+
+      this.$('.toggle-panel:not(#panel-' + this.activePanel + ')').hide()
+      this.$('#toggle-' + this.activePanel).addClass('active');
+
+      var observationsView = new middguard.ObservationsView();
+      this.$('#panel-messages').append(observationsView.render().el);
+
+      var graphsView = new middguard.GraphsView();
+      this.$('#panel-graphs').append(graphsView.render().el);
       return this;
     },
-    obsShow: function(){
-      $('#middguard-packages').css('display', 'none');
-      $('#middguard-obs').css('display', 'initial');
+
+    showUserPanel: function() {
+      this.activePanel = 'user';
+      this.render();
     },
-    obsHide: function(){
-      $('#middguard-obs').css('display', 'none');
-      $('#middguard-packages').css('display', 'initial');
+
+    showGraphsPanel: function() {
+      this.activePanel = 'graphs';
+      this.render();
+    },
+
+    showMessagesPanel: function() {
+      this.activePanel = 'messages';
+      this.render();
     }
   });
 })();
