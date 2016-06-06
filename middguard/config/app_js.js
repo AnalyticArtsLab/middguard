@@ -10,8 +10,6 @@ module.exports = {
     'models/graph.js',
     'models/node.js',
     'models/packaged-module.js',
-    'models/packaged-model.js',
-    'models/packaged-analytics.js',
 
     'collections/base.js',
     'collections/analysts.js',
@@ -19,8 +17,6 @@ module.exports = {
     'collections/graphs.js',
     'collections/nodes.js',
     'collections/packaged-modules.js',
-    'collections/packaged-models.js',
-    'collections/packaged-analytics.js',
 
     'views/observations-view.js',
     'views/app-view.js',
