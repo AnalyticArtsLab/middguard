@@ -1,6 +1,6 @@
 var middguard = middguard || {};
 
-(function () {
+(function() {
   var PackagedAnalytics = Backbone.Collection.extend({
     url: 'analytics',
     model: middguard.PackagedAnalyticsModel

@@ -6,7 +6,7 @@ module.exports = {
     'bower_components/moment/moment.js',
     'bower_components/d3/d3.js',
     'bower_components/pluralize/pluralize.js',
-    'bower_components/ocket.io-client/socket.io.js',
+    'bower_components/socket.io-client/socket.io.js',
     'bower_components/backbone/backbone.js',
     'vendor/backbone.iobind/dist/backbone.iosync.js',
     'vendor/backbone.iobind/dist/backbone.iobind.js',

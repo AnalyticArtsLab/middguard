@@ -1,18 +1,16 @@
 var middguard = middguard || {};
 
-(function () {
+(function() {
   'use strict';
 
   middguard.AppView = Backbone.View.extend({
-    initialize: function () {
+    initialize: function() {
       this.$body = $('body');
       this.header = new middguard.HeaderView();
-      // this.packages = new middguard.PackagesView();
       this.render();
     },
-    render: function () {
+    render: function() {
       this.header.render();
-      // $('#obs-control-div').append(this.packages.render().el);
     }
   });
 })();

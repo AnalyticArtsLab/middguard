@@ -29,7 +29,7 @@ var middguard = middguard || {};
       if (exists) {
         exists.set(data);
       }
-    },
+    }
   });
 
   middguard.Nodes = new Nodes();

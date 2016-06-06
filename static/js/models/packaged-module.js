@@ -1,6 +1,6 @@
 var middguard = middguard || {};
 
-(function () {
+(function() {
   middguard.PackagedModule = Backbone.Model.extend({
     defaults: {
       'name': '',

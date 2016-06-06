@@ -6,7 +6,7 @@
  * @private
  */
 
-exports.readAll = function (socket, data, callback) {
+exports.readAll = function(socket, data, callback) {
   var register = socket.bookshelf.collection('analytics');
 
   callback(null, register.toJSON());

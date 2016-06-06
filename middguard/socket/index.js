@@ -6,11 +6,13 @@ var _ = require('lodash'),
     node = require('./node'),
     io = require('socket.io')();
 
-module.exports = function (socket) {
+module.exports = function(socket) {
   var Bookshelf = socket.bookshelf;
 
   // Only set up sockets if we have a logged in user
-  if (!socket.handshake.session.user) return;
+  if (!socket.handshake.session.user) {
+    return;
+  }
 
   // Set up sockets middguard internal sockets
   socket.on('messages:create', (data, cb) => message.create(socket, data, cb));
@@ -33,28 +35,17 @@ module.exports = function (socket) {
 
   Bookshelf.model('Node').fetchAll()
   .then(nodes => nodes.each(node => node.createReadSocket(socket)));
-
-  // Set up sockets to call analytics from client
-  // Patched models will automatically emit create, update, and delete events
-  // Bookshelf.collection('analytics').each(function (analyticsAttrs) {
-  //   var name = analyticsAttrs.get('name');
-  //   var requirePath = analyticsAttrs.get('requirePath');
-  //
-  //   socket.on('analytics:' + name, function (data, callback) {
-  //     require(requirePath)(Bookshelf, data);
-  //   });
-  // });
 };
 
 function patchModelToEmit(socket, modelName, model) {
   if (!model.prototype._emitting) {
     var _initialize = model.prototype.initialize;
 
-    model.prototype.initialize = function () {
+    model.prototype.initialize = function() {
       var args = Array.prototype.slice.call(arguments);
       _initialize.apply(args);
 
-      this.on('created', function (model, attrs, options) {
+      this.on('created', function(model, attrs, options) {
         // If the model was created on the client, we don't want to emit a
         // create event, since we need to assign an id on the creator via
         // a callback and do a broadcast.emit for everyone else.
@@ -66,11 +57,11 @@ function patchModelToEmit(socket, modelName, model) {
         }
       });
 
-      this.on('updated', function (model) {
+      this.on('updated', function(model) {
         socket.broadcast.emit(pluralize(modelName) + ':update', model.toJSON());
       });
 
-      this.on('destroying', function (model) {
+      this.on('destroying', function(model) {
         socket.broadcast.emit(pluralize(modelName) + ':delete', model.toJSON());
       });
     };
@@ -79,58 +70,58 @@ function patchModelToEmit(socket, modelName, model) {
   }
 }
 
-function setupSocketEvents(socket, modelName, model) {
+function setupSocketEvents(socket, modelName, Model) {
   // Set up create, read, update, delete sockets for each model
-  socket.on(pluralize(modelName) + ':create', function (data, callback) {
+  socket.on(pluralize(modelName) + ':create', function(data, callback) {
     // Pass clientCreate to save so the model won't emit anything on the
     // created event and confuse the client.
     // Create is a special case since the model on the creating client doesn't
     // have an id yet.
-    new model().save(data, {clientCreate: true})
-      .then(function (newModel) {
+    new Model().save(data, {clientCreate: true})
+      .then(function(newModel) {
         callback(null, newModel.toJSON());
       })
-      .catch(function (error) {
+      .catch(function(error) {
         throw new Error(error);
-      })
+      });
   });
 
-  socket.on(modelName + ':update', function (data, callback) {
-    new model({id: _.result(data, 'id')})
+  socket.on(modelName + ':update', function(data) {
+    new Model({id: _.result(data, 'id')})
       .save(_.omit(data, 'id'), {patch: true});
   });
 
-  socket.on(modelName + ':delete', function (data, callback) {
-    var x = new model({id: _.result(data, 'id')});
-    //console.log(String(x.destroy()._resolveFromSyncValue));
-    new model({id: _.result(data, 'id')}).destroy();
+  socket.on(modelName + ':delete', function(data) {
+    new Model({id: _.result(data, 'id')}).destroy();
   });
 
-  socket.on(pluralize(modelName) + ':read', function (data, callback) {
-    if (data){
-      var fetchData = new model().where(data).fetchAll();
+  socket.on(pluralize(modelName) + ':read', function(data, callback) {
+    let query = new Model();
+
+    if (data) {
+      query = query.where(data).fetchAll();
     } else {
-      //if fetching all models at once
-      var fetchData = new model().fetchAll();
+      query = query.fetchAll();
     }
-    fetchData
-      .then(function (collection) {
+
+    query
+      .then(function(collection) {
         callback(null, collection.toJSON());
       })
-      .catch(function (error) {
+      .catch(function(error) {
         callback(error);
       });
   });
 
-  socket.on(modelName + ':read', function (data, callback) {
-    new model({id: _.result(data, 'id')}).fetch({require: true})
-      .then(function (fetchedModel) {
+  socket.on(modelName + ':read', function(data, callback) {
+    new Model({id: _.result(data, 'id')}).fetch({require: true})
+      .then(function(fetchedModel) {
         callback(null, fetchedModel.toJSON());
       })
-      .catch(model.NotFoundError, function () {
+      .catch(Model.NotFoundError, function() {
         callback({'error': `Model ${modelName} not found.`});
       })
-      .catch(function (error) {
+      .catch(function(error) {
         callback(error);
       });
   });

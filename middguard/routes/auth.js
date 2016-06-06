@@ -9,7 +9,7 @@ var Promise = require('bluebird'),
  * Logged out auth route.
  */
 
-exports.index = function (req, res) {
+exports.index = function(req, res) {
   res.render('auth');
 };
 
@@ -17,7 +17,7 @@ exports.index = function (req, res) {
  * Register a new user.
  */
 
-exports.register = function (req, res) {
+exports.register = function(req, res) {
   var Analyst = req.bookshelf.model('Analyst');
 
   if (!req.body.username || !req.body.password || !req.body.passwordConfirm) {
@@ -35,16 +35,16 @@ exports.register = function (req, res) {
       }
     });
   } else {
-    bcrypt.genSalt(10, function (err, salt) {
-      bcrypt.hash(req.body.password, salt, function (err, hash) {
+    bcrypt.genSalt(10, function(err, salt) {
+      bcrypt.hash(req.body.password, salt, function(err, hash) {
         new Analyst({username: req.body.username, password: hash})
         .save()
-        .then(function (analyst) {
+        .then(function() {
           res.render('auth', {
             register: {message: 'Successfully registered!'}
           });
         })
-        .catch(UniqueConstraintError, function (error) {
+        .catch(UniqueConstraintError, function() {
           res.render('auth', {
             register: {
               username: req.body.username,
@@ -61,14 +61,14 @@ exports.register = function (req, res) {
  * Login an existing user.
  */
 
-exports.login = function (req, res) {
+exports.login = function(req, res) {
   var Analyst = req.bookshelf.model('Analyst');
 
   new Analyst({username: req.body.username}).fetch({require: true})
-    .then(function (analyst) {
+    .then(function(analyst) {
       return Promise.join(bcrypt.compareAsync(req.body.password, analyst.get('password')), analyst);
     })
-    .spread(function (bcryptCheck, analyst) {
+    .spread(function(bcryptCheck, analyst) {
       if (bcryptCheck) {
         req.session.user = analyst;
         res.redirect('/');
@@ -81,7 +81,7 @@ exports.login = function (req, res) {
         });
       }
     })
-    .catch(Analyst.NotFoundError, function () {
+    .catch(Analyst.NotFoundError, function() {
       res.render('auth', {
         login: {
           username: req.body.username,
@@ -89,8 +89,8 @@ exports.login = function (req, res) {
         }
       });
     })
-    .catch(function (error) {
-      console.log(error);
+    .catch(function(error) {
+      throw new Error(error);
     });
 };
 
@@ -98,14 +98,17 @@ exports.login = function (req, res) {
  * Logout a logged in user.
  */
 
-exports.logout = function (req, res) {
-  req.session.destroy(function (err) {
+exports.logout = function(req, res) {
+  req.session.destroy(function() {
     res.redirect('auth');
   });
 };
 
-function UniqueConstraintError (err) {
-  if (!err) return false;
+function UniqueConstraintError(err) {
+  if (!err) {
+    return false;
+  }
+
   var re = /UNIQUE constraint failed/;
   return re.test(err.message);
 }

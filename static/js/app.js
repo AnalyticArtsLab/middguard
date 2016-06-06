@@ -1,6 +1,6 @@
 var middguard = middguard || {};
 
-$(function () {
+$(function() {
   'use strict';
 
   middguard.app = new middguard.AppView();

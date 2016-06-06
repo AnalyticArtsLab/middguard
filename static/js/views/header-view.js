@@ -1,6 +1,6 @@
 var middguard = middguard || {};
 
-(function () {
+(function() {
   'use strict';
 
   middguard.HeaderView = Backbone.View.extend({
@@ -9,20 +9,20 @@ var middguard = middguard || {};
     template: _.template($('#sidebar-template').html()),
 
     events: {
-      'click #toggle-graphs' : 'showGraphsPanel',
+      'click #toggle-graphs': 'showGraphsPanel',
       'click #toggle-messages': 'showMessagesPanel',
       'click #toggle-user': 'showUserPanel'
     },
 
-    initialize: function (options) {
+    initialize: function(options) {
       options = options || {};
       this.activePanel = options.activePanel || 'graphs';
     },
 
-    render: function () {
+    render: function() {
       this.$el.html(this.template());
 
-      this.$('.toggle-panel:not(#panel-' + this.activePanel + ')').hide()
+      this.$('.toggle-panel:not(#panel-' + this.activePanel + ')').hide();
       this.$('#toggle-' + this.activePanel).addClass('active');
 
       var observationsView = new middguard.ObservationsView();

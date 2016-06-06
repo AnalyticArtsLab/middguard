@@ -5,7 +5,7 @@
  * @private
  */
 
-module.exports = function (app) {
+module.exports = function(app) {
   var Bookshelf = app.get('bookshelf');
 
   var Message = Bookshelf.Model.extend({
@@ -13,7 +13,7 @@ module.exports = function (app) {
     defaults: {
       timestamp: new Date().toISOString()
     },
-    analyst: function () {
+    analyst: function() {
       return this.belongsTo('Analyst');
     }
   });

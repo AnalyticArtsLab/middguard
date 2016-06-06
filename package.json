@@ -1,12 +1,12 @@
 {
   "name": "middguard",
   "version": "0.0.1",
-  "description": "Modular, multiperson analytics.",
+  "description": "Collaborative and Extensible Visual Analytics",
   "license": "UNLICENSED",
   "private": true,
   "main": "index.js",
   "scripts": {
-    "lint": "jshint middguard/* index.js",
+    "lint": "eslint index.js middguard/* static/*",
     "test": "./node_modules/.bin/mocha"
   },
   "repository": {
@@ -50,7 +50,7 @@
   "devDependencies": {
     "bower": "^1.7.7",
     "csv-parse": "^1.0.1",
-    "jshint": "^2.5.2",
+    "eslint": "^2.11.1",
     "mocha": "^2.3.4",
     "moment": "^2.13.0",
     "pg": "^4.4.0",

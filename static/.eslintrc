@@ -1,0 +1,17 @@
+{
+  "env": {
+    "browser": true,
+    "jquery": true
+  },
+  "globals": {
+    "d3": true,
+    "_": true,
+    "Backbone": true,
+    "moment": true,
+    "io": true,
+    "pluralize": true
+  },
+  "rules": {
+    "no-console": 0
+  }
+}

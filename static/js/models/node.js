@@ -46,7 +46,7 @@ var middguard = middguard || {};
       }
     },
 
-    toJSON: function(options) {
+    toJSON: function() {
       return _.omit(this.attributes, this.blacklistAttributes);
     },
 

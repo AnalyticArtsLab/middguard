@@ -30,26 +30,7 @@ function createApplication(settings) {
 
   _.extend(app, proto);
 
-  // expressConfig(app);
-  //
-  // var server = http.createServer(app);
-  // var io = socketio(server);
-  // app.set('io', io);
-  //
-  // var sessionSockets = new SessionSockets(io,
-  //   app.get('sessionStore'),
-  //   app.get('cookieParser'));
-  //
-  // bookshelfConfig(app);
-  //
-  // // require('./middguard/loaders/models_loader')(app);
-  // // require('./middguard/loaders/analytics_loader')(app);
-  //
-  // sessionSockets.on('connection', require('./middguard/socket'));
-  //
-  // require('./middguard/routes')(app);
-
   app.middguardInit();
 
   return app;
-};
+}

@@ -1,5 +1,4 @@
-var _ = require('lodash'),
-    middguard = require('./middguard'),
+var middguard = require('./middguard'),
     auth = require('./auth');
 
 /**
@@ -10,7 +9,7 @@ var _ = require('lodash'),
  * @private
  */
 
-module.exports = function (app) {
+module.exports = function(app) {
   app.get('/', middguard);
 
   app.get('/auth', auth.index);

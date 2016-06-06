@@ -43,7 +43,9 @@ var middguard = middguard || {};
     ensureEntityCollection: function(node) {
       var tableName = node.get('table');
 
-      if (!tableName || middguard.entities[tableName]) return;
+      if (!tableName || middguard.entities[tableName]) {
+        return;
+      }
 
       var collection = new middguard.EntityCollection([], {
         url: tableName
@@ -77,7 +79,7 @@ var middguard = middguard || {};
       this.$('.graph').append(view.render().el);
     },
 
-    addAllNodes: function(node) {
+    addAllNodes: function() {
       middguard.Nodes.each(this.addNode, this);
     },
 
@@ -112,7 +114,7 @@ var middguard = middguard || {};
     template: _.template('<%= displayName %>'),
 
     events: {
-      'click': 'createNode',
+      'click': 'createNode'
     },
 
     initialize: function(options) {
@@ -143,8 +145,9 @@ var middguard = middguard || {};
     initialize: function() {
       this.connections = [];
 
-      if (this.model.get('connections'))
+      if (this.model.get('connections')) {
         this.addAllConnectingLines();
+      }
 
       // `this.model` is the "input" node
       this.listenTo(this.model, 'change', this.render);
@@ -326,16 +329,19 @@ var middguard = middguard || {};
 
       var selectedInput = this.model.get('selectedInput'),
           selectedOutput = this.model.get('selectedOutput');
-      if (selectedInput)
+      if (selectedInput) {
         this.d3el.select('[data-name="' + selectedInput.name + '"]')
             .classed('selected', true);
+      }
 
-      if (selectedOutput)
+      if (selectedOutput) {
         this.d3el.select('.output')
             .classed('selected', true);
+      }
 
-      if (this.model.isVisualization())
+      if (this.model.isVisualization()) {
         this.d3el.classed('visualization', true);
+      }
 
 
       return this;
@@ -346,8 +352,9 @@ var middguard = middguard || {};
     },
 
     dragged: function(d) {
-      if (!d3.select(d3.event.sourceEvent.target).classed('drag-handle'))
+      if (!d3.select(d3.event.sourceEvent.target).classed('drag-handle')) {
         return;
+      }
 
       var x = d3.event.x;
       var y = d3.event.y;
@@ -383,9 +390,10 @@ var middguard = middguard || {};
     showInputTooltip: function(event) {
       var tooltip = d3.select('.input-tooltip');
 
-      if (!tooltip[0][0])
+      if (!tooltip[0][0]) {
         tooltip = d3.select('body').append('div')
             .attr('class', 'input-tooltip');
+      }
 
       var input = _.find(this.module.get('inputs'), function(input) {
         return input.name === $(event.currentTarget).data('name');
@@ -414,7 +422,9 @@ var middguard = middguard || {};
       });
 
       // Deselect the previously selected input.
-      previouslySelected && previouslySelected.set('selectedInput', null);
+      if (previouslySelected) {
+        previouslySelected.set('selectedInput', null);
+      }
 
       var selectedGroup = _.find(this.module.get('inputs'), function(input) {
         return input.name === $(event.target).data('name');
@@ -431,12 +441,14 @@ var middguard = middguard || {};
       this.connectNodes();
     },
 
-    toggleOutputSelected: function(event) {
+    toggleOutputSelected: function() {
       var previouslySelected = middguard.Nodes.find(function(node) {
         return node.get('selectedOutput');
-      })
+      });
 
-      previouslySelected && previouslySelected.set('selectedOutput', null);
+      if (previouslySelected) {
+        previouslySelected.set('selectedOutput', null);
+      }
 
       this.model.set('selectedOutput', true);
       this.connectNodes();
@@ -543,7 +555,7 @@ var middguard = middguard || {};
     connectionGroupTemplate: _.template($('#connection-group-template').html()),
 
     events: {
-      'click .connection': 'selectConnector',
+      'click .connection': 'selectConnector'
     },
 
     render: function() {

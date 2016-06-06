@@ -99,13 +99,13 @@ module.exports = function(app) {
     },
 
     createReadSocket: function(socket) {
-      let table = Bookshelf.knex(this.get('table'));
-
       socket.on(`${this.get('table')}:read`, (data, callback) => {
+        let query = Bookshelf.knex(this.get('table'));
+
         if (!_.isEmpty(data)) {
-          var query = Bookshelf.knex(this.get('table')).where(data).select('*');
+          query = query.where(data).select('*');
         } else {
-          var query = Bookshelf.knex(this.get('table')).select('*');
+          query = query.select('*');
         }
 
         query.then(results => callback(null, results));

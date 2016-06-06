@@ -1,6 +1,6 @@
 'use strict';
 
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   return knex.schema.table('node', function(table) {
     table.integer('radius').defaultTo(75);
 
@@ -11,7 +11,7 @@ exports.up = function(knex, Promise) {
   });
 };
 
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return knex.schema.table('node', function(table) {
     table.dropColumns('radius', 'position_x', 'position_y');
   });

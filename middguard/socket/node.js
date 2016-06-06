@@ -17,7 +17,9 @@ exports.readAll = function(socket, data, callback) {
   var Node = socket.bookshelf.model('Node');
   var nodes = new Node();
 
-  if (data) nodes = nodes.where(data);
+  if (data) {
+    nodes = nodes.where(data);
+  }
 
   nodes.fetchAll()
   .then(collection => callback(null, collection.toJSON()))
@@ -159,7 +161,7 @@ exports.run = function(socket, data, callback) {
     var handle = require(module.get('requirePath')).handle;
     return Promise.join(node, handle(context));
   })
-  .spread(function(node, result) {
+  .spread(function(node) {
     return node.save({status: 2});
   })
   .then(function(node) {

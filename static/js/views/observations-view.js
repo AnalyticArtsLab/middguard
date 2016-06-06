@@ -1,6 +1,6 @@
 var middguard = middguard || {};
 
-(function () {
+(function() {
   'use strict';
 
   middguard.ObservationsView = Backbone.View.extend({
@@ -16,7 +16,7 @@ var middguard = middguard || {};
       'click': 'focusInput'
     },
 
-    initialize: function () {
+    initialize: function() {
       _.bindAll(this, 'addOne', 'addAll');
 
       this.listenTo(middguard.Messages, 'add', this.addOne);
@@ -26,7 +26,7 @@ var middguard = middguard || {};
       middguard.Messages.fetch({reset: true});
     },
 
-    render: function () {
+    render: function() {
       this.$el.html(this.template());
 
       this.$log = this.$('.log-messages');
@@ -35,38 +35,37 @@ var middguard = middguard || {};
       return this;
     },
 
-    messageContents: function () {
+    messageContents: function() {
       return {
         content: this.$input.val().trim(),
         analyst_id: middguard.user.id,
         seen: true,
         state: JSON.stringify(middguard.state.toJSON())
-      }
+      };
     },
 
-    addOne: function (message) {
+    addOne: function(message) {
       var view = new middguard.ObsMessageView({model: message});
       this.$log.append(view.render().el);
     },
 
-    addAll: function () {
+    addAll: function() {
       middguard.Messages.each(this.addOne);
     },
 
-    sendMessage: function (event) {
+    sendMessage: function(event) {
       if (event.which === 13 && !event.shiftKey) {
         event.preventDefault();
 
-        var message = middguard.Messages.create(this.messageContents());
         this.$input.val('');
 
-				//scroll to bottom when a message is entered
-				this.$log.scrollTop(this.$log[0].scrollHeight);
+				// scroll to bottom when a message is entered
+        this.$log.scrollTop(this.$log[0].scrollHeight);
         return false;
       }
     },
 
-    focusInput: function () {
+    focusInput: function() {
       this.$input.focus();
     }
   });
@@ -86,7 +85,7 @@ var middguard = middguard || {};
       'mouseout': 'showTime',
       'click .timeOrRestore': 'restoreState'
     },
-    initialize: function () {
+    initialize: function() {
       this.analyst = middguard.Analysts.findWhere({
         id: this.model.get('analyst_id')
       });
@@ -95,7 +94,7 @@ var middguard = middguard || {};
 
       this.listenTo(this.model, 'change', this.render);
     },
-    render: function () {
+    render: function() {
       var attrs = {
         analyst: this.analyst.get('username'),
         content: this.model.get('content'),
@@ -105,15 +104,15 @@ var middguard = middguard || {};
       this.$el.toggleClass('sent-by-self', this.sentBySelf);
       return this;
     },
-    showRestoreState: function () {
+    showRestoreState: function() {
       this.$el.find('span').html('Restore state');
     },
-    showTime: function () {
+    showTime: function() {
       this.$el.find('span').html(moment(this.model.get('timestamp')).calendar());
     },
-    restoreState: function () {
+    restoreState: function() {
       var state = JSON.parse(this.model.get('state'));
-      middguard.state.set(state)
+      middguard.state.set(state);
     }
   });
 })();

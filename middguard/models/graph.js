@@ -9,7 +9,7 @@ module.exports = function(app) {
     tableName: 'graph',
 
     nodes: function() {
-      return this.hasMany('Node')
+      return this.hasMany('Node');
     }
   });
 

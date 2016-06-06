@@ -5,13 +5,13 @@
  * @private
  */
 
-module.exports = function (app) {
+module.exports = function(app) {
   var Bookshelf = app.get('bookshelf');
 
   var Analyst = Bookshelf.Model.extend({
     tableName: 'analyst',
     hidden: ['password'],
-    messages: function () {
+    messages: function() {
       return this.hasMany('Message');
     }
   });

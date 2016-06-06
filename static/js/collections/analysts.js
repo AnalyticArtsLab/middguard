@@ -1,6 +1,6 @@
 var middguard = middguard || {};
 
-(function () {
+(function() {
   'use strict';
 
   var Analysts = Backbone.Collection.extend({

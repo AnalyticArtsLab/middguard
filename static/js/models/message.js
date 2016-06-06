@@ -1,6 +1,6 @@
 var middguard = middguard || {};
 
-(function () {
+(function() {
   middguard.Message = Backbone.Model.extend({
     defaults: {
       analyst_id: '',

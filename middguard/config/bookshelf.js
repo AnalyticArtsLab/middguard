@@ -1,4 +1,4 @@
-module.exports = function (app) {
+module.exports = function(app) {
   var knex = require('knex')(app.get('knex config'));
 
   var Bookshelf = require('bookshelf')(knex);

@@ -4,7 +4,7 @@ var middguard = middguard || {};
 
   middguard.View = Backbone.View.extend({
     className: 'middguard-module',
-    fetch: function (collection, options) {
+    fetch: function(collection, options) {
       // set the view name to add to the middguard_views when we create/update
       // the models
       options.middguard_view_name = this.cid;
@@ -26,24 +26,24 @@ var middguard = middguard || {};
      * `middguard.View.prototype.remove.call(this)` as the super call instead
      * of the usual `Backbone.View.prototype.remove.call(this)`.
      */
-    remove: function () {
+    remove: function() {
       var viewName = this.cid;
 
       console.log('About to remove view "' + viewName + '".');
 
       // For each model this view references
-      this.middguard_entities.forEach(function (entityName) {
+      this.middguard_entities.forEach(function(entityName) {
         var collection = middguard.entities[entityName];
 
         // First iteration to remove reference to this model
-        collection.each(function (model, i) {
+        collection.each(function(model) {
           if (model.get('middguard_views').indexOf(viewName) > -1) {
             removeFromArray(model.get('middguard_views'), viewName);
           }
         });
 
         // Get an array of models from this entity collection to remove
-        var toRemove = collection.filter(function (model) {
+        var toRemove = collection.filter(function(model) {
           if (model.get('middguard_views').length === 0) {
             delete model.attributes.middguard_views;
             return true;
@@ -64,9 +64,7 @@ var middguard = middguard || {};
     },
 
     createContext: function() {
-      var moduleName = this.model.get('module')
-          module = middguard.PackagedModules.findWhere({name: moduleName}),
-          connections = JSON.parse(this.model.get('connections')),
+      var connections = JSON.parse(this.model.get('connections')),
           context = {};
 
       context.inputs = _.reduce(_.keys(connections), function(inputs, inputGroup) {
@@ -92,8 +90,8 @@ var middguard = middguard || {};
 
   middguard.activateView = function(node) {
     var main = middguard.Nodes.get(node).module().get('main');
-    var ctor = middguard.__modules[main].ctor;
-    var live = new ctor({model: middguard.Nodes.get(node)});
+    var Ctor = middguard.__modules[main].ctor;
+    var live = new Ctor({model: middguard.Nodes.get(node)});
 
     middguard.__modules[node] = {};
     middguard.__modules[node].live = live;
@@ -124,7 +122,7 @@ var middguard = middguard || {};
    * Makes MiddGuard aware of a top level view.
    * Top level views are listed under "Modules" in the sidebar.
    */
-  middguard.addModule = function (name, view) {
+  middguard.addModule = function(name, view) {
     _addView(name, view, true /* top level */);
   };
 
@@ -133,11 +131,11 @@ var middguard = middguard || {};
    * Subviews are not listed in the sidebar, but have models they fetch tracked
    * and removed when the view is removed.
    */
-  middguard.addSubview = function (name, view) {
+  middguard.addSubview = function(name, view) {
     _addView(name, view, false /* not top level */);
   };
 
-  var _addView = function (name, view, topLevel) {
+  var _addView = function(name, view, topLevel) {
     if (!Object.prototype.hasOwnProperty.call(middguard.__modules, name)) {
       view.prototype.middguard_view_name = name;
       view.prototype.middguard_entities = [];
@@ -158,10 +156,13 @@ var middguard = middguard || {};
    * Source: http://stackoverflow.com/questions/3954438
    */
   function removeFromArray(arr) {
-    var what, a = arguments, L = a.length, ax;
+    var what,
+        a = arguments,
+        L = a.length,
+        ax;
     while (L > 1 && arr.length) {
       what = a[--L];
-      while ((ax= arr.indexOf(what)) !== -1) {
+      while ((ax = arr.indexOf(what)) !== -1) {
         arr.splice(ax, 1);
       }
     }

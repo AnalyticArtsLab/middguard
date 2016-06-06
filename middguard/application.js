@@ -22,10 +22,10 @@ var _ = require('lodash');
  * the express application prototype.
  */
 
-var app = exports = module.exports = {};
+var app = exports = module.exports = {}; // jshint ignore:line
 
 
-app.middguardInit = function () {
+app.middguardInit = function() {
   this.middguardExpressMiddleware();
 
   var server = http.createServer(this);

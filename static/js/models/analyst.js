@@ -1,6 +1,6 @@
 var middguard = middguard || {};
 
-(function () {
+(function() {
   middguard.Analyst = Backbone.Model.extend({
     defaults: {
       username: ''

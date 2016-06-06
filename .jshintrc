@@ -1,9 +1,0 @@
-{
-  "eqeqeq": true,
-  "nonbsp": true,
-  "node": true,
-  "undef": true,
-  "unused": true,
-  "quotmark": "single",
-  "esnext": true
-}
