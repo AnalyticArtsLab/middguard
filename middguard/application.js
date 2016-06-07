@@ -49,6 +49,8 @@ app.middguardInit = function() {
 app.middguardExpressMiddleware = function middguardExpressMiddleware() {
   this.use('/static', express.static(path.join(__dirname, '..', 'static')));
 
+  this.set('showStackError', app.get('env') !== 'production');
+
   var knex = require('knex')(this.get('knex config'));
   var sessionStore = new KnexSessionStore({knex: knex});
   this.set('sessionStore', sessionStore);
