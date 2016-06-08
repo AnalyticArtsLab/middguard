@@ -6,7 +6,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "lint": "eslint index.js middguard/* static/*",
+    "lint": "eslint index.js middguard/* static/* bin/*",
     "test": "mocha",
     "postinstall": "bower install"
   },

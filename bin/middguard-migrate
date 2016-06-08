@@ -36,7 +36,7 @@ function initKnex(program) {
   }
 
   return knex(config);
-};
+}
 
 initKnex(program).migrate.latest(internalMigrationsConfig)
 .spread(function(batchNo, log) {
