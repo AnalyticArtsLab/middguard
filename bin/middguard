@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+
+let program = require('commander');
+
+program
+  .version(require('../package.json').version)
+  .command('migrate', 'Update database to latest migration')
+  .command('init', 'Create the files for a new MiddGuard investigation')
+  .parse(process.argv);
