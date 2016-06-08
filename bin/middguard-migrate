@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-var program = require('commander');
-var chalk = require('chalk');
-var knex = require('knex');
-var path = require('path');
+let program = require('commander');
+const chalk = require('chalk');
+const knex = require('knex');
+const path = require('path');
 
 program
   .version('0.0.1')
@@ -12,22 +12,22 @@ program
   .option('--env [name]', 'environment, default: process.env.NODE_ENV || development')
   .parse(process.argv);
 
-var internalMigrationsConfig = {
+const internalMigrationsConfig = {
   directory: path.join(__dirname, '../middguard/migrations')
 };
 
 function initKnex(program) {
-  var config = require(path.resolve(program.knexfile));
+  let config = require(path.resolve(program.knexfile));
 
-  var env = program.env || process.env.NODE_ENV;
-  var defaultEnv = 'development';
+  let env = program.env || process.env.NODE_ENV;
+  const defaultEnv = 'development';
 
   if (!env && typeof config[defaultEnv] === 'object') {
     env = defaultEnv;
   }
 
   if (env) {
-    console.log('Using environment:', chalk.magenta(env));
+    console.log(`Using environment: ${chalk.magenta(env)}`);
     config = config[env];
   }
 
@@ -39,7 +39,7 @@ function initKnex(program) {
 }
 
 initKnex(program).migrate.latest(internalMigrationsConfig)
-.spread(function(batchNo, log) {
+.spread((batchNo, log) => {
   if (log.length === 0) {
     console.log(chalk.cyan('Already up to date.'));
     process.exit(0);
