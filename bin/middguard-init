@@ -30,5 +30,5 @@ return Promise.map([
   return fs.writeFileAsync(path.join(process.cwd(), file.name), templated);
 })
 .each((file) => {
-  console.log(chalk.green(`Wrote ${file.name} to ${process.cwd()}.`));
+  console.log(chalk.green(`Wrote ${file.name}.`));
 });

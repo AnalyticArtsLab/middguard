@@ -6,4 +6,5 @@ program
   .version(require('../package.json').version)
   .command('migrate', 'Update database to latest migration')
   .command('init', 'Create the files for a new MiddGuard investigation')
+  .command('module', 'Create a new analytic or visualization module')
   .parse(process.argv);
