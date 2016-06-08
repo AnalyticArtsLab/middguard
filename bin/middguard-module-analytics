@@ -10,7 +10,7 @@ const _ = require('lodash');
 
 program
   .version(require('../package.json').version)
-  .option('-n, --name [name]', 'The name for the module', 'my-vis')
+  .option('-n, --name [name]', 'The name for the module', 'my-transform')
   .parse(process.argv);
 
 const context = {
@@ -23,12 +23,10 @@ function initialCap(word) {
   return `${word.charAt(0).toUpperCase()}${word.slice(1)}`;
 }
 
-return mkdirp(path.join(context.moduleName, 'static'))
+return mkdirp(path.join(context.moduleName))
 .then(() => {
   return Promise.map([
-    'visualization-module/index.js',
-    'visualization-module/static/<%- moduleName %>.css',
-    'visualization-module/static/<%- moduleName %>.js'
+    'analytics-module/index.js'
   ], (filename) => {
     return Promise.props({
       name: filename,
@@ -39,7 +37,7 @@ return mkdirp(path.join(context.moduleName, 'static'))
 .each((file) => {
   const templated = _.template(file.file)(context);
   file.name = _.template(file.name)(context);
-  file.name = file.name.replace('visualization-module', context.moduleName);
+  file.name = file.name.replace('analytics-module', context.moduleName);
 
   return fs.writeFileAsync(path.join(process.cwd(), file.name), templated);
 })
