@@ -57,6 +57,7 @@ var middguard = middguard || {};
       if (event.which === 13 && !event.shiftKey) {
         event.preventDefault();
 
+        middguard.Messages.create(this.messageContents());
         this.$input.val('');
 
 				// scroll to bottom when a message is entered
