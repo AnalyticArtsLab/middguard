@@ -1,7 +1,9 @@
+const path = require('path');
+
 module.exports = {
  client: 'sqlite3',
  connection: {
-   filename: 'simple.db'
+   filename: path.join(__dirname, 'simple.db')
  },
  pool: {
    min: 0,
@@ -10,4 +12,4 @@ module.exports = {
      conn.run('PRAGMA foreign_keys = ON', cb);
    }
  }
-}
+};
