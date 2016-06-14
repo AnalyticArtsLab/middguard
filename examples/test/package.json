@@ -1,0 +1,14 @@
+{
+  "name": "simple-test",
+  "version": "0.0.1",
+  "description": "This is a simple test of the new dataflow enabled Middguard.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Christopher Andrews",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.4.0"
+  }
+}
