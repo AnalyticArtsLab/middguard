@@ -154,6 +154,8 @@ exports.run = function(socket, data, callback) {
       return inputs;
     }, {});
 
+    context.knex = socket.bookshelf.knex;
+
     context.table = {};
     context.table.knex = socket.bookshelf.knex(node.get('table'));
     context.table.name = node.get('table');
