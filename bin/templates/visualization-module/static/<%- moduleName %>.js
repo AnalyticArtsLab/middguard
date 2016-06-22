@@ -8,7 +8,7 @@ var middguard = middguard || {};
 
     className: 'middguard-module',
 
-    template: _.template(),
+    template: _.template(''),
 
     initialize: function() {
       this.context = this.createContext();
