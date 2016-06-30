@@ -117,6 +117,38 @@ function connectionsByName(inputs, outputs) {
                 .map(output => ({output: output, input: output}));
 }
 
+
+/**
+* Helper function that loads data in object form into a database table.
+* This uses a transaction to make the operation atomic, and chunks the
+* data to get past the sqlite/knex connection limitations.
+*
+* @private
+* @param {Object} a knex connection Object
+* @param {Object} a knex QueryBuilder associated with the destination table
+* @param {Object[]} an array of object to be inserted
+* @param {boolean} a flag to indicate if the table should be cleared first
+* @param {string} an name to put on the log message
+*/
+function storeData(knex, table, data, clear, name){
+  return knex.transaction(function(trx){
+    const CHUNK = 100;
+
+    // start with a clear of the database
+    var sequence = clear ? table.del().transacting(trx) : Promise.resolve();
+    for (let i = 0; i < data.length; i += CHUNK){
+      let d = data.slice(i, i+CHUNK);
+      sequence = sequence.then(() => table.insert(d).transacting(trx));
+    }
+    sequence.then(trx.commit)
+    .catch(trx.rollback);
+  })
+  .then(function(){
+    console.log(name + ' : complete');
+    return Promise.resolve();
+  });
+}
+
 exports.run = function(socket, data, callback) {
   var Node = socket.bookshelf.model('Node');
   var modules = socket.bookshelf.collection('analytics');
@@ -159,6 +191,12 @@ exports.run = function(socket, data, callback) {
     context.table = {};
     context.table.knex = () => socket.bookshelf.knex(node.get('table'));
     context.table.name = node.get('table');
+
+    context.storeData = (data, clear, name) => storeData(socket.bookshelf.knex,
+                                                socket.bookshelf.knex(node.get('table')),
+                                                data,
+                                                clear || false,
+                                                name || node.get('table'));
 
     var handle = require(module.get('requirePath')).handle;
     return Promise.join(node, handle(context));
