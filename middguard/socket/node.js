@@ -148,6 +148,7 @@ exports.run = function(socket, data, callback) {
 
       inputs[inputGroup] = {};
       inputs[inputGroup].knex = socket.bookshelf.knex(outputs[inputGroup].get('table'));
+      inputs[inputGroup].table = () => socket.bookshelf.knex(outputs[inputGroup].get('table'));
       inputs[inputGroup].cols = columns;
       inputs[inputGroup].tableName = outputs[inputGroup].get('table');
 
