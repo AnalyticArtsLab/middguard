@@ -35,7 +35,7 @@ exports.handle = function(context) {
       };
     });
 
-    return context.table.knex.insert(tweets);
+    return context.table.knex().insert(tweets);
   });
 };
 

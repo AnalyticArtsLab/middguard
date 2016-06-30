@@ -34,7 +34,7 @@ exports.handle = function(context, done) {
     });
 
     // SQLite parameter limit is 999
-    return context.table.knex.insert(_.take(tweets, 300));
+    return context.table.knex().insert(_.take(tweets, 300));
   })
   .then(done);
 };

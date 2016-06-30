@@ -25,7 +25,7 @@ exports.handle = function(context) {
       hashtags = {},
       hashtagsArray = [];
 
-  return tweets.knex.select(hashtagCol)
+  return tweets.knex().select(hashtagCol)
   .then(function(tweets) {
     tweets.forEach(function(tweet) {
       tweet.hashtags.split(',').forEach(function(hashtag) {
@@ -45,7 +45,7 @@ exports.handle = function(context) {
     });
 
     return Promise.each(_.chunk(hashtagsArray, 200), function(chunk) {
-      return context.table.knex.insert(chunk);
+      return context.table.knex().insert(chunk);
     });
   });
 };

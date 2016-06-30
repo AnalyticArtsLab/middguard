@@ -41,7 +41,7 @@ exports.handle = function(context) {
 
     // SQLite parameter limit is 999, so insert in chunks
     return Promise.each(_.chunk(tweets, 200), function(chunk) {
-      return context.table.knex.insert(chunk);
+      return context.table.knex().insert(chunk);
     });
   });
 };

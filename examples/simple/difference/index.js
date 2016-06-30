@@ -31,7 +31,7 @@ exports.handle = function(context) {
       tweets2 = context.inputs.tweets2,
       week = [];
 
-  return Promise.join(tweets1.knex.select('*'), tweets2.knex.select('*'),
+  return Promise.join(tweets1.knex().select('*'), tweets2.knex().select('*'),
   function(tweets1, tweets2) {
     _.range(24).forEach(function(hour) {
       _.range(7).forEach(function(day) {
@@ -47,6 +47,6 @@ exports.handle = function(context) {
       });
     });
 
-    return context.table.knex.insert(week);
+    return context.table.knex().insert(week);
   });
 };

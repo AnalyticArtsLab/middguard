@@ -35,7 +35,7 @@ exports.handle = function(context) {
     });
   });
 
-  return tweets.knex.select('*')
+  return tweets.knex().select('*')
   .then(function(tweets) {
     tweets.forEach(function(tweet) {
       var m = moment(tweet[timestampCol]),
@@ -45,6 +45,6 @@ exports.handle = function(context) {
       _.find(week, {day: day, hour: hour}).count++;
     });
 
-    return context.table.knex.insert(week);
+    return context.table.knex().insert(week);
   });
 };
