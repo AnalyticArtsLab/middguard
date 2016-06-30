@@ -147,8 +147,7 @@ exports.run = function(socket, data, callback) {
       }, {});
 
       inputs[inputGroup] = {};
-      inputs[inputGroup].knex = socket.bookshelf.knex(outputs[inputGroup].get('table'));
-      inputs[inputGroup].table = () => socket.bookshelf.knex(outputs[inputGroup].get('table'));
+      inputs[inputGroup].knex = () => socket.bookshelf.knex(outputs[inputGroup].get('table'));
       inputs[inputGroup].cols = columns;
       inputs[inputGroup].tableName = outputs[inputGroup].get('table');
 
@@ -158,7 +157,7 @@ exports.run = function(socket, data, callback) {
     context.knex = socket.bookshelf.knex;
 
     context.table = {};
-    context.table.knex = socket.bookshelf.knex(node.get('table'));
+    context.table.knex = () => socket.bookshelf.knex(node.get('table'));
     context.table.name = node.get('table');
 
     var handle = require(module.get('requirePath')).handle;
