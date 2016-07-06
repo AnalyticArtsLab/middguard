@@ -1,6 +1,8 @@
 var middguard = middguard || {};
 
 (function() {
+  'use strict';
+
   middguard.socket = Backbone.socket = io();
 
 
