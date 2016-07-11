@@ -34,7 +34,7 @@ module.exports = function(socket) {
   setupSocketEvents(socket, 'graph', Graph);
 
   Bookshelf.model('Node').fetchAll()
-  .then(nodes => nodes.each(node => node.createReadSocket(socket)));
+  .then(nodes => nodes.each(node => node.createSockets(socket)));
 };
 
 function patchModelToEmit(socket, modelName, model) {

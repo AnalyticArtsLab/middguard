@@ -98,7 +98,7 @@ module.exports = function(app) {
       return this.set('connections', JSON.stringify(groups));
     },
 
-    createReadSocket: function(socket) {
+    createSockets: function(socket) {
       socket.on(`${this.get('table')}:read`, (data, callback) => {
         let query = Bookshelf.knex(this.get('table'));
 
@@ -110,7 +110,34 @@ module.exports = function(app) {
 
         query.then(results => callback(null, results));
       });
+
+    socket.on(`${this.get('table')}:create`, (data, callback) => {
+      let query = Bookshelf.knex(this.get('table'))
+      .insert(data);
+
+      query.then(results => {
+        console.log('creating ' + this.get('table') + ' entry');
+        console.warn('This should share the results with connected parties');
+        return callback(null, {id: results[0]});
+      });
+    });
+
+    socket.on(`${this.get('table')}:update`, (data, callback) => {
+      // strip out the extra property
+      let strippedData = _.pickBy(data, (v,k) => k !== 'middguard_views');
+      let query = Bookshelf.knex(this.get('table'))
+      .where({id: data.id})
+      .update(strippedData);
+
+      query.then(results => {
+        console.log('updating ' + this.get('table') + ' entry');
+        console.warn('This should share the results with connected parties');
+        return callback(null);
+      });
+
+    });
     }
+
   });
 
   return Bookshelf.model('Node', Node);

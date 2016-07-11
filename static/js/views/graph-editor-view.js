@@ -476,9 +476,9 @@ var middguard = middguard || {};
     runNode: function() {
       if (this.model.isVisualization()) {
         middguard.toggleView(this.model.get('id'));
-      } else {
+      } //else {
         this.model.run();
-      }
+      //}
     },
 
     toggleDetail: function() {

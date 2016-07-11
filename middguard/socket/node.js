@@ -7,7 +7,7 @@ exports.create = function(socket, data, callback) {
   new Node()
   .save(data, {clientCreate: true})
   .then(node => {
-    node.createReadSocket(socket);
+    node.createSockets(socket);
     callback(null, node.toJSON());
     socket.broadcast.emit('nodes:create', node.toJSON());
   });
@@ -152,7 +152,6 @@ function storeData(knex, table, data, clear, name){
 exports.run = function(socket, data, callback) {
   var Node = socket.bookshelf.model('Node');
   var modules = socket.bookshelf.collection('analytics');
-
   new Node({id: data.id})
   .fetch()
   .tap(node => node.ensureTable())
@@ -167,6 +166,10 @@ exports.run = function(socket, data, callback) {
     var module = modules.findWhere({name: node.get('module')}),
         connections = JSON.parse(node.get('connections')),
         context = {};
+    if (require(module.get('requirePath')).visualization){
+      // this is a visualziation, it won't do real work
+      return Promise.join(node);
+    }
 
     context.inputs = _.reduce(_.keys(connections), function(inputs, inputGroup) {
       var groupConnections = connections[inputGroup].connections;

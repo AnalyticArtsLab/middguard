@@ -84,6 +84,11 @@ var middguard = middguard || {};
         return inputs;
       }, {});
 
+      context.output = {
+        tableName: this.model.get('table'),
+        collection: middguard.entities[this.model.get('table')]
+      };
+
       return context;
     }
   });
