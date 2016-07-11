@@ -69,7 +69,7 @@ module.exports = function(app) {
     ensureTable: function() {
       return Bookshelf.knex.schema.hasTable(this.get('table'))
       .then(exists => {
-        if (!exists) {
+        if (!exists && this.module().createTable) {
           return this.module().createTable(this.get('table'), Bookshelf.knex);
         }
       });
