@@ -35,6 +35,12 @@ module.exports = function(app) {
     },
 
     createTableName: function() {
+      var modules = Bookshelf.collection('analytics'),
+          moduleName = this.get('module'),
+          module = modules.findWhere({name: moduleName});
+      if (require(module.get('requirePath')).singleton){
+        return this.set('table', this.get('module'));
+      }
       return Node
       .where('module', this.get('module'))
       .count()

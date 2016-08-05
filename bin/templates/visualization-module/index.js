@@ -6,6 +6,8 @@ exports.outputs = [];
 
 exports.displayName = '<%- displayName %>';
 
+exports.singleton = true; //change to false to allow node to create a unique table
+
 exports.visualization = true;
 
 exports.static = path.join(__dirname, 'static');
