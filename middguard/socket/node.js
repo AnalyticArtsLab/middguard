@@ -155,10 +155,21 @@ exports.run = function(socket, data, callback) {
   new Node({id: data.id})
   .fetch()
   .tap(node => node.ensureTable())
-  .then(node => node.save({status: 1}))
-  .then(function(node) {
-    socket.emit('nodes:update', node.toJSON());
-    socket.broadcast.emit('nodes:update', node.toJSON());
+  .then(function(node){
+    let moduleName = node.get('module');
+     Node.where('module', moduleName).fetchAll()
+     .then(result => {
+       var promises = [];
+       result.forEach((r)=>{
+         promises.push(r.save({status: 1}));
+       });
+       Promise.all(promises).then(function(n){
+         n.forEach((mod)=>{
+           socket.emit('nodes:update', mod.toJSON());
+           socket.broadcast.emit('nodes:update', mod.toJSON());
+         });
+       });
+      });
     return node;
   })
   .then(node => Promise.join(node, node.outputNodes()))
@@ -205,11 +216,20 @@ exports.run = function(socket, data, callback) {
     return Promise.join(node, handle(context));
   })
   .spread(function(node) {
-    return node.save({status: 2});
-  })
-  .then(function(node) {
-    socket.emit('nodes:update', node.toJSON());
-    socket.broadcast.emit('nodes:update', node.toJSON());
+    let moduleName = node.get('module');
+     Node.where('module', moduleName).fetchAll()
+     .then(result => {
+       var promises = [];
+       result.forEach((r)=>{
+         promises.push(r.save({status: 2}));
+       });
+       Promise.all(promises).then(function(n){
+         n.forEach((mod)=>{
+           socket.emit('nodes:update', mod.toJSON());
+           socket.broadcast.emit('nodes:update', mod.toJSON());
+         });
+       });
+      });
   })
   .catch(callback);
 };
