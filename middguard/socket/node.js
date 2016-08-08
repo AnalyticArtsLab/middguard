@@ -145,31 +145,38 @@ function connectionsByName(inputs, outputs) {
   return outputs.filter(output => _.indexOf(inputs, output) > -1)
                 .map(output => ({output: output, input: output}));
 }
-
-function runError (node, Node, socket){
-
+/**
+* Changes the status of a node (right now: only nodes with singleton as true)
+*
+* @private
+* @param {Object} the node whose status is to be changed
+* @param {Object[]} the collection of nodes
+* @param {Object} the connection to the client
+* @param {integer} the status to apply to the node
+*/
+function changeStatus (node, Node, socket, status){
   var modules = socket.bookshelf.collection('analytics');
   var module = modules.findWhere({name: node.get('module')});
   if(require(module.get('requirePath')).singleton){
-    Node.where('module', node.attributes.module).fetchAll()
-      .then(result=>{
+    Node.where('module', node.get('module')).fetchAll()
+      .then(result =>{
         var promises = [];
-        result.forEach((r)=>{
-          promises.push(r.save({status: 3}));
+        result.forEach(r=>{
+            promises.push(r.save({status:status}));
         });
         Promise.all(promises).then(function(n){
-          n.forEach((mod)=>{
+          n.forEach(mod =>{
             socket.emit('nodes:update', mod.toJSON());
             socket.broadcast.emit('nodes:update', mod.toJSON());
           });
         });
       });
   }else{
-    node.save({status:3})
-    .then(node=>{
-      socket.emit('nodes:update', node.toJSON());
-      socket.broadcast.emit('nodes:update', node.toJSON());
-    });
+    node.save({status:status})
+     .then(node=>{
+       socket.emit('nodes:update', node.toJSON());
+       socket.broadcast.emit('nodes:update', node.toJSON());
+     })
   }
 
 }
@@ -192,7 +199,7 @@ function runError (node, Node, socket){
 function storeData(knex, table, data, clear, name, node, Node, socket){
   return knex.transaction(function(trx){
     const CHUNK = 100;
-    //const CHUNK = 500;
+    // const CHUNK = 500;  /*to force error, change CHUNK size to 500*/
 
     // start with a clear of the database
     var sequence = clear ? table.del().transacting(trx) : Promise.resolve();
@@ -208,7 +215,7 @@ function storeData(knex, table, data, clear, name, node, Node, socket){
     return Promise.resolve();
   })
   .catch(function(){
-    runError(node, Node, socket);
+    changeStatus(node, Node, socket, 3);
     throw new Error('Error in '+node.attributes.module);
   });
 
@@ -225,25 +232,7 @@ exports.run = function(socket, data, callback) {
     let moduleName = node.get('module');
      Node.where('module', moduleName).fetchAll()
      .then(result => {
-       var module = modules.findWhere({name: node.get('module')});
-       if(require(module.get('requirePath')).singleton){
-         var promises = [];
-         result.forEach((r)=>{
-           promises.push(r.save({status: 1}));
-         });
-         Promise.all(promises).then(function(n){
-           n.forEach((mod)=>{
-             socket.emit('nodes:update', mod.toJSON());
-             socket.broadcast.emit('nodes:update', mod.toJSON());
-           });
-         });
-       }else{
-         node.save({status:1})
-          .then(node=>{
-            socket.emit('nodes:update', node.toJSON());
-            socket.broadcast.emit('nodes:update', node.toJSON());
-          })
-       }
+       changeStatus(node, Node, socket, 1);
       });
     return node;
   })
@@ -297,27 +286,7 @@ exports.run = function(socket, data, callback) {
     let moduleName = node.get('module');
      Node.where('module', moduleName).fetchAll()
      .then(result => {
-       var module = modules.findWhere({name: moduleName});
-       if(require(module.get('requirePath')).singleton){
-         var promises = [];
-         result.forEach((r)=>{
-           promises.push(r.save({status: 2}));
-         });
-         Promise.all(promises).then(function(n){
-           n.forEach((mod)=>{
-             socket.emit('nodes:update', mod.toJSON());
-             socket.broadcast.emit('nodes:update', mod.toJSON());
-           });
-         });
-       }else{
-         node.save({status:2})
-          .then(node=>{
-            socket.emit('nodes:update', node.toJSON());
-            socket.broadcast.emit('nodes:update', node.toJSON());
-          })
-       }
-
-
+       changeStatus(node, Node, socket, 2);
       });
   })
   .catch(callback);
