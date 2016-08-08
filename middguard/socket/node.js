@@ -3,28 +3,43 @@ var _ = require('lodash');
 
 exports.create = function(socket, data, callback) {
   var Node = socket.bookshelf.model('Node');
-  Node.where('module', data.module).fetchAll()
-  .then(result=>{
-    let status = result.at(0)?result.at(0).attributes.status:0;
-    data = {
-      status:status,
-      radius:75,
-      position_x:0,
-      position_y:0,
-      connections:'{}',
-      module:data.module,
-      graph_id:data.graph_id
-    };
-    return data;
-  }).then(data =>{
+  var modules = socket.bookshelf.collection('analytics');
+  //console.log(modules);
+  var module = modules.findWhere({name: data.module});
+  //console.log(module);
+  if(require(module.get('requirePath')).singleton){
+    Node.where('module', data.module).fetchAll()
+    .then(result=>{
+      let status = result.at(0)?result.at(0).attributes.status:0;
+      data = {
+        status:status,
+        radius:75,
+        position_x:0,
+        position_y:0,
+        connections:'{}',
+        module:data.module,
+        graph_id:data.graph_id
+      };
+      return data;
+    }).then(data =>{
+      new Node()
+      .save(data, {clientCreate: true})
+      .then(node => {
+        node.createSockets(socket);
+        callback(null, node.toJSON());
+        socket.broadcast.emit('nodes:create', node.toJSON());
+      });
+    })
+  }else{
     new Node()
-    .save(data, {clientCreate: true})
-    .then(node => {
+    .save(data, {clientCreate:true})
+    .then(node=>{
       node.createSockets(socket);
       callback(null, node.toJSON());
       socket.broadcast.emit('nodes:create', node.toJSON());
     });
-  })
+  }
+
 };
 
 exports.readAll = function(socket, data, callback) {
@@ -133,20 +148,30 @@ function connectionsByName(inputs, outputs) {
 
 function runError (node, Node, socket){
 
-  //NEED TO GET SINGLETON VARIABLE SO ONLY UPDATE ONE IF SINGLETON FALSE
-   Node.where('module', node.attributes.module).fetchAll()
-     .then(result=>{
-       var promises = [];
-       result.forEach((r)=>{
-         promises.push(r.save({status: 3}));
-       });
-       Promise.all(promises).then(function(n){
-         n.forEach((mod)=>{
-           socket.emit('nodes:update', mod.toJSON());
-           socket.broadcast.emit('nodes:update', mod.toJSON());
-         });
-       });
-     })
+  var modules = socket.bookshelf.collection('analytics');
+  var module = modules.findWhere({name: node.get('module')});
+  if(require(module.get('requirePath')).singleton){
+    Node.where('module', node.attributes.module).fetchAll()
+      .then(result=>{
+        var promises = [];
+        result.forEach((r)=>{
+          promises.push(r.save({status: 3}));
+        });
+        Promise.all(promises).then(function(n){
+          n.forEach((mod)=>{
+            socket.emit('nodes:update', mod.toJSON());
+            socket.broadcast.emit('nodes:update', mod.toJSON());
+          });
+        });
+      });
+  }else{
+    node.save({status:3})
+    .then(node=>{
+      socket.emit('nodes:update', node.toJSON());
+      socket.broadcast.emit('nodes:update', node.toJSON());
+    });
+  }
+
 }
 /**
 * Helper function that loads data in object form into a database table.
@@ -167,7 +192,7 @@ function runError (node, Node, socket){
 function storeData(knex, table, data, clear, name, node, Node, socket){
   return knex.transaction(function(trx){
     const CHUNK = 100;
-    // const CHUNK = 500;
+    //const CHUNK = 500;
 
     // start with a clear of the database
     var sequence = clear ? table.del().transacting(trx) : Promise.resolve();
