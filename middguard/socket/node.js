@@ -4,10 +4,16 @@ var _ = require('lodash');
 exports.create = function(socket, data, callback) {
   var Node = socket.bookshelf.model('Node');
   var modules = socket.bookshelf.collection('analytics');
-  //console.log(modules);
   var module = modules.findWhere({name: data.module});
-  //console.log(module);
-  if(require(module.get('requirePath')).singleton){
+  var singleton = require(module.get('requirePath')).singleton;
+  var inputs = require(module.get('requirePath')).inputs.length;
+  if(singleton && inputs > 0){
+    console.log('Singleton cannot be true if node has inputs');
+    console.log('changing singleton to false...');
+    singleton = false;
+  }
+  module.set('singleton', singleton);
+  if(module.get('singleton')){
     Node.where('module', data.module).fetchAll()
     .then(result=>{
       let status = result.at(0)?result.at(0).attributes.status:0;
@@ -157,7 +163,8 @@ function connectionsByName(inputs, outputs) {
 function changeStatus (node, Node, socket, status){
   var modules = socket.bookshelf.collection('analytics');
   var module = modules.findWhere({name: node.get('module')});
-  if(require(module.get('requirePath')).singleton){
+
+  if(module.get('singleton')){
     Node.where('module', node.get('module')).fetchAll()
       .then(result =>{
         var promises = [];
