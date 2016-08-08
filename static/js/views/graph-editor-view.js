@@ -230,10 +230,12 @@ var middguard = middguard || {};
           r = this.model.get('radius'),
           n = this.module.get('inputs').length,
           offset = NodeView.prototype.inputPosition(i, r, n);
+          var svg = d3.select('.editor').select('svg');
+          var bounds = {x: svg.attr('width'), y: svg.attr('height')};
 
       return {
-        x: this.model.position().x + offset.x,
-        y: this.model.position().y + offset.y
+        x: this.model.position().x + offset.x, // bounds x line movement.
+        y: this.model.position().y + offset.y //bounds y line movement.
       };
     },
 
@@ -293,30 +295,30 @@ var middguard = middguard || {};
       this.d3el = d3.select(this.el)
           .datum(this.model.position());
 
+     //Drag behavior for nodes, modified (2016).
       this.drag = d3.behavior.drag()
           .origin(function(d) { return d; })
           .on('dragstart', this.dragstarted.bind(this))
           .on('drag', this.dragged.bind(this))
-          .on('dragend', this.dragended.bind(this));
+          .on('dragend', this.dragended.bind(this)); //binds dragging end event 'dragended' to drag.
 
       this.listenTo(this.model, 'change', this.render);
     },
 
     template: _.template($('#graph-node-template').html()),
+    //middguard/middguard/views/graph-editor-template.jade
 
     render: function() {
       var x = this.model.position().x;
       var y = this.model.position().y;
 
       this.d3el
-          .datum(this.model.position())
-          .attr('transform', 'translate(' + x + ',' + y + ')')
+          .datum(this.model.position()) //binds x,y to 'g'.
+          .attr('transform', 'translate(' + x + ',' + y + ')') //moves nodes to saved positions.
           .call(this.drag);
 
       this.$el.html(this.template({
         r: this.model.get('radius'),
-        handlePosition: this.dragHandlePosition(),
-        dragHandlePath: d3.svg.symbol().type('cross').size(150)(),
         runPosition: this.runPosition(),
         runPath: d3.svg.symbol().type('triangle-up').size(150)(),
         status: this.model.get('status'),
@@ -348,13 +350,19 @@ var middguard = middguard || {};
     },
 
     dragstarted: function(d) {
+       d3.selectAll('.node').each( function(d){
+        d.order = 0;
+      }) //flags unselected nodes as 0, so will sort to bottom with 'sort' funct. Uses '.each' iterating all data on the 'g', adding 'order' & value.
+       d3.select(this.el).each(function(d){
+         d.order = 1;
+       })//flags selected nodes as 1, so will 'sort' to top.
+       d3.selectAll('.node').sort(function(a,b) {return a.order-b.order;});
+      d3.event.sourceEvent.stopPropagation();
+  //   d3.select(this).classed('dragging', true);
       this.dragStartPosition = _.clone(d);
     },
 
     dragged: function(d) {
-      if (!d3.select(d3.event.sourceEvent.target).classed('drag-handle')) {
-        return;
-      }
 
       var x = d3.event.x;
       var y = d3.event.y;
@@ -375,8 +383,11 @@ var middguard = middguard || {};
     },
 
     dragended: function() {
+      var svg = d3.select(this.editor.el).select('svg');
       if (this.dragMoved())
-        this.model.save();
+         d3.event.sourceEvent.stopPropagation();
+        //d3.select(this).classed('dragging', false);//removes 'dragging' class.
+       this.model.save(); //saves new position.
     },
 
     dragMoved: function() {
@@ -490,19 +501,14 @@ var middguard = middguard || {};
       this.editor.setDetailView(view);
     },
 
-    dragHandlePosition: function() {
-      var r = this.model.get('radius');
-      return {
-        x: r + -r * Math.sqrt(2) / 2 + 15,
-        y: r - r * Math.sqrt(2) / 2 + 15
-      };
-    },
-
     runPosition: function() {
       var r = this.model.get('radius');
       return {
-        x: r + r * Math.sqrt(2) / 2 - 15,
-        y: r - r * Math.sqrt(2) / 2 + 15
+        x: r ,
+        y: r + r/2
+        //r+r* Math.sqrt(2) /2 for lower middle position.
+        //original upper left corner position.
+        //x: r + r * Math.sqrt(2) / 2 - 15, y: r-r* Math.sqrt(2)+15
       };
     },
 

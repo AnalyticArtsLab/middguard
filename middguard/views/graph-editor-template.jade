@@ -19,12 +19,6 @@ script(type="text/template", id="graph-node-template").
     x="<%= r %>" y="<%= r + 20 %>">
     <%= statusText %>
   </text>
-  <circle class="drag-handle"
-    cx="<%= handlePosition.x %>" cy="<%= handlePosition.y %>" r="20"></circle>
-  <path
-    class="drag-handle"
-    transform="translate(<%= handlePosition.x %>,<%= handlePosition.y %>)"
-    d="<%= dragHandlePath %>"></path>
   <path class="run"
     transform="translate(<%= runPosition.x %>,<%= runPosition.y %>) rotate(90)"
     d="<%= runPath %>"></path>
