@@ -3,14 +3,28 @@ var _ = require('lodash');
 
 exports.create = function(socket, data, callback) {
   var Node = socket.bookshelf.model('Node');
-
-  new Node()
-  .save(data, {clientCreate: true})
-  .then(node => {
-    node.createSockets(socket);
-    callback(null, node.toJSON());
-    socket.broadcast.emit('nodes:create', node.toJSON());
-  });
+  Node.where('module', data.module).fetchAll()
+  .then(result=>{
+    let status = result.at(0)?result.at(0).attributes.status:0;
+    data = {
+      status:status,
+      radius:75,
+      position_x:0,
+      position_y:0,
+      connections:'{}',
+      module:data.module,
+      graph_id:data.graph_id
+    };
+    return data;
+  }).then(data =>{
+    new Node()
+    .save(data, {clientCreate: true})
+    .then(node => {
+      node.createSockets(socket);
+      callback(null, node.toJSON());
+      socket.broadcast.emit('nodes:create', node.toJSON());
+    });
+  })
 };
 
 exports.readAll = function(socket, data, callback) {
@@ -152,7 +166,7 @@ function storeData(knex, table, data, clear, name){
 exports.run = function(socket, data, callback) {
   var Node = socket.bookshelf.model('Node');
   var modules = socket.bookshelf.collection('analytics');
-  new Node({id: data.id})
+  new Node({id:data.id})
   .fetch()
   .tap(node => node.ensureTable())
   .then(function(node){
