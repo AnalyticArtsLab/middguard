@@ -29,7 +29,7 @@ var middguard = middguard || {};
       this.$el.html(this.template(this.graph.toJSON()));
       d3.select(this.el).select('.editor').append('svg')
           .attr('class', 'graph')
-          .attr('width', 500);
+          .attr('width', 700); //change back to 500.
 
       this.resizeEditor();
 
@@ -227,24 +227,26 @@ var middguard = middguard || {};
       var i = _.findIndex(this.module.get('inputs'), input => {
             return input.name === this.inputGroup;
           }),
-          r = this.model.get('radius'),
+          w = this.model.get('width'), //changed from radius
           n = this.module.get('inputs').length,
-          offset = NodeView.prototype.inputPosition(i, r, n);
+          offset = NodeView.prototype.inputPosition(i, w, n);
           var svg = d3.select('.editor').select('svg');
           var bounds = {x: svg.attr('width'), y: svg.attr('height')};
 
       return {
+        //not bounding right & down.
         x: this.model.position().x + offset.x, // bounds x line movement.
         y: this.model.position().y + offset.y //bounds y line movement.
       };
     },
 
     outputPosition: function() {
-      var r = this.outputNode.get('radius');
+      var w = this.outputNode.get('width');
+      var h = this.outputNode.get('height');
 
-      return {
-        x: this.outputNode.position().x + r,
-        y: this.outputNode.position().y + 2 * r - 10
+      return { //issue here.
+        x: this.outputNode.position().x + w/2,
+        y: this.outputNode.position().y + w/2
       };
     },
 
@@ -314,11 +316,14 @@ var middguard = middguard || {};
 
       this.d3el
           .datum(this.model.position()) //binds x,y to 'g'.
-          .attr('transform', 'translate(' + x + ',' + y + ')') //moves nodes to saved positions.
+          //.attr('transform', 'translate(' + x + ',' + y + ')') //moves nodes to saved positions. //makes rects offset??
           .call(this.drag);
 
       this.$el.html(this.template({
-        r: this.model.get('radius'),
+        w: this.model.get('width'),
+        h: this.model.get('height'),
+        x: this.model.position().x,
+        y: this.model.position().y,
         runPosition: this.runPosition(),
         runPath: d3.svg.symbol().type('triangle-up').size(150)(),
         status: this.model.get('status'),
@@ -366,16 +371,17 @@ var middguard = middguard || {};
 
       var x = d3.event.x;
       var y = d3.event.y;
-      var r = this.model.get('radius');
+      var w = this.model.get('width');
+      var h = this.model.get('height');
 
       var svg = d3.select(this.editor.el).select('svg');
       var bounds = {x: svg.attr('width'), y: svg.attr('height')};
 
       // Prevent element from being dragged out bounds
-      if (x < 0) x = 0;
+      if (x < 0) x = 0; //up & left bounds work
       if (y < 0) y = 0;
-      if (y + r * 2 > bounds.y) y = bounds.y - r * 2;
-      if (x + r * 2 > bounds.x) x = bounds.x - r * 2;
+      if (y + w > bounds.y) y = bounds.y - w;
+      if (x + w > bounds.x) x = bounds.x - w;
 
       this.model.position(x, y);
       d3.select(this.el)
@@ -502,16 +508,15 @@ var middguard = middguard || {};
     },
 
     runPosition: function() {
-      var r = this.model.get('radius');
+      var h = this.model.get('height');
+      var w = this.model.get('width');
       return {
-        x: r ,
-        y: r + r/2
-        //r+r* Math.sqrt(2) /2 for lower middle position.
-        //original upper left corner position.
-        //x: r + r * Math.sqrt(2) / 2 - 15, y: r-r* Math.sqrt(2)+15
+        x: w/2 , //in right spot!
+        y: h/2 + h/4
       };
     },
 
+    //r changed to width (w) 2016.
     /* Calculate each input circle's position.
      * Circles are arranged in rows of three from the top down.
      * Assume 5 pixel circle radius and 15 pixels spacing between
@@ -528,11 +533,11 @@ var middguard = middguard || {};
      *
      * @return the center position for the input circle
      */
-    inputPosition: function(i, r, n) {
+    inputPosition: function(i, w, n) {
       var rowIndexX = i % 3,
           rowIndexY = Math.floor(i / 3),
           rowLength = i >= n - n % 3 ? n % 3 : 3,
-          baseX = r - (rowLength - 1) * 7.5,
+          baseX = w/2 - (rowLength - 1) * 7.5,
           baseY = 10;
 
       return {

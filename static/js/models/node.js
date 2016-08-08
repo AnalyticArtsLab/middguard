@@ -9,7 +9,8 @@ var middguard = middguard || {};
 
     defaults: {
       status: 0,
-      radius: 75,
+      width: 75,
+      height: 50,
       position_x: 0,
       position_y: 0,
       selectedInput: null,
