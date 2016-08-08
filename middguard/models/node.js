@@ -28,7 +28,8 @@ module.exports = function(app) {
       var statuses = {
         0: 'Not run',
         1: 'In progress',
-        2: 'Done'
+        2: 'Done',
+        3: 'Error'
       };
 
       return statuses[this.get('status')];

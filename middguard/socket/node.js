@@ -131,7 +131,23 @@ function connectionsByName(inputs, outputs) {
                 .map(output => ({output: output, input: output}));
 }
 
+function runError (node, Node, socket){
 
+  //NEED TO GET SINGLETON VARIABLE SO ONLY UPDATE ONE IF SINGLETON FALSE
+   Node.where('module', node.attributes.module).fetchAll()
+     .then(result=>{
+       var promises = [];
+       result.forEach((r)=>{
+         promises.push(r.save({status: 3}));
+       });
+       Promise.all(promises).then(function(n){
+         n.forEach((mod)=>{
+           socket.emit('nodes:update', mod.toJSON());
+           socket.broadcast.emit('nodes:update', mod.toJSON());
+         });
+       });
+     })
+}
 /**
 * Helper function that loads data in object form into a database table.
 * This uses a transaction to make the operation atomic, and chunks the
@@ -143,10 +159,15 @@ function connectionsByName(inputs, outputs) {
 * @param {Object[]} an array of object to be inserted
 * @param {boolean} a flag to indicate if the table should be cleared first
 * @param {string} an name to put on the log message
+* @param {Oject} the node object we are storing data for
+* @param {Object} the collection of Nodes
+* @param {Object} connection to client
 */
-function storeData(knex, table, data, clear, name){
+
+function storeData(knex, table, data, clear, name, node, Node, socket){
   return knex.transaction(function(trx){
     const CHUNK = 100;
+    // const CHUNK = 500;
 
     // start with a clear of the database
     var sequence = clear ? table.del().transacting(trx) : Promise.resolve();
@@ -160,8 +181,14 @@ function storeData(knex, table, data, clear, name){
   .then(function(){
     console.log(name + ' : complete');
     return Promise.resolve();
+  })
+  .catch(function(){
+    runError(node, Node, socket);
+    throw new Error('Error in '+node.attributes.module);
   });
+
 }
+
 
 exports.run = function(socket, data, callback) {
   var Node = socket.bookshelf.model('Node');
@@ -173,16 +200,25 @@ exports.run = function(socket, data, callback) {
     let moduleName = node.get('module');
      Node.where('module', moduleName).fetchAll()
      .then(result => {
-       var promises = [];
-       result.forEach((r)=>{
-         promises.push(r.save({status: 1}));
-       });
-       Promise.all(promises).then(function(n){
-         n.forEach((mod)=>{
-           socket.emit('nodes:update', mod.toJSON());
-           socket.broadcast.emit('nodes:update', mod.toJSON());
+       var module = modules.findWhere({name: node.get('module')});
+       if(require(module.get('requirePath')).singleton){
+         var promises = [];
+         result.forEach((r)=>{
+           promises.push(r.save({status: 1}));
          });
-       });
+         Promise.all(promises).then(function(n){
+           n.forEach((mod)=>{
+             socket.emit('nodes:update', mod.toJSON());
+             socket.broadcast.emit('nodes:update', mod.toJSON());
+           });
+         });
+       }else{
+         node.save({status:1})
+          .then(node=>{
+            socket.emit('nodes:update', node.toJSON());
+            socket.broadcast.emit('nodes:update', node.toJSON());
+          })
+       }
       });
     return node;
   })
@@ -224,7 +260,10 @@ exports.run = function(socket, data, callback) {
                                                 socket.bookshelf.knex(node.get('table')),
                                                 data,
                                                 clear || false,
-                                                name || node.get('table'));
+                                                name || node.get('table'),
+                                                node,
+                                                Node,
+                                                socket);
 
     var handle = require(module.get('requirePath')).handle;
     return Promise.join(node, handle(context));
@@ -233,16 +272,27 @@ exports.run = function(socket, data, callback) {
     let moduleName = node.get('module');
      Node.where('module', moduleName).fetchAll()
      .then(result => {
-       var promises = [];
-       result.forEach((r)=>{
-         promises.push(r.save({status: 2}));
-       });
-       Promise.all(promises).then(function(n){
-         n.forEach((mod)=>{
-           socket.emit('nodes:update', mod.toJSON());
-           socket.broadcast.emit('nodes:update', mod.toJSON());
+       var module = modules.findWhere({name: moduleName});
+       if(require(module.get('requirePath')).singleton){
+         var promises = [];
+         result.forEach((r)=>{
+           promises.push(r.save({status: 2}));
          });
-       });
+         Promise.all(promises).then(function(n){
+           n.forEach((mod)=>{
+             socket.emit('nodes:update', mod.toJSON());
+             socket.broadcast.emit('nodes:update', mod.toJSON());
+           });
+         });
+       }else{
+         node.save({status:2})
+          .then(node=>{
+            socket.emit('nodes:update', node.toJSON());
+            socket.broadcast.emit('nodes:update', node.toJSON());
+          })
+       }
+
+
       });
   })
   .catch(callback);

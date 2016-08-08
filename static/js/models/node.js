@@ -20,7 +20,8 @@ var middguard = middguard || {};
     statusMap: {
       0: 'Not run',
       1: 'In progress',
-      2: 'Completed'
+      2: 'Completed',
+      3: 'Error'
     },
 
     connectToOutput: function(other, inputGroup) {
