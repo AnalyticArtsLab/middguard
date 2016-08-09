@@ -38,12 +38,6 @@ var middguard = middguard || {};
       });
     },
 
-    delete: function(){
-      middguard.socket.emit('node:delete', {
-        id: this.get('id')
-      });
-    },
-
     position: function(x, y) {
       if (!arguments.length) {
         return {x: this.get('position_x'), y: this.get('position_y')};
