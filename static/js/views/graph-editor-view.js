@@ -151,12 +151,14 @@ var middguard = middguard || {};
 
       // `this.model` is the "input" node
       this.listenTo(this.model, 'change', this.render);
+
+      //this.listenTo(this.model, 'pow', ()=>{console.log('node destroyed');});
+      this.listenTo(this.model, 'destroy', this.remove);
     },
 
     render: function() {
       this.connections.forEach(connection => connection.render());
       this.unrenderedConnections().forEach(this.addConnectingLine, this);
-
       return this;
     },
 
@@ -173,6 +175,10 @@ var middguard = middguard || {};
       });
       this.$el.append(view.render().el);
       this.connections.push(view);
+      let outputNode = middguard.Nodes.findWhere({
+        id: JSON.parse(this.model.get('connections'))[inputGroup].output_node
+      });
+      this.listenTo(outputNode, 'destroy', () => {this.connections.splice(this.connections.indexOf(view), 1); view.remove();})
     },
 
     renderedConnections: function() {
@@ -200,7 +206,6 @@ var middguard = middguard || {};
       this.module = middguard.PackagedModules.findWhere({
         name: this.model.get('module')
       });
-
       this.diagonal = d3.svg.diagonal();
 
       // Only rerender this particular line when the output node moves.
@@ -272,6 +277,11 @@ var middguard = middguard || {};
         this.listenTo(this.outputNode, 'change', this.render);
         this.render();
       }
+    },
+
+    deleteConnection: function(){
+      console.log(this);
+      d3.select(this.el).remove();
     }
   });
 
@@ -504,13 +514,16 @@ var middguard = middguard || {};
         this.model.run();
       //}
     },
-    
+
     /*THIS DOES NOT YET HANDLE THE SINGLETON VARIABLE - WILL DELETE ALL NODES ASSOCIATED WITH THE SAME TABLE */
     deleteNode: function(){
-      d3.select(this.el).remove();
       var tableName = this.model.get('table');
+      //removes node from middguard.entities
       delete middguard.entities[tableName];
-      this.model.delete();
+      //removes node from view
+      this.remove();
+      //removes node from database table
+      this.model.destroy();
     },
 
     toggleDetail: function() {
