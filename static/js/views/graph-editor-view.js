@@ -227,16 +227,18 @@ var middguard = middguard || {};
       var i = _.findIndex(this.module.get('inputs'), input => {
             return input.name === this.inputGroup;
           }),
+          x = this.model.position().x,
+          y = this.model.position().y,
+          h = this.model.get('height'),
           w = this.model.get('width'), //changed from radius
           n = this.module.get('inputs').length,
-          offset = NodeView.prototype.inputPosition(i, w, n);
+          offset = NodeView.prototype.inputPosition(i, x, n);
           var svg = d3.select('.editor').select('svg');
           var bounds = {x: svg.attr('width'), y: svg.attr('height')};
 
-      return {
-        //not bounding right & down.
-        x: this.model.position().x + offset.x, // bounds x line movement.
-        y: this.model.position().y + offset.y //bounds y line movement.
+      return { //controls 'input' positon of paths
+        x: x + w/2,
+        y: this.model.position().y + offset.y
       };
     },
 
@@ -244,7 +246,7 @@ var middguard = middguard || {};
       var w = this.outputNode.get('width');
       var h = this.outputNode.get('height');
 
-      return { //controls output position of paths. circles in jade file.
+      return { //controls 'output' position of paths.
         x: this.outputNode.position().x + w/2,
         y: this.outputNode.position().y + h -5
       };
@@ -331,6 +333,9 @@ var middguard = middguard || {};
         status: this.model.get('status'),
         statusText: this.model.statusText(),
         displayName: this.module.get('displayName'),
+        //add delete glyph here.
+        deletePosition: this.deletePosition(),
+        deleteNode: d3.svg.symbol().type('cross').size(100)(),
         inputs: this.module.get('inputs'),
         output: this.module.get('outputs').length,
         inputPosition: this.inputPosition
@@ -382,8 +387,8 @@ var middguard = middguard || {};
       // Prevent element from being dragged out bounds
       if (x < 0) x = 0; //up & left bounds work
       if (y < 0) y = 0;
-      if (y + w/2 > bounds.y) y = bounds.y - w/2;
-      if (x + w/2 > bounds.x) x = bounds.x - w/2;
+      if (y - h > bounds.y) y = bounds.y - h; //not bounding.
+      if (x - w > bounds.x) x = bounds.x - w;
 
       this.model.position(x, y); //careful. This redeclares x & y as values from node.js!
       d3.select(this.el)
@@ -510,6 +515,14 @@ var middguard = middguard || {};
       this.model.delete();
     },
 
+    deleteNode: function() {
+      if (this.model.isVisualization()) {
+        middguard.toggleView(this.model.get('id'));
+      } //else {
+      //  this.model.delete();
+      //}
+    },
+
     toggleDetail: function() {
       var view = new NodeDetailView({model: this.model});
 
@@ -527,6 +540,17 @@ var middguard = middguard || {};
       return {
         x: (x + w/2),
         y: y+ h/2+h/4-2
+      };
+    },
+
+    deletePosition: function() {
+      var x = this.model.position().x;
+      var y = this.model.position().y;
+      var h = this.model.get('height');
+      var w = this.model.get('width');
+      return {
+        x: x + 10,
+        y: y + 10
       };
     },
 
@@ -548,13 +572,14 @@ var middguard = middguard || {};
      * @return the center position for the input circle
      */
 
-    //controls input path location. & Used for dot location later.
+     //check to be sure works for multiple input.
+    //Used for dot location.
     inputPosition: function(i, x, n) {
-      var rowIndexX = i % 3,
-          rowIndexY = Math.floor(i / 3),
-          rowLength = i >= n - n % 3 ? n % 3 : 3,
-          baseX = x/2,
-          baseY = 2;
+      var rowIndexX = i % 5,
+          rowIndexY = Math.floor(i / 5),
+          rowLength = i >= n - n % 5 ? n % 5 : 5,
+          baseX = x,
+          baseY = 5;
           // baseX = w/2 - (rowLength - 1) * 7.5,
           // baseY = 10;
 

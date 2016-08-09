@@ -47,9 +47,15 @@
   fill: #fff;
 }
 
-.middguard-graph-editor .node:hover path.drag-handle {
+.middguard-graph-editor .deleteNode  {
+  fill:transparent;
+  stroke:transparent;
+}
+
+.middguard-graph-editor .node:hover path.deleteNode {
   fill: transparent;
-  stroke: rgb(194, 194, 194);
+  /*stroke: rgb(194, 194, 194);*/
+  stroke: rgb(167, 167, 167);
   stroke-width: 2px;
   cursor: pointer;
 }
