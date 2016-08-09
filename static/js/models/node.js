@@ -39,10 +39,9 @@ var middguard = middguard || {};
     },
 
     delete: function(){
-      console.log('im in delete!');
-      // middguard.socket.emit('node:delete', {
-      //   id: this.get('id');
-      // });
+      middguard.socket.emit('node:delete', {
+        id: this.get('id')
+      });
     },
 
     position: function(x, y) {

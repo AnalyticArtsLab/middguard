@@ -286,7 +286,7 @@ var middguard = middguard || {};
       'click .input': 'toggleInputSelected',
       'click .output': 'toggleOutputSelected',
       'click .run': 'runNode',
-      'click .run':'deleteNode', //UPDATE THIS TO RESPOND TO DELETE WIDGET
+      'click .deleteNode':'deleteNode',
       'click': 'toggleDetail'
     },
 
@@ -504,23 +504,13 @@ var middguard = middguard || {};
         this.model.run();
       //}
     },
+    
     /*THIS DOES NOT YET HANDLE THE SINGLETON VARIABLE - WILL DELETE ALL NODES ASSOCIATED WITH THE SAME TABLE */
     deleteNode: function(){
-      // if (this.model.isVisualization()) {
-      //   middguard.toggleView(this.model.get('id'));
-      // }
       d3.select(this.el).remove();
       var tableName = this.model.get('table');
       delete middguard.entities[tableName];
       this.model.delete();
-    },
-
-    deleteNode: function() {
-      if (this.model.isVisualization()) {
-        middguard.toggleView(this.model.get('id'));
-      } //else {
-      //  this.model.delete();
-      //}
     },
 
     toggleDetail: function() {
