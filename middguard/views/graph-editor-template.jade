@@ -27,8 +27,8 @@ script(type="text/template", id="graph-node-template").
     d="<%= deleteNode %>"></path>
   <% inputs.forEach(function(input, i) { %>
     <circle class="connector input" data-name="<%= input.name %>"
-      cx="<% print(inputPosition(i, x, inputs.length).x +w/2)%>"
-      cy="<% print(inputPosition(i, x, inputs.length).y +y +4) %>"
+      cx="<% print(inputPosition(i, w, x, inputs.length).x)%>"
+      cy="<% print(inputPosition(i, w, y, inputs.length).y + y + 3) %>"
       r="3" ></circle>
   <% }); %>
   <% if (output) { %>
