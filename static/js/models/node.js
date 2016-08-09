@@ -90,8 +90,16 @@ var middguard = middguard || {};
       return _.difference(allOutputs, connectedOutputs);
     },
 
+    removeInputConnection: function(inputGroup){
+      var connections = JSON.parse(this.get('connections'));
+      delete connections[inputGroup];
+      this.set('connections', JSON.stringify(connections));
+      this.save();
+    },
+
     isVisualization: function() {
       return this.module().get('visualization');
-    }
+    },
+
   });
 })();

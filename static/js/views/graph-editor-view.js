@@ -178,7 +178,11 @@ var middguard = middguard || {};
       let outputNode = middguard.Nodes.findWhere({
         id: JSON.parse(this.model.get('connections'))[inputGroup].output_node
       });
-      this.listenTo(outputNode, 'destroy', () => {this.connections.splice(this.connections.indexOf(view), 1); view.remove();})
+      this.listenTo(outputNode, 'destroy', () => {
+        this.connections.splice(this.connections.indexOf(view), 1);
+        view.remove();
+        this.model.removeInputConnection(inputGroup);
+      })
     },
 
     renderedConnections: function() {
