@@ -5,27 +5,12 @@ exports.create = function(socket, data, callback) {
   var Node = socket.bookshelf.model('Node');
   var modules = socket.bookshelf.collection('analytics');
   var module = modules.findWhere({name: data.module});
-  var singleton = require(module.get('requirePath')).singleton;
-  var inputs = require(module.get('requirePath')).inputs.length;
-  if(singleton && inputs > 0){
-    console.log('Singleton cannot be true if node has inputs');
-    console.log('changing singleton to false...');
-    singleton = false;
-  }
-  module.set('singleton', singleton);
+
   if(module.get('singleton')){
     Node.where('module', data.module).fetchAll()
     .then(result=>{
       let status = result.at(0)?result.at(0).attributes.status:0;
-      data = {
-        status:status,
-        radius:75,
-        position_x:0,
-        position_y:0,
-        connections:'{}',
-        module:data.module,
-        graph_id:data.graph_id
-      };
+      data.status = status;
       return data;
     }).then(data =>{
       new Node()
@@ -51,7 +36,6 @@ exports.create = function(socket, data, callback) {
 exports.readAll = function(socket, data, callback) {
   var Node = socket.bookshelf.model('Node');
   var nodes = new Node();
-
   if (data) {
     nodes = nodes.where(data);
   }
@@ -63,7 +47,6 @@ exports.readAll = function(socket, data, callback) {
 
 exports.update = function(socket, data, callback) {
   var Node = socket.bookshelf.model('Node');
-
   new Node({id: data.id})
   .save(_.omit(data, 'id'), {patch: true})
   .then(function(node) {
@@ -163,7 +146,6 @@ function connectionsByName(inputs, outputs) {
 function changeStatus (node, Node, socket, status){
   var modules = socket.bookshelf.collection('analytics');
   var module = modules.findWhere({name: node.get('module')});
-
   if(module.get('singleton')){
     Node.where('module', node.get('module')).fetchAll()
       .then(result =>{
@@ -205,8 +187,8 @@ function changeStatus (node, Node, socket, status){
 
 function storeData(knex, table, data, clear, name, node, Node, socket){
   return knex.transaction(function(trx){
-    const CHUNK = 100;
-    // const CHUNK = 500;  /*to force error, change CHUNK size to 500*/
+    // const CHUNK = 100;
+    const CHUNK = 500;  /*to force error, change CHUNK size to 500*/
 
     // start with a clear of the database
     var sequence = clear ? table.del().transacting(trx) : Promise.resolve();
@@ -236,11 +218,11 @@ exports.run = function(socket, data, callback) {
   .fetch()
   .tap(node => node.ensureTable())
   .then(function(node){
-    let moduleName = node.get('module');
-     Node.where('module', moduleName).fetchAll()
-     .then(result => {
+    //let moduleName = node.get('module');
+     //Node.where('module', moduleName).fetchAll()
+     //.then(result => {
        changeStatus(node, Node, socket, 1);
-      });
+      //});
     return node;
   })
   .then(node => Promise.join(node, node.outputNodes()))

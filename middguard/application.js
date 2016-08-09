@@ -104,6 +104,13 @@ app.module = function module(name, requirePath) {
     this.use(`/modules/${name}`, express.static(attributes.static));
   }
 
+  var singleton = require(requirePath).singleton;
+  var inputs = require(requirePath).inputs.length;
+  if(singleton && inputs > 0){
+    console.log('['+name+'] Singleton cannot be true if node has inputs');
+    console.log('changing singleton to false...');
+    singleton = false;
+  }
   register.add(new AnalyticsModule({
     name: name,
     requirePath: requirePath,
@@ -111,7 +118,8 @@ app.module = function module(name, requirePath) {
     inputs: attributes.inputs,
     outputs: attributes.outputs,
     visualization: attributes.visualization,
-    main: attributes.visualization ? attributes.mainView : null
+    main: attributes.visualization ? attributes.mainView : null,
+    singleton: singleton
   }));
 };
 
