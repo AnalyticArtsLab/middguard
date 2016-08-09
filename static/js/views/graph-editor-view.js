@@ -318,7 +318,7 @@ var middguard = middguard || {};
 
       this.d3el
           .datum(this.model.position()) //binds x,y to 'g'.
-          .attr('transform', 'translate(' + 0 + ',' + 0 + ')')
+        //  .attr('transform', 'translate(' + y + ',' + x + ')')
           //moves nodes to saved positions. //makes rects wayy offset- need to get position set again below in dragged correctly.
           .call(this.drag);
 
@@ -384,15 +384,17 @@ var middguard = middguard || {};
       var bounds = {x: svg.attr('width'), y: svg.attr('height')};
 
       // Prevent element from being dragged out bounds
-      if (x < 0) x = 0; //up & left bounds work
+      //bounds d3.event.x & d3.event.y. NEED both this & min(max()) below!
+      if (x < 0) x = 0;
       if (y < 0) y = 0;
-      if (y + h > bounds.y) y = bounds.y - h; //bounding.
+      if (y + h > bounds.y) y = bounds.y - h;
       if (x + w > bounds.x) x = bounds.x - w;
 
       this.model.position(x, y); //careful. This redeclares x & y as values from node.js!
+      //bounds node & path behavior to within the bounds of the svg.
       d3.select(this.el)
-          //.attr('transform', 'translate(' + (d.x =  Math.max(0-w/2,Math.min(x-d3.event.x, bounds.x-w/2))) + ',' + (d.y = (y-d3.event.y)) + ')');
-          .attr('transform', 'translate(' + (d.x =  x-d3.event.x) + ',' + (d.y = y-d3.event.y) + ')');
+          .attr('transform', 'translate(' + (d.x =  Math.min(0,Math.max(x-d3.event.x, bounds.x-w/8))) + ',' + (d.y = Math.min(0, Math.max(y-d3.event.y, bounds.y-h/8))) + ')');
+        //  .attr('transform', 'translate(' + (d.x =  x-d3.event.x) + ',' + (d.y = y-d3.event.y) + ')');
     },
 
     dragended: function() {
@@ -504,7 +506,7 @@ var middguard = middguard || {};
         this.model.run();
       //}
     },
-    
+
     /*THIS DOES NOT YET HANDLE THE SINGLETON VARIABLE - WILL DELETE ALL NODES ASSOCIATED WITH THE SAME TABLE */
     deleteNode: function(){
       d3.select(this.el).remove();

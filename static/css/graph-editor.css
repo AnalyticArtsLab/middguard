@@ -104,6 +104,11 @@
   fill: rgb(81, 210, 141);
 }
 
+.middguard-graph-editor .node:hover .status {
+  stroke: transparent;
+  fill: transparent;
+}
+
 .middguard-graph-editor .run {
   fill: none;
   cursor: pointer;
