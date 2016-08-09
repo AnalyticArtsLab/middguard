@@ -237,13 +237,12 @@ var middguard = middguard || {};
             return input.name === this.inputGroup;
           }),
           x = this.model.position().x,
-          y = this.model.position().y,
           h = this.model.get('height'),
           w = this.model.get('width'), //changed from radius
           n = this.module.get('inputs').length,
-          offset = NodeView.prototype.inputPosition(i, x, n);
-          var svg = d3.select('.editor').select('svg');
-          var bounds = {x: svg.attr('width'), y: svg.attr('height')};
+          offset = NodeView.prototype.inputPosition(i, w, x, n);
+           var svg = d3.select('.editor').select('svg');
+           var bounds = {x: svg.attr('width'), y: svg.attr('height')};
 
       return { //controls 'input' positon of paths
         x: x + w/2,
@@ -257,7 +256,7 @@ var middguard = middguard || {};
 
       return { //controls 'output' position of paths.
         x: this.outputNode.position().x + w/2,
-        y: this.outputNode.position().y + h -5
+        y: this.outputNode.position().y + h - 5
       };
     },
 
@@ -333,7 +332,7 @@ var middguard = middguard || {};
 
       this.d3el
           .datum(this.model.position()) //binds x,y to 'g'.
-        //  .attr('transform', 'translate(' + x + ',' + y + ')')
+        //  .attr('transform', 'translate(' + y + ',' + x + ')')
           //moves nodes to saved positions. //makes rects wayy offset- need to get position set again below in dragged correctly.
           .call(this.drag);
 
@@ -376,6 +375,7 @@ var middguard = middguard || {};
     },
 
     dragstarted: function(d) {
+      this.dragStartPosition = _.clone(d);
        d3.selectAll('.node').each( function(d){
         d.order = 0;
       }) //flags unselected nodes as 0, so will sort to bottom with 'sort' funct. Uses '.each' iterating all data on the 'g', adding 'order' & value.
@@ -385,7 +385,6 @@ var middguard = middguard || {};
        d3.selectAll('.node').sort(function(a,b) {return a.order-b.order;});
       d3.event.sourceEvent.stopPropagation();
   //   d3.select(this).classed('dragging', true);
-      this.dragStartPosition = _.clone(d);
     },
 
     dragged: function(d) {
@@ -399,14 +398,17 @@ var middguard = middguard || {};
       var bounds = {x: svg.attr('width'), y: svg.attr('height')};
 
       // Prevent element from being dragged out bounds
-      if (x < 0) x = 0; //up & left bounds work
+      //bounds d3.event.x & d3.event.y. NEED both this & min(max()) below!
+      if (x < 0) x = 0;
       if (y < 0) y = 0;
-      if (y - h > bounds.y) y = bounds.y - h; //not bounding.
-      if (x - w > bounds.x) x = bounds.x - w;
+      if (y + h > bounds.y) y = bounds.y - h;
+      if (x + w > bounds.x) x = bounds.x - w;
 
       this.model.position(x, y); //careful. This redeclares x & y as values from node.js!
+      //bounds node & path behavior to within the bounds of the svg.
       d3.select(this.el)
-          .attr('transform', 'translate(' + (d.x = (x-d3.event.x)) + ',' + (d.y = (y-d3.event.y)) + ')');
+          .attr('transform', 'translate(' + (d.x =  Math.min(0,Math.max(x-d3.event.x, bounds.x-w/8))) + ',' + (d.y = Math.min(0, Math.max(y-d3.event.y, bounds.y-h/8))) + ')');
+        //  .attr('transform', 'translate(' + (d.x =  x-d3.event.x) + ',' + (d.y = y-d3.event.y) + ')');
     },
 
     dragended: function() {
@@ -553,8 +555,6 @@ var middguard = middguard || {};
     deletePosition: function() {
       var x = this.model.position().x;
       var y = this.model.position().y;
-      var h = this.model.get('height');
-      var w = this.model.get('width');
       return {
         x: x + 10,
         y: y + 10
@@ -581,13 +581,13 @@ var middguard = middguard || {};
 
      //check to be sure works for multiple input.
     //Used for dot location.
-    inputPosition: function(i, x, n) {
+    inputPosition: function(i, w, x, n) {
       var rowIndexX = i % 5,
           rowIndexY = Math.floor(i / 5),
           rowLength = i >= n - n % 5 ? n % 5 : 5,
-          baseX = x,
+          baseX = x+w/2,
           baseY = 5;
-          // baseX = w/2 - (rowLength - 1) * 7.5,
+        //  baseX =(x + w/2) - (rowLength - 1);
           // baseY = 10;
 
       return {

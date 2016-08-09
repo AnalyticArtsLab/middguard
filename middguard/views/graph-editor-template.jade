@@ -15,20 +15,20 @@ script(type="text/template", id="graph-node-template").
   <text x="<%= (x+w/2)  %>" y="<%= y+35 %>" style="text-anchor: middle;">
     <%= displayName %>
   </text>
+  <path class="run"
+    transform="translate(<%= runPosition.x %>,<%= runPosition.y %>) rotate(90)"
+    d="<%= runPath %>"></path>
   <text class="status status-<%= status %>" style="text-anchor: middle;"
     x="<%= (x+w/2) %>" y="<%= y + 55 %>">
     <%= statusText %>
   </text>
-  <path class="run"
-    transform="translate(<%= runPosition.x %>,<%= runPosition.y %>) rotate(90)"
-    d="<%= runPath %>"></path>
   <path class="deleteNode"
     transform="translate(<%= deletePosition.x %>,<%= deletePosition.y %>) rotate(45)"
     d="<%= deleteNode %>"></path>
   <% inputs.forEach(function(input, i) { %>
     <circle class="connector input" data-name="<%= input.name %>"
-      cx="<% print(inputPosition(i, x, inputs.length).x +w/2)%>"
-      cy="<% print(inputPosition(i, x, inputs.length).y +y +4) %>"
+      cx="<% print(inputPosition(i, w, x, inputs.length).x)%>"
+      cy="<% print(inputPosition(i, w, y, inputs.length).y + y + 3) %>"
       r="3" ></circle>
   <% }); %>
   <% if (output) { %>
