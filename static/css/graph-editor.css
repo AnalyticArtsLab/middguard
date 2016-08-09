@@ -47,14 +47,6 @@
   fill: #fff;
 }
 
-.middguard-graph-editor .node circle.drag-handle {
-  fill: transparent;
-}
-
-.middguard-graph-editor .node .drag-handle {
-  fill: none;
-}
-
 .middguard-graph-editor .node:hover path.drag-handle {
   fill: transparent;
   stroke: rgb(194, 194, 194);
@@ -62,11 +54,11 @@
   cursor: pointer;
 }
 
-.middguard-graph-editor .node.visualization circle.outline {
+.middguard-graph-editor .node.visualization rect.outline {
   stroke: orange;
 }
 
-.middguard-graph-editor .node.selected circle.outline {
+.middguard-graph-editor .node.selected rect.outline {
   stroke-width: 4px;
 }
 

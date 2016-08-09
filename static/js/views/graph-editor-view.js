@@ -244,7 +244,7 @@ var middguard = middguard || {};
       var w = this.outputNode.get('width');
       var h = this.outputNode.get('height');
 
-      return { //issue here
+      return { //controls output position of paths. circles in jade file.
         x: this.outputNode.position().x + w/2,
         y: this.outputNode.position().y + h -5
       };
@@ -316,7 +316,8 @@ var middguard = middguard || {};
 
       this.d3el
           .datum(this.model.position()) //binds x,y to 'g'.
-          //.attr('transform', 'translate(' + x + ',' + y + ')') //moves nodes to saved positions. //makes rects wayy offset- need to get position set again below in dragged correctly.
+        //  .attr('transform', 'translate(' + x + ',' + y + ')')
+          //moves nodes to saved positions. //makes rects wayy offset- need to get position set again below in dragged correctly.
           .call(this.drag);
 
       this.$el.html(this.template({
@@ -513,8 +514,8 @@ var middguard = middguard || {};
       var h = this.model.get('height');
       var w = this.model.get('width');
       return {
-        x: x + w/2 , //in right spot! AFTER transform.
-        y: y+ h/2 + h/4
+        x: (x + w/2),
+        y: y+ h/2+h/4-2
       };
     },
 
@@ -535,24 +536,16 @@ var middguard = middguard || {};
      *
      * @return the center position for the input circle
      */
-    // inputPosition: function(i, w, n) {
-    //   var rowIndexX = i % 3,
-    //       rowIndexY = Math.floor(i / 3),
-    //       rowLength = i >= n - n % 3 ? n % 3 : 3,
-    //       baseX = w/2 - (rowLength - 1) * 7.5,
-    //       baseY = 10;
-    //
-    //   return {
-    //     x: baseX + 15 * rowIndexX,
-    //     y: baseY + 15 * rowIndexY
-    //   };
-    // }
-    inputPosition: function(i, w, n) {
+
+    //controls input path location. & Used for dot location later.
+    inputPosition: function(i, x, n) {
       var rowIndexX = i % 3,
           rowIndexY = Math.floor(i / 3),
           rowLength = i >= n - n % 3 ? n % 3 : 3,
-          baseX = w/2,
-          baseY = 0;
+          baseX = x/2,
+          baseY = 2;
+          // baseX = w/2 - (rowLength - 1) * 7.5,
+          // baseY = 10;
 
       return {
         x: baseX + 15 * rowIndexX,

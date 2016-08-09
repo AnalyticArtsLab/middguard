@@ -12,11 +12,11 @@ script(type="text/template", id="graph-editor-template").
 
 script(type="text/template", id="graph-node-template").
   <rect class="outline" x="<%= x %>" y="<%= y %>" rx="<%= 6 %>" ry="<%= 6 %>" width="<%= w %>" height="<%= h %>" ></rect>
-  <text x="<%= x+w/2  %>" y="<%= y+20 %>" style="text-anchor: middle;">
+  <text x="<%= (x+w/2)  %>" y="<%= y+20 %>" style="text-anchor: middle;">
     <%= displayName %>
   </text>
   <text class="status status-<%= status %>" style="text-anchor: middle;"
-    x="<%= x+w/2 %>" y="<%= y + 40 %>">
+    x="<%= (x+w/2) %>" y="<%= y + 40 %>">
     <%= statusText %>
   </text>
   <path class="run"
