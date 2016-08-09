@@ -187,8 +187,8 @@ function changeStatus (node, Node, socket, status){
 
 function storeData(knex, table, data, clear, name, node, Node, socket){
   return knex.transaction(function(trx){
-    // const CHUNK = 100;
-    const CHUNK = 500;  /*to force error, change CHUNK size to 500*/
+    const CHUNK = 100;
+    // const CHUNK = 500;  /*to force error, change CHUNK size to 500*/
 
     // start with a clear of the database
     var sequence = clear ? table.del().transacting(trx) : Promise.resolve();
@@ -218,11 +218,7 @@ exports.run = function(socket, data, callback) {
   .fetch()
   .tap(node => node.ensureTable())
   .then(function(node){
-    //let moduleName = node.get('module');
-     //Node.where('module', moduleName).fetchAll()
-     //.then(result => {
-       changeStatus(node, Node, socket, 1);
-      //});
+      changeStatus(node, Node, socket, 1);
     return node;
   })
   .then(node => Promise.join(node, node.outputNodes()))
@@ -267,6 +263,14 @@ exports.run = function(socket, data, callback) {
                                                 node,
                                                 Node,
                                                 socket);
+    context.throwError = (error) => {
+      changeStatus(node, Node, socket, 3);
+      if(error){
+        throw error;
+      }else{
+        throw new Error('Error in '+node.attributes.module);
+      }
+    }
 
     var handle = require(module.get('requirePath')).handle;
     return Promise.join(node, handle(context));
