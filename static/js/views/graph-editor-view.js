@@ -244,9 +244,9 @@ var middguard = middguard || {};
       var w = this.outputNode.get('width');
       var h = this.outputNode.get('height');
 
-      return { //issue here.
+      return { //issue here
         x: this.outputNode.position().x + w/2,
-        y: this.outputNode.position().y + w/2
+        y: this.outputNode.position().y + h -5
       };
     },
 
@@ -316,14 +316,14 @@ var middguard = middguard || {};
 
       this.d3el
           .datum(this.model.position()) //binds x,y to 'g'.
-          //.attr('transform', 'translate(' + x + ',' + y + ')') //moves nodes to saved positions. //makes rects offset??
+          //.attr('transform', 'translate(' + x + ',' + y + ')') //moves nodes to saved positions. //makes rects wayy offset- need to get position set again below in dragged correctly.
           .call(this.drag);
 
       this.$el.html(this.template({
         w: this.model.get('width'),
         h: this.model.get('height'),
-        x: this.model.position().x,
-        y: this.model.position().y,
+        x: x,
+        y: y,
         runPosition: this.runPosition(),
         runPath: d3.svg.symbol().type('triangle-up').size(150)(),
         status: this.model.get('status'),
@@ -380,12 +380,12 @@ var middguard = middguard || {};
       // Prevent element from being dragged out bounds
       if (x < 0) x = 0; //up & left bounds work
       if (y < 0) y = 0;
-      if (y + w > bounds.y) y = bounds.y - w;
-      if (x + w > bounds.x) x = bounds.x - w;
+      if (y + w/2 > bounds.y) y = bounds.y - w/2;
+      if (x + w/2 > bounds.x) x = bounds.x - w/2;
 
-      this.model.position(x, y);
+      this.model.position(x, y); //careful. This redeclares x & y as values from node.js!
       d3.select(this.el)
-          .attr('transform', 'translate(' + (d.x = x) + ',' + (d.y = y) + ')');
+          .attr('transform', 'translate(' + (d.x = (x-d3.event.x)) + ',' + (d.y = (y-d3.event.y)) + ')');
     },
 
     dragended: function() {
@@ -508,11 +508,13 @@ var middguard = middguard || {};
     },
 
     runPosition: function() {
+      var x = this.model.position().x;
+      var y = this.model.position().y;
       var h = this.model.get('height');
       var w = this.model.get('width');
       return {
-        x: w/2 , //in right spot!
-        y: h/2 + h/4
+        x: x + w/2 , //in right spot! AFTER transform.
+        y: y+ h/2 + h/4
       };
     },
 
@@ -533,12 +535,24 @@ var middguard = middguard || {};
      *
      * @return the center position for the input circle
      */
+    // inputPosition: function(i, w, n) {
+    //   var rowIndexX = i % 3,
+    //       rowIndexY = Math.floor(i / 3),
+    //       rowLength = i >= n - n % 3 ? n % 3 : 3,
+    //       baseX = w/2 - (rowLength - 1) * 7.5,
+    //       baseY = 10;
+    //
+    //   return {
+    //     x: baseX + 15 * rowIndexX,
+    //     y: baseY + 15 * rowIndexY
+    //   };
+    // }
     inputPosition: function(i, w, n) {
       var rowIndexX = i % 3,
           rowIndexY = Math.floor(i / 3),
           rowLength = i >= n - n % 3 ? n % 3 : 3,
-          baseX = w/2 - (rowLength - 1) * 7.5,
-          baseY = 10;
+          baseX = w/2,
+          baseY = 0;
 
       return {
         x: baseX + 15 * rowIndexX,
