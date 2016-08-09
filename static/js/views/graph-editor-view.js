@@ -285,6 +285,7 @@ var middguard = middguard || {};
       'click .input': 'toggleInputSelected',
       'click .output': 'toggleOutputSelected',
       'click .run': 'runNode',
+      'click .deleteNode':'deleteNode',
       'click': 'toggleDetail'
     },
 
@@ -503,13 +504,13 @@ var middguard = middguard || {};
         this.model.run();
       //}
     },
-
-    deleteNode: function() {
-      if (this.model.isVisualization()) {
-        middguard.toggleView(this.model.get('id'));
-      } //else {
-      //  this.model.delete();
-      //}
+    
+    /*THIS DOES NOT YET HANDLE THE SINGLETON VARIABLE - WILL DELETE ALL NODES ASSOCIATED WITH THE SAME TABLE */
+    deleteNode: function(){
+      d3.select(this.el).remove();
+      var tableName = this.model.get('table');
+      delete middguard.entities[tableName];
+      this.model.delete();
     },
 
     toggleDetail: function() {
