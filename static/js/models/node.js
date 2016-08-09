@@ -10,7 +10,7 @@ var middguard = middguard || {};
     defaults: {
       status: 0,
       width: 190,
-      height: 50,
+      height: 70,
       position_x: 0,
       position_y: 0,
       selectedInput: null,
