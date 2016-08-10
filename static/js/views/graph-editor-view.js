@@ -375,6 +375,7 @@ var middguard = middguard || {};
     },
 
     dragstarted: function(d) {
+      var svg = d3.select(this.editor.el).select('svg');
       this.dragStartPosition = _.clone(d);
        d3.selectAll('.node').each( function(d){
         d.order = 0;
@@ -412,7 +413,6 @@ var middguard = middguard || {};
     },
 
     dragended: function() {
-      var svg = d3.select(this.editor.el).select('svg');
       if (this.dragMoved())
          d3.event.sourceEvent.stopPropagation();
         //d3.select(this).classed('dragging', false);//removes 'dragging' class.
@@ -689,7 +689,7 @@ var middguard = middguard || {};
     connectSelection: function() {
       if (!this.selectedInputGroup ||
           !this.selectedInput ||
-          !this.selectedOutput) {
+          !this.selectedOutput ) {
         return;
       }
 
@@ -716,6 +716,7 @@ var middguard = middguard || {};
 
       this.model.set('connections', JSON.stringify(this.connections));
       this.model.save();
+
     }
   });
 })();
