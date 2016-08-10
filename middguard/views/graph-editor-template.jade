@@ -11,12 +11,12 @@ script(type="text/template", id="graph-editor-template").
   </div>
 
 script(type="text/template", id="graph-node-template").
-  <rect class="outline" x="<%= x %>" y="<%= y %>" rx="<%= 6 %>" ry="<%= 6 %>" width="<%= w %>" height="<%= h %>" ></rect>
-  <text x="<%= (x+w/2)  %>" y="<%= y+35 %>" style="text-anchor: middle;">
+  <rect class="outline" x="<%= 0 %>" y="<%= 0 %>" rx="<%= 6 %>" ry="<%= 6 %>" width="<%= w %>" height="<%= h %>" ></rect>
+  <text x="<%= w/2  %>" y="<%= 35 %>" style="text-anchor: middle;">
     <%= displayName %>
   </text>
   <text class="status status-<%= status %>" style="text-anchor: middle;"
-    x="<%= (x+w/2) %>" y="<%= y + 55 %>">
+    x="<%= w/2 %>" y="<%= 55 %>">
     <%= statusText %>
   </text>
   <path class="run"
@@ -27,12 +27,12 @@ script(type="text/template", id="graph-node-template").
     d="<%= deleteNode %>"></path>
   <% inputs.forEach(function(input, i) { %>
     <circle class="connector input" data-name="<%= input.name %>"
-      cx="<% print(inputPosition(i, w, x, inputs.length).x)%>"
-      cy="<% print(inputPosition(i, w, y, inputs.length).y + y + 3) %>"
+      cx="<% print(inputPosition(i, w, inputs.length).x)%>"
+      cy="<% print(inputPosition(i, h, inputs.length).y) %>"
       r="4" ></circle>
   <% }); %>
   <% if (output) { %>
-    <circle class="connector output" r="4" cx="<%= x+w/2 %>" cy="<%= y+h-6 %>">
+    <circle class="connector output" r="4" cx="<%= w/2 %>" cy="<%= h-6 %>">
   <% } %>
 
 script(type="text/template", id="connection-group-template").

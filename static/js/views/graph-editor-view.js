@@ -245,16 +245,15 @@ var middguard = middguard || {};
       var i = _.findIndex(this.module.get('inputs'), input => {
             return input.name === this.inputGroup;
           }),
-          x = this.model.position().x,
-          h = this.model.get('height'),
           w = this.model.get('width'), //changed from radius
+          h = this.model.get('height'),
           n = this.module.get('inputs').length,
-          offset = NodeView.prototype.inputPosition(i, w, x, n);
+          offset = NodeView.prototype.inputPosition(i, w, n);
            var svg = d3.select('.editor').select('svg');
            var bounds = {x: svg.attr('width'), y: svg.attr('height')};
 
       return { //controls 'input' positon of paths
-        x: x + w/2,
+        x: this.model.position().x + offset.x,
         y: this.model.position().y + offset.y
       };
     },
@@ -311,6 +310,9 @@ var middguard = middguard || {};
       'click': 'toggleDetail'
     },
 
+    template: _.template($('#graph-node-template').html()),
+    //middguard/middguard/views/graph-editor-template.jade
+
     initialize: function(options) {
       this.editor = options.editor;
       this.model = options.model;
@@ -321,46 +323,39 @@ var middguard = middguard || {};
       this.d3el = d3.select(this.el)
           .datum(this.model.position());
 
-     //Drag behavior for nodes, modified (2016).
       this.drag = d3.behavior.drag()
           .origin(function(d) { return d; })
           .on('dragstart', this.dragstarted.bind(this))
           .on('drag', this.dragged.bind(this))
           .on('dragend', this.dragended.bind(this)); //binds dragging end event 'dragended' to drag.
 
-      this.listenTo(this.model, 'change', this.render);
-    },
-
-    template: _.template($('#graph-node-template').html()),
-    //middguard/middguard/views/graph-editor-template.jade
-
-    render: function() {
-      var x = this.model.position().x;
-      var y = this.model.position().y;
-
-      this.d3el
-          .datum(this.model.position()) //binds x,y to 'g'.
-        //  .attr('transform', 'translate(' + y + ',' + x + ')')
-          //moves nodes to saved positions. //makes rects wayy offset- need to get position set again below in dragged correctly.
-          .call(this.drag);
-
       this.$el.html(this.template({
         w: this.model.get('width'),
         h: this.model.get('height'),
-        x: x,
-        y: y,
         runPosition: this.runPosition(),
         runPath: d3.svg.symbol().type('triangle-up').size(150)(),
         status: this.model.get('status'),
         statusText: this.model.statusText(),
         displayName: this.module.get('displayName'),
-        //add delete glyph here.
         deletePosition: this.deletePosition(),
         deleteNode: d3.svg.symbol().type('cross').size(100)(),
         inputs: this.module.get('inputs'),
         output: this.module.get('outputs').length,
         inputPosition: this.inputPosition
       }));
+
+      this.d3el.call(this.drag);
+
+      this.listenTo(this.model, 'change', this.render);
+    },
+
+
+    render: function() {
+
+      this.d3el
+          .datum(this.model.position()) //binds x,y to 'g'.
+          .attr('transform', d => 'translate(' + d.x + ',' + d.y + ')');
+          //moves nodes to saved positions.
 
       var selectedInput = this.model.get('selectedInput'),
           selectedOutput = this.model.get('selectedOutput');
@@ -378,25 +373,23 @@ var middguard = middguard || {};
         this.d3el.classed('visualization', true);
       }
 
-
       return this;
     },
 
     dragstarted: function(d) {
-      var svg = d3.select(this.editor.el).select('svg');
+      var ed = d3.select(this.editor.el);
       this.dragStartPosition = _.clone(d);
-       d3.selectAll('.node').each( function(d){
+       ed.selectAll('.node').each( function(d){
         d.order = 0;
       }) //flags unselected nodes as 0, so will sort to bottom with 'sort' funct. Uses '.each' iterating all data on the 'g', adding 'order' & value.
        d3.select(this.el).each(function(d){
          d.order = 1;
        })//flags selected nodes as 1, so will 'sort' to top.
-       d3.selectAll('.node').sort(function(a,b) {return a.order-b.order;});
+       ed.selectAll('.node').sort(function(a,b) {return a.order-b.order;});
       d3.event.sourceEvent.stopPropagation();
-  //   d3.select(this).classed('dragging', true);
     },
 
-    dragged: function(d) {
+    dragged: function() {
 
       var x = d3.event.x;
       var y = d3.event.y;
@@ -407,23 +400,17 @@ var middguard = middguard || {};
       var bounds = {x: svg.attr('width'), y: svg.attr('height')};
 
       // Prevent element from being dragged out bounds
-      //bounds d3.event.x & d3.event.y. NEED both this & min(max()) below!
       if (x < 0) x = 0;
       if (y < 0) y = 0;
       if (y + h > bounds.y) y = bounds.y - h;
       if (x + w > bounds.x) x = bounds.x - w;
 
-      this.model.position(x, y); //careful. This redeclares x & y as values from node.js!
-      //bounds node & path behavior to within the bounds of the svg.
-      d3.select(this.el)
-          .attr('transform', 'translate(' + (d.x =  Math.min(0,Math.max(x-d3.event.x, bounds.x-w/8))) + ',' + (d.y = Math.min(0, Math.max(y-d3.event.y, bounds.y-h/8))) + ')');
-        //  .attr('transform', 'translate(' + (d.x =  x-d3.event.x) + ',' + (d.y = y-d3.event.y) + ')');
+      this.model.position(x, y);
     },
 
     dragended: function() {
       if (this.dragMoved())
          d3.event.sourceEvent.stopPropagation();
-        //d3.select(this).classed('dragging', false);//removes 'dragging' class.
        this.model.save(); //saves new position.
     },
 
@@ -533,8 +520,10 @@ var middguard = middguard || {};
     /*THIS DOES NOT YET HANDLE THE SINGLETON VARIABLE - WILL DELETE ALL NODES ASSOCIATED WITH THE SAME TABLE */
     deleteNode: function(){
       var tableName = this.model.get('table');
+      this.hideInputTooltip();
       //removes node from middguard.entities
       delete middguard.entities[tableName];
+
       //removes node from view
       this.remove();
       //removes node from database table
@@ -556,17 +545,15 @@ var middguard = middguard || {};
       var h = this.model.get('height');
       var w = this.model.get('width');
       return {
-        x: (x + w/2),
-        y: y+ h/2+h/4-2
+        x: w/2,
+        y: h/2+h/4-2
       };
     },
 
     deletePosition: function() {
-      var x = this.model.position().x;
-      var y = this.model.position().y;
       return {
-        x: x + 10,
-        y: y + 10
+        x: 10,
+        y: 10
       };
     },
 
@@ -590,18 +577,17 @@ var middguard = middguard || {};
 
      //check to be sure works for multiple input.
     //Used for dot location.
-    inputPosition: function(i, w, x, n) {
+    inputPosition: function(i, w, n) {
+      const spacing = 15;
       var rowIndexX = i % 5,
-          rowIndexY = Math.floor(i / 5),
-          rowLength = i >= n - n % 5 ? n % 5 : 5,
-          baseX = x+w/2,
-          baseY = 5;
-        //  baseX =(x + w/2) - (rowLength - 1);
-          // baseY = 10;
+          rowIndexY = Math.floor(i / 10),
+          rowLength = n % 5,
+          baseX = w/2- spacing*(rowLength - 1)/2,
+          baseY = 10;
 
       return {
-        x: baseX + 15 * rowIndexX,
-        y: baseY + 15 * rowIndexY
+        x: baseX + spacing * rowIndexX,
+        y: baseY + spacing * rowIndexY
       };
     }
   });
