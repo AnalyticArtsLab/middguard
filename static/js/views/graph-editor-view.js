@@ -298,9 +298,6 @@ var middguard = middguard || {};
       }
     },
 
-    deleteConnection: function(){
-      d3.select(this.el).remove();
-    }
   });
 
   var NodeView = Backbone.NSView.extend({
@@ -357,7 +354,6 @@ var middguard = middguard || {};
       this.listenTo(this.model, 'change', this.render);
     },
 
-
     render: function() {
 
       this.d3el
@@ -374,7 +370,7 @@ var middguard = middguard || {};
 
       if (selectedOutput) {
         this.d3el.select('.output')
-            .classed('selected', true);
+          .classed('selected', true);
       }
 
       if (this.model.isVisualization()) {
@@ -394,7 +390,6 @@ var middguard = middguard || {};
          d.order = 1;
        })//flags selected nodes as 1, so will 'sort' to top.
        ed.selectAll('.node').sort(function(a,b) {return a.order-b.order;});
-      //d3.event.sourceEvent.stopPropagation();
     },
 
     dragged: function() {
@@ -417,12 +412,10 @@ var middguard = middguard || {};
     },
 
     dragended: function() {
-      if (this.dragMoved()){
-          this.model.save(); //saves new position.
-      }
-
-      //d3.event.sourceEvent.stopPropagation();
-
+    if (this.dragMoved()){
+      this.model.save();
+    }
+      //saves new position.
     },
 
     dragMoved: function() {
