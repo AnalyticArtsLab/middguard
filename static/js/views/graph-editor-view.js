@@ -151,11 +151,12 @@ var middguard = middguard || {};
 
       // `this.model` is the "input" node
       this.listenTo(this.model, 'change', this.render);
-
-      //deletes connection when node is deleted
-      this.listenTo(this.model, 'destroy', this.remove);
-      //deletes connection when 'Delete Connection' button is cliked
-      this.listenTo(this.model, 'delete-connection', this.remove);
+      this.listenTo(this.model, 'destroy', ()=>{
+          this.connections.forEach((connection)=>{
+            connection.remove();
+          });
+          this.remove();
+      });
     },
 
     render: function() {
@@ -180,13 +181,13 @@ var middguard = middguard || {};
       let outputNode = middguard.Nodes.findWhere({
         id: JSON.parse(this.model.get('connections'))[inputGroup].output_node
       });
-      this.listenTo(outputNode, 'destroy', () => {
+      view.listenTo(outputNode, 'destroy', () => {
         this.connections.splice(this.connections.indexOf(view), 1);
         view.remove();
         this.model.removeInputConnection(inputGroup);
       });
 
-      this.listenTo(this.model, 'delete-connection', () => {
+      view.listenTo(this.model, 'delete-connection', () => {
         console.log('entered');
         this.connections.splice(this.connections.indexOf(view), 1);
         view.remove();
@@ -642,6 +643,7 @@ var middguard = middguard || {};
     },
 
     addAllConnectionGroups: function() {
+      this.connections = JSON.parse(this.model.get('connections'));
       _.each(this.connections, (value, key) => {
         var inputs = value.connections.map(connection => connection.input),
             outputs = value.connections.map(connection => connection.output),
