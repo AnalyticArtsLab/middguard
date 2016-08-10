@@ -150,6 +150,7 @@ function storeData(knex, table, data, clear, name){
 }
 
 exports.run = function(socket, data, callback) {
+  conosle.log('in socket/node.js');
   var Node = socket.bookshelf.model('Node');
   var modules = socket.bookshelf.collection('analytics');
   new Node({id: data.id})
