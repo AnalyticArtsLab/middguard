@@ -15,14 +15,14 @@ var middguard = middguard || {};
       this.detailView = null;
 
       this.listenTo(middguard.PackagedModules, 'reset', this.addModules);
-      this.listenTo(middguard.Nodes, 'reset', this.addAllNodes);
-      this.listenTo(middguard.Nodes, 'reset', this.addAllConnectorGroups);
-      this.listenTo(middguard.Nodes, 'reset', this.ensureEntityCollections);
+      this.listenToOnce(middguard.Nodes, 'sync', this.addAllNodes);
+      this.listenToOnce(middguard.Nodes, 'sync', this.addAllConnectorGroups);
+      this.listenToOnce(middguard.Nodes, 'sync', this.ensureEntityCollections);
       this.listenTo(middguard.Nodes, 'add', this.addNode);
       this.listenTo(middguard.Nodes, 'add', this.addConnectorGroup);
 
       middguard.PackagedModules.fetch({reset: true, data: {}});
-      middguard.Nodes.fetch({reset: true, data: {}});
+      middguard.Nodes.fetch({ data: {}});
     },
 
     render: function() {
@@ -71,7 +71,9 @@ var middguard = middguard || {};
     },
 
     addNode: function(node) {
+      console.log(node);
       if (node.get('graph_id') !== this.graph.get('id')) {
+        console.log('do not add to this graph');
         return;
       }
 
@@ -425,6 +427,7 @@ var middguard = middguard || {};
       if (this.dragMoved())
          d3.event.sourceEvent.stopPropagation();
         //d3.select(this).classed('dragging', false);//removes 'dragging' class.
+        // console.log(this.model.collection);
        this.model.save(); //saves new position.
     },
 
