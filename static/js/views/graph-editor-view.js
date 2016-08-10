@@ -14,22 +14,30 @@ var middguard = middguard || {};
       this.graph = options.graph;
       this.detailView = null;
 
-      this.listenTo(middguard.PackagedModules, 'reset', this.addModules);
-      this.listenToOnce(middguard.Nodes, 'sync', this.addAllNodes);
-      this.listenToOnce(middguard.Nodes, 'sync', this.addAllConnectorGroups);
-      this.listenToOnce(middguard.Nodes, 'sync', this.ensureEntityCollections);
-      this.listenTo(middguard.Nodes, 'add', this.addNode);
-      this.listenTo(middguard.Nodes, 'add', this.addConnectorGroup);
-
-      middguard.PackagedModules.fetch({reset: true, data: {}});
-      middguard.Nodes.fetch({ data: {}});
-    },
-
-    render: function() {
       this.$el.html(this.template(this.graph.toJSON()));
       d3.select(this.el).select('.editor').append('svg')
           .attr('class', 'graph')
           .attr('width', 700); //change back to 500.
+
+      this.listenTo(middguard.Nodes, 'add', this.addNode);
+      this.listenTo(middguard.Nodes, 'add', this.addConnectorGroup);
+
+      if(middguard.Nodes.length == 0){
+        this.listenTo(middguard.PackagedModules, 'reset', this.addModules);
+        this.listenToOnce(middguard.Nodes, 'reset', this.ensureEntityCollections);
+        this.listenToOnce(middguard.Nodes, 'reset',this.addAllNodes);
+        this.listenToOnce(middguard.Nodes, 'reset',this.addAllConnectorGroups);
+        middguard.PackagedModules.fetch({reset: true, data: {}});
+        middguard.Nodes.fetch({ reset: true, data: {}});
+      }else{
+        this.addModules();
+        this.ensureEntityCollections();
+        this.addAllNodes();
+        this.addAllConnectorGroups();
+      }
+    },
+
+    render: function() {
 
       this.resizeEditor();
 
@@ -71,9 +79,7 @@ var middguard = middguard || {};
     },
 
     addNode: function(node) {
-      console.log(node);
       if (node.get('graph_id') !== this.graph.get('id')) {
-        console.log('do not add to this graph');
         return;
       }
 
@@ -190,7 +196,6 @@ var middguard = middguard || {};
       });
 
       view.listenTo(this.model, 'delete-connection', () => {
-        console.log('entered');
         this.connections.splice(this.connections.indexOf(view), 1);
         view.remove();
         this.model.removeInputConnection(inputGroup);
@@ -389,7 +394,7 @@ var middguard = middguard || {};
          d.order = 1;
        })//flags selected nodes as 1, so will 'sort' to top.
        ed.selectAll('.node').sort(function(a,b) {return a.order-b.order;});
-      d3.event.sourceEvent.stopPropagation();
+      //d3.event.sourceEvent.stopPropagation();
     },
 
     dragged: function() {
@@ -412,9 +417,12 @@ var middguard = middguard || {};
     },
 
     dragended: function() {
-      if (this.dragMoved())
-         d3.event.sourceEvent.stopPropagation();
-       this.model.save(); //saves new position.
+      if (this.dragMoved()){
+          this.model.save(); //saves new position.
+      }
+
+      //d3.event.sourceEvent.stopPropagation();
+
     },
 
     dragMoved: function() {
@@ -512,7 +520,6 @@ var middguard = middguard || {};
     },
 
     runNode: function() {
-      console.log('runNode');
       if (this.model.isVisualization()) {
         middguard.toggleView(this.model.get('id'));
       } //else {
@@ -656,7 +663,6 @@ var middguard = middguard || {};
     },
 
     deleteConnector: function(){
-      console.log('deleting connection...');
       this.model.trigger('delete-connection');
     },
 

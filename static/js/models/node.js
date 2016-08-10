@@ -33,7 +33,6 @@ var middguard = middguard || {};
     },
 
     run: function() {
-      console.log('in models node.js');
       middguard.socket.emit('node:run', {
         id: this.get('id')
       });
