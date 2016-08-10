@@ -152,8 +152,10 @@ var middguard = middguard || {};
       // `this.model` is the "input" node
       this.listenTo(this.model, 'change', this.render);
 
-      //this.listenTo(this.model, 'pow', ()=>{console.log('node destroyed');});
+      //deletes connection when node is deleted
       this.listenTo(this.model, 'destroy', this.remove);
+      //deletes connection when 'Delete Connection' button is cliked
+      this.listenTo(this.model, 'delete-connection', this.remove);
     },
 
     render: function() {
@@ -182,7 +184,14 @@ var middguard = middguard || {};
         this.connections.splice(this.connections.indexOf(view), 1);
         view.remove();
         this.model.removeInputConnection(inputGroup);
-      })
+      });
+
+      this.listenTo(this.model, 'delete-connection', () => {
+        console.log('entered');
+        this.connections.splice(this.connections.indexOf(view), 1);
+        view.remove();
+        this.model.removeInputConnection(inputGroup);
+      });
     },
 
     renderedConnections: function() {
@@ -283,7 +292,6 @@ var middguard = middguard || {};
     },
 
     deleteConnection: function(){
-      console.log(this);
       d3.select(this.el).remove();
     }
   });
@@ -514,6 +522,7 @@ var middguard = middguard || {};
     },
 
     runNode: function() {
+      console.log('runNode');
       if (this.model.isVisualization()) {
         middguard.toggleView(this.model.get('id'));
       } //else {
@@ -611,12 +620,14 @@ var middguard = middguard || {};
 
     template: _.template(
       `<h4><%- name %></h4>
-      <div class="connection-groups"><div>`),
+      <div class="connection-groups"><div>
+      <div class="delete-connection"><div>`),
 
     connectionGroupTemplate: _.template($('#connection-group-template').html()),
 
     events: {
-      'click .connection': 'selectConnector'
+      'click .connection': 'selectConnector',
+      'click .delete': 'deleteConnector'
     },
 
     render: function() {
@@ -625,6 +636,7 @@ var middguard = middguard || {};
       }));
 
       this.addAllConnectionGroups();
+      this.addDeleteConnection();
 
       return this;
     },
@@ -647,6 +659,15 @@ var middguard = middguard || {};
           unconnectedOutputs: this.model.unconnectedOutputs(key)
         }));
       });
+    },
+
+    addDeleteConnection: function (){
+      this.$('.delete-connection').prepend('<button type = "button", class = "delete", id = "deleteButton">Delete Connection</button>');
+    },
+
+    deleteConnector: function(){
+      console.log('deleting connection...');
+      this.model.trigger('delete-connection');
     },
 
     deselectOutput: function() {
