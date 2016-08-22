@@ -11,31 +11,28 @@ script(type="text/template", id="graph-editor-template").
   </div>
 
 script(type="text/template", id="graph-node-template").
-  <circle class="outline" r="<%= r %>" cx="<%= r %>" cy="<%= r %>"></circle>
-  <text x="<%= r %>" y="<%= r %>" style="text-anchor: middle;">
+  <rect class="outline" x="<%= 0 %>" y="<%= 0 %>" rx="<%= 6 %>" ry="<%= 6 %>" width="<%= w %>" height="<%= h %>" ></rect>
+  <text x="<%= w/2  %>" y="<%= 35 %>" style="text-anchor: middle;">
     <%= displayName %>
   </text>
   <text class="status status-<%= status %>" style="text-anchor: middle;"
-    x="<%= r %>" y="<%= r + 20 %>">
+    x="<%= w/2 %>" y="<%= 55 %>">
     <%= statusText %>
   </text>
-  <circle class="drag-handle"
-    cx="<%= handlePosition.x %>" cy="<%= handlePosition.y %>" r="20"></circle>
-  <path
-    class="drag-handle"
-    transform="translate(<%= handlePosition.x %>,<%= handlePosition.y %>)"
-    d="<%= dragHandlePath %>"></path>
   <path class="run"
     transform="translate(<%= runPosition.x %>,<%= runPosition.y %>) rotate(90)"
     d="<%= runPath %>"></path>
+  <path class="deleteNode"
+    transform="translate(<%= deletePosition.x %>,<%= deletePosition.y %>) rotate(45)"
+    d="<%= deleteNode %>"></path>
   <% inputs.forEach(function(input, i) { %>
     <circle class="connector input" data-name="<%= input.name %>"
-      cx="<% print(inputPosition(i, r, inputs.length).x) %>"
-      cy="<% print(inputPosition(i, r, inputs.length).y) %>"
-      r="5"></circle>
+      cx="<% print(inputPosition(i, w, inputs.length).x)%>"
+      cy="<% print(inputPosition(i, h, inputs.length).y) %>"
+      r="4" ></circle>
   <% }); %>
   <% if (output) { %>
-    <circle class="connector output" r="5" cx="<%= r %>" cy="<%= 2 * r - 10 %>">
+    <circle class="connector output" r="4" cx="<%= w/2 %>" cy="<%= h-6 %>">
   <% } %>
 
 script(type="text/template", id="connection-group-template").

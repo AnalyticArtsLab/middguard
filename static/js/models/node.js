@@ -9,7 +9,8 @@ var middguard = middguard || {};
 
     defaults: {
       status: 0,
-      radius: 75,
+      width: 190,
+      height: 70,
       position_x: 0,
       position_y: 0,
       selectedInput: null,
@@ -90,8 +91,16 @@ var middguard = middguard || {};
       return _.difference(allOutputs, connectedOutputs);
     },
 
+    removeInputConnection: function(inputGroup){
+      var connections = JSON.parse(this.get('connections'));
+      delete connections[inputGroup];
+      this.set('connections', JSON.stringify(connections));
+      this.save();
+    },
+
     isVisualization: function() {
       return this.module().get('visualization');
-    }
+    },
+
   });
 })();

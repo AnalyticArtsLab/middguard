@@ -25,6 +25,7 @@ module.exports = function(socket) {
 
   socket.on('node:connect', (data, cb) => node.connect(socket, data, cb));
   socket.on('node:run', (data, cb) => node.run(socket, data, cb));
+  socket.on('nodes:delete',(data, cb) => node.delete(socket, data, cb)); //LISTEN FOR NODE DELETION
   socket.on('nodes:create', (data, cb) => node.create(socket, data, cb));
   socket.on('nodes:read', (data, cb) => node.readAll(socket, data, cb));
   socket.on('nodes:update', (data, cb) => node.update(socket, data, cb));

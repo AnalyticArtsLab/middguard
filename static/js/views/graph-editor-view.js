@@ -14,23 +14,31 @@ var middguard = middguard || {};
       this.graph = options.graph;
       this.detailView = null;
 
-      this.listenTo(middguard.PackagedModules, 'reset', this.addModules);
-      this.listenTo(middguard.Nodes, 'reset', this.addAllNodes);
-      this.listenTo(middguard.Nodes, 'reset', this.addAllConnectorGroups);
-      this.listenTo(middguard.Nodes, 'reset', this.ensureEntityCollections);
+      this.$el.html(this.template(this.graph.toJSON()));
+      d3.select(this.el).select('.editor').append('svg')
+          .attr('class', 'graph')
+          .attr('width', 700); //change back to 500.
+
       this.listenTo(middguard.Nodes, 'add', this.addNode);
       this.listenTo(middguard.Nodes, 'add', this.ensureEntityCollection);
       this.listenTo(middguard.Nodes, 'add', this.addConnectorGroup);
 
-      middguard.PackagedModules.fetch({reset: true, data: {}});
-      middguard.Nodes.fetch({reset: true, data: {}});
+      if(middguard.Nodes.length == 0){
+        this.listenTo(middguard.PackagedModules, 'reset', this.addModules);
+        this.listenToOnce(middguard.Nodes, 'reset', this.ensureEntityCollections);
+        this.listenToOnce(middguard.Nodes, 'reset',this.addAllNodes);
+        this.listenToOnce(middguard.Nodes, 'reset',this.addAllConnectorGroups);
+        middguard.PackagedModules.fetch({reset: true, data: {}});
+        middguard.Nodes.fetch({ reset: true, data: {}});
+      }else{
+        this.addModules();
+        this.ensureEntityCollections();
+        this.addAllNodes();
+        this.addAllConnectorGroups();
+      }
     },
 
     render: function() {
-      this.$el.html(this.template(this.graph.toJSON()));
-      d3.select(this.el).select('.editor').append('svg')
-          .attr('class', 'graph')
-          .attr('width', 500);
 
       this.resizeEditor();
 
@@ -152,12 +160,17 @@ var middguard = middguard || {};
 
       // `this.model` is the "input" node
       this.listenTo(this.model, 'change', this.render);
+      this.listenTo(this.model, 'destroy', ()=>{
+          this.connections.forEach((connection)=>{
+            connection.remove();
+          });
+          this.remove();
+      });
     },
 
     render: function() {
       this.connections.forEach(connection => connection.render());
       this.unrenderedConnections().forEach(this.addConnectingLine, this);
-
       return this;
     },
 
@@ -174,6 +187,20 @@ var middguard = middguard || {};
       });
       this.$el.append(view.render().el);
       this.connections.push(view);
+      let outputNode = middguard.Nodes.findWhere({
+        id: JSON.parse(this.model.get('connections'))[inputGroup].output_node
+      });
+      view.listenTo(outputNode, 'destroy', () => {
+        this.connections.splice(this.connections.indexOf(view), 1);
+        view.remove();
+        this.model.removeInputConnection(inputGroup);
+      });
+
+      view.listenTo(this.model, 'delete-connection', () => {
+        this.connections.splice(this.connections.indexOf(view), 1);
+        view.remove();
+        this.model.removeInputConnection(inputGroup);
+      });
     },
 
     renderedConnections: function() {
@@ -201,7 +228,6 @@ var middguard = middguard || {};
       this.module = middguard.PackagedModules.findWhere({
         name: this.model.get('module')
       });
-
       this.diagonal = d3.svg.diagonal();
 
       // Only rerender this particular line when the output node moves.
@@ -228,22 +254,26 @@ var middguard = middguard || {};
       var i = _.findIndex(this.module.get('inputs'), input => {
             return input.name === this.inputGroup;
           }),
-          r = this.model.get('radius'),
+          w = this.model.get('width'), //changed from radius
+          h = this.model.get('height'),
           n = this.module.get('inputs').length,
-          offset = NodeView.prototype.inputPosition(i, r, n);
+          offset = NodeView.prototype.inputPosition(i, w, n);
+           var svg = d3.select('.editor').select('svg');
+           var bounds = {x: svg.attr('width'), y: svg.attr('height')};
 
-      return {
+      return { //controls 'input' positon of paths
         x: this.model.position().x + offset.x,
         y: this.model.position().y + offset.y
       };
     },
 
     outputPosition: function() {
-      var r = this.outputNode.get('radius');
+      var w = this.outputNode.get('width');
+      var h = this.outputNode.get('height');
 
-      return {
-        x: this.outputNode.position().x + r,
-        y: this.outputNode.position().y + 2 * r - 10
+      return { //controls 'output' position of paths.
+        x: this.outputNode.position().x + w/2,
+        y: this.outputNode.position().y + h - 5
       };
     },
 
@@ -267,7 +297,8 @@ var middguard = middguard || {};
         this.listenTo(this.outputNode, 'change', this.render);
         this.render();
       }
-    }
+    },
+
   });
 
   var NodeView = Backbone.NSView.extend({
@@ -281,8 +312,12 @@ var middguard = middguard || {};
       'click .input': 'toggleInputSelected',
       'click .output': 'toggleOutputSelected',
       'click .run': 'runNode',
+      'click .deleteNode':'deleteNode',
       'click': 'toggleDetail'
     },
+
+    template: _.template($('#graph-node-template').html()),
+    //middguard/middguard/views/graph-editor-template.jade
 
     initialize: function(options) {
       this.editor = options.editor;
@@ -298,35 +333,34 @@ var middguard = middguard || {};
           .origin(function(d) { return d; })
           .on('dragstart', this.dragstarted.bind(this))
           .on('drag', this.dragged.bind(this))
-          .on('dragend', this.dragended.bind(this));
-
-      this.listenTo(this.model, 'change', this.render);
-    },
-
-    template: _.template($('#graph-node-template').html()),
-
-    render: function() {
-      var x = this.model.position().x;
-      var y = this.model.position().y;
-
-      this.d3el
-          .datum(this.model.position())
-          .attr('transform', 'translate(' + x + ',' + y + ')')
-          .call(this.drag);
+          .on('dragend', this.dragended.bind(this)); //binds dragging end event 'dragended' to drag.
 
       this.$el.html(this.template({
-        r: this.model.get('radius'),
-        handlePosition: this.dragHandlePosition(),
-        dragHandlePath: d3.svg.symbol().type('cross').size(150)(),
+        w: this.model.get('width'),
+        h: this.model.get('height'),
         runPosition: this.runPosition(),
         runPath: d3.svg.symbol().type('triangle-up').size(150)(),
         status: this.model.get('status'),
         statusText: this.model.statusText(),
         displayName: this.module.get('displayName'),
+        deletePosition: this.deletePosition(),
+        deleteNode: d3.svg.symbol().type('cross').size(100)(),
         inputs: this.module.get('inputs'),
         output: this.module.get('outputs').length,
         inputPosition: this.inputPosition
       }));
+
+      this.d3el.call(this.drag);
+
+      this.listenTo(this.model, 'change', this.render);
+    },
+
+    render: function() {
+
+      this.d3el
+          .datum(this.model.position()) //binds x,y to 'g'.
+          .attr('transform', d => 'translate(' + d.x + ',' + d.y + ')');
+          //moves nodes to saved positions.
 
       var selectedInput = this.model.get('selectedInput'),
           selectedOutput = this.model.get('selectedOutput');
@@ -337,29 +371,34 @@ var middguard = middguard || {};
 
       if (selectedOutput) {
         this.d3el.select('.output')
-            .classed('selected', true);
+          .classed('selected', true);
       }
 
       if (this.model.isVisualization()) {
         this.d3el.classed('visualization', true);
       }
 
-
       return this;
     },
 
     dragstarted: function(d) {
+      var ed = d3.select(this.editor.el);
       this.dragStartPosition = _.clone(d);
+       ed.selectAll('.node').each( function(d){
+        d.order = 0;
+      }) //flags unselected nodes as 0, so will sort to bottom with 'sort' funct. Uses '.each' iterating all data on the 'g', adding 'order' & value.
+       d3.select(this.el).each(function(d){
+         d.order = 1;
+       })//flags selected nodes as 1, so will 'sort' to top.
+       ed.selectAll('.node').sort(function(a,b) {return a.order-b.order;});
     },
 
-    dragged: function(d) {
-      if (!d3.select(d3.event.sourceEvent.target).classed('drag-handle')) {
-        return;
-      }
+    dragged: function() {
 
       var x = d3.event.x;
       var y = d3.event.y;
-      var r = this.model.get('radius');
+      var w = this.model.get('width');
+      var h = this.model.get('height');
 
       var svg = d3.select(this.editor.el).select('svg');
       var bounds = {x: svg.attr('width'), y: svg.attr('height')};
@@ -367,17 +406,17 @@ var middguard = middguard || {};
       // Prevent element from being dragged out bounds
       if (x < 0) x = 0;
       if (y < 0) y = 0;
-      if (y + r * 2 > bounds.y) y = bounds.y - r * 2;
-      if (x + r * 2 > bounds.x) x = bounds.x - r * 2;
+      if (y + h > bounds.y) y = bounds.y - h;
+      if (x + w > bounds.x) x = bounds.x - w;
 
       this.model.position(x, y);
-      d3.select(this.el)
-          .attr('transform', 'translate(' + (d.x = x) + ',' + (d.y = y) + ')');
     },
 
     dragended: function() {
-      if (this.dragMoved())
-        this.model.save();
+    if (this.dragMoved()){
+      this.model.save();
+    }
+      //saves new position.
     },
 
     dragMoved: function() {
@@ -482,6 +521,19 @@ var middguard = middguard || {};
       //}
     },
 
+    /*THIS DOES NOT YET HANDLE THE SINGLETON VARIABLE - WILL DELETE ALL NODES ASSOCIATED WITH THE SAME TABLE */
+    deleteNode: function(){
+      var tableName = this.model.get('table');
+      this.hideInputTooltip();
+      //removes node from middguard.entities
+      delete middguard.entities[tableName];
+
+      //removes node from view
+      this.remove();
+      //removes node from database table
+      this.model.destroy();
+    },
+
     toggleDetail: function() {
       var view = new NodeDetailView({model: this.model});
 
@@ -491,22 +543,25 @@ var middguard = middguard || {};
       this.editor.setDetailView(view);
     },
 
-    dragHandlePosition: function() {
-      var r = this.model.get('radius');
-      return {
-        x: r + -r * Math.sqrt(2) / 2 + 15,
-        y: r - r * Math.sqrt(2) / 2 + 15
-      };
-    },
-
     runPosition: function() {
-      var r = this.model.get('radius');
+      var x = this.model.position().x;
+      var y = this.model.position().y;
+      var h = this.model.get('height');
+      var w = this.model.get('width');
       return {
-        x: r + r * Math.sqrt(2) / 2 - 15,
-        y: r - r * Math.sqrt(2) / 2 + 15
+        x: w/2,
+        y: h/2+h/4-2
       };
     },
 
+    deletePosition: function() {
+      return {
+        x: 10,
+        y: 10
+      };
+    },
+
+    //r changed to width (w) 2016.
     /* Calculate each input circle's position.
      * Circles are arranged in rows of three from the top down.
      * Assume 5 pixel circle radius and 15 pixels spacing between
@@ -523,16 +578,20 @@ var middguard = middguard || {};
      *
      * @return the center position for the input circle
      */
-    inputPosition: function(i, r, n) {
-      var rowIndexX = i % 3,
-          rowIndexY = Math.floor(i / 3),
-          rowLength = i >= n - n % 3 ? n % 3 : 3,
-          baseX = r - (rowLength - 1) * 7.5,
+
+     //check to be sure works for multiple input.
+    //Used for dot location.
+    inputPosition: function(i, w, n) {
+      const spacing = 15;
+      var rowIndexX = i % 5,
+          rowIndexY = Math.floor(i / 10),
+          rowLength = n % 5,
+          baseX = w/2- spacing*(rowLength - 1)/2,
           baseY = 10;
 
       return {
-        x: baseX + 15 * rowIndexX,
-        y: baseY + 15 * rowIndexY
+        x: baseX + spacing * rowIndexX,
+        y: baseY + spacing * rowIndexY
       };
     }
   });
@@ -551,12 +610,14 @@ var middguard = middguard || {};
 
     template: _.template(
       `<h4><%- name %></h4>
-      <div class="connection-groups"><div>`),
+      <div class="connection-groups"><div>
+      <div class="delete-connection"><div>`),
 
     connectionGroupTemplate: _.template($('#connection-group-template').html()),
 
     events: {
-      'click .connection': 'selectConnector'
+      'click .connection': 'selectConnector',
+      'click .delete': 'deleteConnector'
     },
 
     render: function() {
@@ -565,11 +626,13 @@ var middguard = middguard || {};
       }));
 
       this.addAllConnectionGroups();
+      this.addDeleteConnection();
 
       return this;
     },
 
     addAllConnectionGroups: function() {
+      this.connections = JSON.parse(this.model.get('connections'));
       _.each(this.connections, (value, key) => {
         var inputs = value.connections.map(connection => connection.input),
             outputs = value.connections.map(connection => connection.output),
@@ -587,6 +650,14 @@ var middguard = middguard || {};
           unconnectedOutputs: this.model.unconnectedOutputs(key)
         }));
       });
+    },
+
+    addDeleteConnection: function (){
+      this.$('.delete-connection').prepend('<button type = "button", class = "delete", id = "deleteButton">Delete Connection</button>');
+    },
+
+    deleteConnector: function(){
+      this.model.trigger('delete-connection');
     },
 
     deselectOutput: function() {
@@ -629,7 +700,7 @@ var middguard = middguard || {};
     connectSelection: function() {
       if (!this.selectedInputGroup ||
           !this.selectedInput ||
-          !this.selectedOutput) {
+          !this.selectedOutput ) {
         return;
       }
 
@@ -656,6 +727,7 @@ var middguard = middguard || {};
 
       this.model.set('connections', JSON.stringify(this.connections));
       this.model.save();
+
     }
   });
 })();

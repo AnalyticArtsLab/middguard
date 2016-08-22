@@ -2,7 +2,9 @@
 
 exports.up = function(knex) {
   return knex.schema.table('node', function(table) {
-    table.integer('radius').defaultTo(75);
+    console.log('im in here');
+    table.integer('width').defaultTo(190);
+    table.integer('height').defaultTo(50);
 
     // These are the top left coordinates of the node,
     // not the center coordinates.
@@ -13,6 +15,6 @@ exports.up = function(knex) {
 
 exports.down = function(knex) {
   return knex.schema.table('node', function(table) {
-    table.dropColumns('radius', 'position_x', 'position_y');
+    table.dropColumns('width', 'height', 'position_x','position_y');
   });
 };

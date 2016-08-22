@@ -47,26 +47,24 @@
   fill: #fff;
 }
 
-.middguard-graph-editor .node circle.drag-handle {
-  fill: transparent;
+.middguard-graph-editor .deleteNode  {
+  fill:transparent;
+  stroke:transparent;
 }
 
-.middguard-graph-editor .node .drag-handle {
-  fill: none;
-}
-
-.middguard-graph-editor .node:hover path.drag-handle {
+.middguard-graph-editor .node:hover path.deleteNode {
   fill: transparent;
-  stroke: rgb(194, 194, 194);
+  /*stroke: rgb(194, 194, 194);*/
+  stroke: rgb(167, 167, 167);
   stroke-width: 2px;
   cursor: pointer;
 }
 
-.middguard-graph-editor .node.visualization circle.outline {
+.middguard-graph-editor .node.visualization rect.outline {
   stroke: orange;
 }
 
-.middguard-graph-editor .node.selected circle.outline {
+.middguard-graph-editor .node.selected rect.outline {
   stroke-width: 4px;
 }
 
@@ -108,6 +106,10 @@
   fill: rgb(81, 210, 141);
 }
 
+.middguard-graph-editor .node:hover .status {
+  stroke: transparent;
+  fill: transparent;
+}
 
 .middguard-graph-editor .run {
   fill: none;

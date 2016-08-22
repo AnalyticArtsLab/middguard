@@ -284,3 +284,10 @@ exports.run = function(socket, data, callback) {
   })
   .catch(callback);
 };
+
+exports.delete = function(socket, data, callback){
+
+  var Node = socket.bookshelf.model('Node');
+  new Node({id:data.id})
+    .destroy()
+};
