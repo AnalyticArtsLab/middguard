@@ -357,6 +357,11 @@ var middguard = middguard || {};
 
     render: function() {
 
+      // update the status label
+      this.d3el.select('.status')
+      .attr('class', 'status status-' + this.model.get('status'))
+      .text(this.model.statusText());
+
       this.d3el
           .datum(this.model.position()) //binds x,y to 'g'.
           .attr('transform', d => 'translate(' + d.x + ',' + d.y + ')');
