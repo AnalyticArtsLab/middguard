@@ -2,7 +2,7 @@
   "name": "middguard",
   "version": "0.0.1",
   "description": "Collaborative and Extensible Visual Analytics",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": true,
   "main": "index.js",
   "scripts": {
