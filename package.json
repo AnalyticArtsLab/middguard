@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Collaborative and Extensible Visual Analytics",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "main": "index.js",
   "scripts": {
     "lint": "eslint index.js middguard/* static/* bin/*",
