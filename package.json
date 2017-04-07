@@ -13,21 +13,26 @@
   "bin": "bin/middguard",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ProfBlack/middguard.git"
+    "url": "https://github.com/AnalyticArtsLab/middguard"
   },
   "keywords": [
     "analytics",
     "module",
     "multiperson"
   ],
-  "author": {
+  "contributors": [
+    {
     "name": "Dana Silver",
     "email": "dsilver@middlebury.edu"
-  },
+    },
+    {
+      "name": "Christopher Andrews",
+      "email": "candrews@middlebury.edu"
+      }],
   "bugs": {
-    "url": "https://github.com/ProfBlack/middguard/issues"
+    "url": "https://github.com/AnalyticArtsLab/middguard/issues"
   },
-  "homepage": "https://github.com/ProfBlack/middguard",
+  "homepage": "https://github.com/AnalyticArtsLab/middguard",
   "dependencies": {
     "bcrypt": "^0.8.0",
     "bluebird": "^2.2.2",
