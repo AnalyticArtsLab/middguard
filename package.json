@@ -1,6 +1,6 @@
 {
   "name": "middguard",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Collaborative and Extensible Visual Analytics",
   "license": "MIT",
   "private": false,
@@ -32,7 +32,7 @@
     {
       "name": "Julian Billings",
       "email": "jabillings@middlebury.edu"
-      }
+    }
   ],
   "bugs": {
     "url": "https://github.com/AnalyticArtsLab/middguard/issues"
