@@ -8,7 +8,7 @@
   "scripts": {
     "lint": "eslint index.js middguard/* static/* bin/*",
     "test": "mocha",
-    "postinstall": "bower install"
+    "postinstall": "node_modules/bower/bin/bower install"
   },
   "bin": "bin/middguard",
   "repository": {
@@ -28,7 +28,11 @@
     {
       "name": "Christopher Andrews",
       "email": "candrews@middlebury.edu"
-    }
+    },
+    {
+      "name": "Julian Billings",
+      "email": "jabillings@middlebury.edu"
+      }
   ],
   "bugs": {
     "url": "https://github.com/AnalyticArtsLab/middguard/issues"
@@ -64,6 +68,6 @@
     "twitter": "^1.2.5"
   },
   "engines": {
-    "node": "6.x"
+    "node": "7.x"
   }
 }

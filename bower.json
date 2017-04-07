@@ -1,13 +1,13 @@
 {
   "name": "middguard",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "authors": [
     "Dana Silver <dsilver@middlebury.edu>",
     "Christopher Andrews <candrews@middlebury.edu>",
     "Julian Billings <jabillings@middlebury.edu>"
   ],
   "description": "Modular, multiperson analytics.",
-  "homepage": "https://github.com/ProfBlack/middguard",
+  "homepage": "https://github.com/AnalysticArtsLab/middguard",
   "ignore": [
     "**/.*",
     "node_modules",
