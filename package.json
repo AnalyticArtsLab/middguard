@@ -1,6 +1,6 @@
 {
   "name": "middguard",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Collaborative and Extensible Visual Analytics",
   "license": "MIT",
   "private": false,
@@ -22,13 +22,14 @@
   ],
   "contributors": [
     {
-    "name": "Dana Silver",
-    "email": "dsilver@middlebury.edu"
+      "name": "Dana Silver",
+      "email": "dsilver@middlebury.edu"
     },
     {
       "name": "Christopher Andrews",
       "email": "candrews@middlebury.edu"
-      }],
+    }
+  ],
   "bugs": {
     "url": "https://github.com/AnalyticArtsLab/middguard/issues"
   },
