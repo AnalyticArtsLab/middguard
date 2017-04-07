@@ -18,7 +18,7 @@ $ node --version
 6.2.0
 ```
 
-Install MiddGuard from npm. (This does not work yet, MiddGuard is not on npm.)
+Install MiddGuard from npm.
 
 ```sh
 $ npm install --save middguard
